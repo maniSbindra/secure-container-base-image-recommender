@@ -1,0 +1,32 @@
+# add gitignore for this project
+# Ignore node_modules directory
+node_modules/
+# Ignore build output directory
+dist/
+# Ignore pycache files
+__pycache__/
+
+venv/
+
+# Add standard python ignores
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.env
+*.venv
+*.DS_Store
+*.log
+*.coverage
+*.mypy_cache/
+*.pytest_cache/
+*.vscode/
+*.idea/
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+*.zip
+*.tar.gz

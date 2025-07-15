@@ -1,0 +1,729 @@
+{% extends "base.html" %}
+
+{% block title %}MCR Scanner - Container Image Recommendations and Analysis{% endblock %}
+
+{% block styles %}
+<style>
+.log-entry {
+    border-bottom: 1px solid #333;
+    transition: background-color 0.2s;
+}
+
+.log-entry:hover {
+    background-color: #2a2a2a;
+}
+
+#scanLogs {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    line-height: 1.4;
+}
+
+#scanLogs::-webkit-scrollbar {
+    width: 8px;
+}
+
+#scanLogs::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+#scanLogs::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
+
+#scanLogs::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-arrow-clockwise text-primary"></i>
+            MCR registry key image repository scanner
+        </h1>
+        <p class="lead text-muted">
+            Update the image database by scanning Microsoft Container Registry
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-gear"></i> Scan Configuration</h5>
+            </div>
+            <div class="card-body">
+                <!-- Scan Type Tabs -->
+                <ul class="nav nav-tabs mb-3" id="scanTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="full-scan-tab" data-bs-toggle="tab" data-bs-target="#full-scan" type="button" role="tab">
+                            <i class="bi bi-globe"></i> Full Registry
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="repo-scan-tab" data-bs-toggle="tab" data-bs-target="#repo-scan" type="button" role="tab">
+                            <i class="bi bi-folder"></i> Repository
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="image-scan-tab" data-bs-toggle="tab" data-bs-target="#image-scan" type="button" role="tab">
+                            <i class="bi bi-box"></i> Single Image
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="scanTabContent">
+                    <!-- Full Registry Scan -->
+                    <div class="tab-pane fade show active" id="full-scan" role="tabpanel">
+                        <form id="scanForm">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="comprehensive" value="true">
+                                    <label class="form-check-label" for="comprehensive">
+                                        <strong>Comprehensive Scan</strong>
+                                    </label>
+                                    <div class="form-text">
+                                        Includes Trivy security analysis (secrets, misconfigurations). Takes longer.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="updateExisting" value="true">
+                                    <label class="form-check-label" for="updateExisting">
+                                        <strong>Update Existing Images</strong>
+                                    </label>
+                                    <div class="form-text">
+                                        Re-scan images that are already in the database.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="maxTags" class="form-label">Maximum Tags per Repository</label>
+                                <select class="form-select" id="maxTags">
+                                    <option value="3">3 (Quick scan)</option>
+                                    <option value="5" selected>5 (Recommended for UI)</option>
+                                    <option value="10">10 (More thorough)</option>
+                                    <option value="0">All available tags (Full scan)</option>
+                                </select>
+                                <div class="form-text">
+                                    Limiting tags reduces scan time. Use "All" for comprehensive database.
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                <strong>Note:</strong> Scanning can take several minutes and will pull Docker images temporarily.
+                                The scan will automatically clean up downloaded images.
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary" id="scanButton">
+                                <i class="bi bi-arrow-clockwise"></i> Start Full Scan
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Repository Scan -->
+                    <div class="tab-pane fade" id="repo-scan" role="tabpanel">
+                        <form id="repoScanForm">
+                            <div class="mb-3">
+                                <label for="repositoryName" class="form-label">Repository Name</label>
+                                <input type="text" class="form-control" id="repositoryName" 
+                                       placeholder="e.g., azurelinux/base/python or mcr.microsoft.com/azurelinux/base/python">
+                                <div class="form-text">
+                                    Enter repository path with or without MCR prefix.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="repoComprehensive" value="true">
+                                    <label class="form-check-label" for="repoComprehensive">
+                                        <strong>Comprehensive Scan</strong>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="repoUpdateExisting" value="true">
+                                    <label class="form-check-label" for="repoUpdateExisting">
+                                        <strong>Update Existing Images</strong>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="repoMaxTags" class="form-label">Maximum Tags</label>
+                                <select class="form-select" id="repoMaxTags">
+                                    <option value="5">5 tags</option>
+                                    <option value="10" selected>10 tags</option>
+                                    <option value="20">20 tags</option>
+                                    <option value="0">All tags</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary" id="repoScanButton">
+                                <i class="bi bi-folder"></i> Scan Repository
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Single Image Scan -->
+                    <div class="tab-pane fade" id="image-scan" role="tabpanel">
+                        <form id="imageScanForm">
+                            <div class="mb-3">
+                                <label for="imageName" class="form-label">Image Name</label>
+                                <input type="text" class="form-control" id="imageName" 
+                                       placeholder="e.g., mcr.microsoft.com/azurelinux/base/python:3.12">
+                                <div class="form-text">
+                                    Enter full image name with tag.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="imageComprehensive" value="true">
+                                    <label class="form-check-label" for="imageComprehensive">
+                                        <strong>Comprehensive Scan</strong>
+                                    </label>
+                                    <div class="form-text">
+                                        Includes Trivy security analysis.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="imageUpdateExisting" value="true">
+                                    <label class="form-check-label" for="imageUpdateExisting">
+                                        <strong>Update if Exists</strong>
+                                    </label>
+                                    <div class="form-text">
+                                        Update the image if it already exists in the database.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Note:</strong> Single image scan is faster and great for testing specific images.
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary" id="imageScanButton">
+                                <i class="bi bi-box"></i> Scan Image
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Scan Progress</h5>
+            </div>
+            <div class="card-body">
+                <!-- Initial state -->
+                <div id="initialScanState">
+                    <div class="text-center py-4">
+                        <i class="bi bi-play-circle display-1 text-muted"></i>
+                        <h6 class="text-muted mt-3">Ready to scan</h6>
+                        <p class="text-muted">Click "Start Scan" to update the image database</p>
+                    </div>
+                </div>
+                
+                <!-- Scanning state -->
+                <div id="scanningSate" style="display: none;">
+                    <div class="py-4">
+                        <div class="text-center mb-3">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">Scanning...</span>
+                            </div>
+                            <h6 class="text-primary">Scanning in progress...</h6>
+                            <p class="text-muted">This may take several minutes</p>
+                        </div>
+                        
+                        <!-- Real-time logs -->
+                        <div class="card">
+                            <div class="card-header bg-dark text-white">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-terminal"></i> Scan Logs
+                                    <button class="btn btn-sm btn-outline-light float-end" onclick="clearLogs()">
+                                        <i class="bi bi-trash"></i> Clear
+                                    </button>
+                                </h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="scanLogs" style="height: 300px; overflow-y: auto; background-color: #1e1e1e; color: #fff; font-family: monospace; font-size: 0.85em;">
+                                    <div class="p-3">
+                                        <div class="text-muted">Scan logs will appear here...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress mt-3">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results state -->
+                <div id="scanResults" style="display: none;">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                
+                <!-- Error state -->
+                <div id="scanError" style="display: none;">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Current Database Status -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-database"></i> Current Database</h5>
+            </div>
+            <div class="card-body">
+                <div id="currentStats">
+                    <div class="text-center">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MCR Repositories Scanned -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> MCR Repositories Scanned</h5>
+            </div>
+            <div class="card-body">
+                <div id="repositoriesList">
+                    <div class="text-center">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load current stats on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadCurrentStats();
+    loadRepositoriesList();
+});
+
+async function loadCurrentStats() {
+    try {
+        const response = await fetch('/api/stats');
+        const data = await response.json();
+        
+        if (data.success) {
+            const statsDiv = document.getElementById('currentStats');
+            statsDiv.innerHTML = `
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h4 class="mb-1">${data.stats.total_images}</h4>
+                            <small class="text-muted">Total Images</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h4 class="mb-1">${data.stats.zero_vuln_images}</h4>
+                            <small class="text-muted">Secure Images</small>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <small class="text-muted">
+                            Languages: ${data.language_stats.slice(0, 5).map(l => l.language).join(', ')}
+                            ${data.language_stats.length > 5 ? '...' : ''}
+                        </small>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Failed to load stats:', error);
+        document.getElementById('currentStats').innerHTML = 
+            '<div class="text-danger">Failed to load current statistics</div>';
+    }
+}
+
+async function loadRepositoriesList() {
+    try {
+        const response = await fetch('/api/repositories');
+        const data = await response.json();
+        
+        if (data.success) {
+            const repositoriesDiv = document.getElementById('repositoriesList');
+            repositoriesDiv.innerHTML = `
+                <div class="row">
+                    <div class="col-12">
+                        <p class="text-muted mb-3">
+                            <strong>${data.count}</strong> MCR repositories configured for scanning:
+                        </p>
+                        <div class="list-group list-group-flush">
+                            ${data.repositories.map(repo => `
+                                <div class="list-group-item border-0 px-0 py-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-box me-2 text-primary"></i>
+                                        <code class="small">${repo.startsWith('mcr.microsoft.com/') ? repo : 'mcr.microsoft.com/' + repo}</code>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Failed to load repositories:', error);
+        document.getElementById('repositoriesList').innerHTML = 
+            '<div class="text-danger">Failed to load repository list</div>';
+    }
+}
+
+document.getElementById('scanForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Collect form data
+    const formData = {
+        comprehensive: document.getElementById('comprehensive').checked,
+        update_existing: document.getElementById('updateExisting').checked,
+        max_tags: parseInt(document.getElementById('maxTags').value)
+    };
+    
+    // Update UI state
+    const initialState = document.getElementById('initialScanState');
+    const scanningState = document.getElementById('scanningSate');
+    const resultsState = document.getElementById('scanResults');
+    const errorState = document.getElementById('scanError');
+    const scanButton = document.getElementById('scanButton');
+    
+    initialState.style.display = 'none';
+    scanningState.style.display = 'block';
+    resultsState.style.display = 'none';
+    errorState.style.display = 'none';
+    scanButton.disabled = true;
+    scanButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Scanning...';
+    
+    // Clear previous logs
+    clearLogs();
+    
+    try {
+        // Start the streaming scan
+        const response = await fetch('/api/scan/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Start listening to the log stream
+            startLogStream(data.scan_id, 'Full Registry');
+        } else {
+            throw new Error(data.error);
+        }
+        
+    } catch (error) {
+        // Show error
+        errorState.innerHTML = `
+            <div class="alert alert-danger">
+                <h6><i class="bi bi-exclamation-triangle"></i> Scan Failed</h6>
+                <p class="mb-0">${error.message}</p>
+            </div>
+            
+            <div class="d-grid">
+                <button class="btn btn-outline-primary" onclick="location.reload()">
+                    <i class="bi bi-arrow-clockwise"></i> Try Again
+                </button>
+            </div>
+        `;
+        errorState.style.display = 'block';
+        
+        showAlert('Scan failed: ' + error.message, 'danger');
+        
+        // Reset UI
+        scanningState.style.display = 'none';
+        scanButton.disabled = false;
+        scanButton.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Start Full Scan';
+    }
+});
+
+// Repository Scan Form Handler
+document.getElementById('repoScanForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const repository = document.getElementById('repositoryName').value.trim();
+    if (!repository) {
+        showAlert('Please enter a repository name', 'warning');
+        return;
+    }
+    
+    const formData = {
+        repository: repository,
+        comprehensive: document.getElementById('repoComprehensive').checked,
+        update_existing: document.getElementById('repoUpdateExisting').checked,
+        max_tags: parseInt(document.getElementById('repoMaxTags').value)
+    };
+    
+    await performStreamingScan('/api/scan-repo/start', formData, 'repoScanButton', 'Repository');
+});
+
+// Image Scan Form Handler
+document.getElementById('imageScanForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const imageName = document.getElementById('imageName').value.trim();
+    if (!imageName) {
+        showAlert('Please enter an image name', 'warning');
+        return;
+    }
+    
+    const formData = {
+        image_name: imageName,
+        comprehensive: document.getElementById('imageComprehensive').checked,
+        update_existing: document.getElementById('imageUpdateExisting').checked
+    };
+    
+    await performStreamingScan('/api/scan-image/start', formData, 'imageScanButton', 'Image');
+});
+
+// Generic streaming scan function
+async function performStreamingScan(endpoint, formData, buttonId, scanType) {
+    const button = document.getElementById(buttonId);
+    const initialState = document.getElementById('initialScanState');
+    const scanningState = document.getElementById('scanningSate');
+    const resultsState = document.getElementById('scanResults');
+    const errorState = document.getElementById('scanError');
+    
+    // Update UI state
+    initialState.style.display = 'none';
+    scanningState.style.display = 'block';
+    resultsState.style.display = 'none';
+    errorState.style.display = 'none';
+    button.disabled = true;
+    
+    const originalButtonText = button.innerHTML;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Scanning...';
+    
+    // Clear previous logs
+    clearLogs();
+    
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Start listening to the log stream
+            startLogStream(data.scan_id, scanType);
+        } else {
+            throw new Error(data.error);
+        }
+        
+    } catch (error) {
+        // Show error
+        errorState.innerHTML = `
+            <div class="alert alert-danger">
+                <h6><i class="bi bi-exclamation-triangle"></i> ${scanType} Scan Failed</h6>
+                <p class="mb-0">${error.message}</p>
+            </div>
+            
+            <div class="d-grid">
+                <button class="btn btn-outline-primary" onclick="location.reload()">
+                    <i class="bi bi-arrow-clockwise"></i> Try Again
+                </button>
+            </div>
+        `;
+        errorState.style.display = 'block';
+        
+        showAlert(`${scanType} scan failed: ` + error.message, 'danger');
+        
+        // Reset UI
+        scanningState.style.display = 'none';
+        button.disabled = false;
+        button.innerHTML = originalButtonText;
+    }
+}
+
+// Log streaming functionality
+let currentEventSource = null;
+
+function startLogStream(scanId, scanType) {
+    // Close any existing connection
+    if (currentEventSource) {
+        currentEventSource.close();
+    }
+    
+    const logsContainer = document.getElementById('scanLogs');
+    
+    // Create EventSource for Server-Sent Events
+    currentEventSource = new EventSource(`/api/scan/stream/${scanId}`);
+    
+    currentEventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        
+        if (data.heartbeat) {
+            // Ignore heartbeat messages
+            return;
+        }
+        
+        if (data.error) {
+            addLogMessage('error', data.error);
+            handleScanCompletion(false, scanType);
+            return;
+        }
+        
+        if (data.completed) {
+            if (data.error) {
+                addLogMessage('error', `Scan failed: ${data.error}`);
+                handleScanCompletion(false, scanType);
+            } else {
+                handleScanCompletion(true, scanType);
+            }
+            return;
+        }
+        
+        if (data.message) {
+            addLogMessage(data.type || 'info', data.message, data.timestamp);
+        }
+    };
+    
+    currentEventSource.onerror = function(event) {
+        console.error('EventSource failed:', event);
+        addLogMessage('error', 'Connection to scan logs failed');
+        handleScanCompletion(false, scanType);
+    };
+}
+
+function addLogMessage(type, message, timestamp) {
+    const logsContainer = document.getElementById('scanLogs');
+    const logEntry = document.createElement('div');
+    logEntry.className = 'log-entry px-3 py-1';
+    
+    const time = timestamp || new Date().toLocaleTimeString();
+    const color = type === 'error' ? '#ff6b6b' : '#4ecdc4';
+    
+    logEntry.innerHTML = `
+        <span style="color: #888; font-size: 0.8em;">[${time}]</span>
+        <span style="color: ${color};">${escapeHtml(message)}</span>
+    `;
+    
+    logsContainer.appendChild(logEntry);
+    logsContainer.scrollTop = logsContainer.scrollHeight;
+}
+
+function clearLogs() {
+    const logsContainer = document.getElementById('scanLogs');
+    logsContainer.innerHTML = '<div class="p-3"><div class="text-muted">Scan logs will appear here...</div></div>';
+}
+
+function handleScanCompletion(success, scanType) {
+    // Close the event source
+    if (currentEventSource) {
+        currentEventSource.close();
+        currentEventSource = null;
+    }
+    
+    const scanningState = document.getElementById('scanningSate');
+    const resultsState = document.getElementById('scanResults');
+    const errorState = document.getElementById('scanError');
+    
+    // Reset all scan buttons
+    const buttons = ['scanButton', 'repoScanButton', 'imageScanButton'];
+    buttons.forEach(buttonId => {
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.disabled = false;
+            // Restore original text based on button type
+            if (buttonId === 'scanButton') {
+                button.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Start Full Scan';
+            } else if (buttonId === 'repoScanButton') {
+                button.innerHTML = '<i class="bi bi-folder"></i> Scan Repository';
+            } else if (buttonId === 'imageScanButton') {
+                button.innerHTML = '<i class="bi bi-box"></i> Scan Image';
+            }
+        }
+    });
+    
+    scanningState.style.display = 'none';
+    
+    if (success) {
+        resultsState.innerHTML = `
+            <div class="alert alert-success">
+                <h6><i class="bi bi-check-circle"></i> ${scanType} Scan Completed Successfully!</h6>
+                <p class="mb-1">The scan has completed successfully. Check the logs above for details.</p>
+            </div>
+            
+            <div class="d-grid">
+                <a href="/images" class="btn btn-primary">
+                    <i class="bi bi-list"></i> View Updated Images
+                </a>
+            </div>
+        `;
+        resultsState.style.display = 'block';
+        
+        // Refresh stats
+        loadCurrentStats();
+        
+        // Show success notification
+        showAlert(`${scanType} scan completed successfully!`, 'success');
+    } else {
+        errorState.innerHTML = `
+            <div class="alert alert-danger">
+                <h6><i class="bi bi-exclamation-triangle"></i> ${scanType} Scan Failed</h6>
+                <p class="mb-0">The scan failed. Check the logs above for details.</p>
+            </div>
+            
+            <div class="d-grid">
+                <button class="btn btn-outline-primary" onclick="location.reload()">
+                    <i class="bi bi-arrow-clockwise"></i> Try Again
+                </button>
+            </div>
+        `;
+        errorState.style.display = 'block';
+        
+        showAlert(`${scanType} scan failed`, 'danger');
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+{% endblock %}

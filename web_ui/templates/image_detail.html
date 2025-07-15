@@ -1,0 +1,616 @@
+{% extends "base.html" %}
+
+{% block title %}{{ image.name }} - Image Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="/images">Images</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ image.name }}</li>
+            </ol>
+        </nav>
+        
+        <h1 class="mb-4">
+            <i class="bi bi-box text-primary"></i>
+            Image Details
+        </h1>
+    </div>
+</div>
+
+<!-- Image Overview -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Image Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4 class="text-break">{{ image.name }}</h4>
+                        
+                        {% if image.digest %}
+                        <!-- Full image reference with digest -->
+                        <div class="mt-2 mb-3">
+                            <strong>Full Reference:</strong>
+                            <div class="input-group mt-1">
+                                <input type="text" class="form-control font-monospace small" 
+                                       value="{{ image.registry }}/{{ image.repository }}@{{ image.digest }}" 
+                                       readonly id="fullImageRef">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" 
+                                        onclick="copyToClipboard('fullImageRef')" title="Copy to clipboard">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">Full Image Reference</small>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row mt-3">
+                            <div class="col-sm-6">
+                                <strong>Registry:</strong> {{ image.registry }}<br>
+                                <strong>Repository:</strong> {{ image.repository }}<br>
+                                <strong>Tag:</strong> {{ image.tag }}<br>
+                                {% if image.digest %}
+                                <strong>Digest:</strong> <code class="small">{{ image.digest[:32] }}...</code><br>
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Size:</strong> {{ image.size_bytes|formatBytes }}<br>
+                                <strong>Layers:</strong> {{ image.layers or 'Unknown' }}<br>
+                                <strong>Created:</strong> {{ image.created_date or 'Unknown' }}<br>
+                                <strong>Scanned:</strong> {{ image.scan_timestamp[:19] if image.scan_timestamp else 'Unknown' }}<br>
+                            </div>
+                        </div>
+                        
+                        {% if image.base_os_name %}
+                        <div class="mt-3">
+                            <strong>Base OS:</strong> {{ image.base_os_name }}
+                            {% if image.base_os_version %} {{ image.base_os_version }}{% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-4 text-md-end">
+                        <!-- Security Status -->
+                        <div class="mb-3">
+                            {% set vuln_class = 'success' if image.total_vulnerabilities == 0 else 'danger' if (image.critical_vulnerabilities > 0 or image.high_vulnerabilities > 0) else 'warning' %}
+                            <span class="badge bg-{{ vuln_class }} fs-6">
+                                {% if image.total_vulnerabilities == 0 %}
+                                    <i class="bi bi-shield-check"></i> Secure
+                                {% elif image.critical_vulnerabilities > 0 or image.high_vulnerabilities > 0 %}
+                                    <i class="bi bi-exclamation-triangle"></i> High Risk
+                                {% else %}
+                                    <i class="bi bi-info-circle"></i> Low Risk
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <!-- Vulnerability Summary -->
+                        <div class="small">
+                            <div><strong>Total Vulnerabilities:</strong> {{ image.total_vulnerabilities }}</div>
+                            {% if image.critical_vulnerabilities > 0 %}
+                            <div class="text-danger"><strong>Critical:</strong> {{ image.critical_vulnerabilities }}</div>
+                            {% endif %}
+                            {% if image.high_vulnerabilities > 0 %}
+                            <div class="text-warning"><strong>High:</strong> {{ image.high_vulnerabilities }}</div>
+                            {% endif %}
+                            {% if image.medium_vulnerabilities > 0 %}
+                            <div><strong>Medium:</strong> {{ image.medium_vulnerabilities }}</div>
+                            {% endif %}
+                            {% if image.low_vulnerabilities > 0 %}
+                            <div><strong>Low:</strong> {{ image.low_vulnerabilities }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                        </div>
+                        <small class="text-muted">
+                            <i class="bi bi-calendar"></i> Scanned: {{ image.scan_timestamp[:10] if image.scan_timestamp else 'Unknown' }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Details -->
+<div class="row">
+    <!-- Image Information -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Image Information</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <td><strong>Size:</strong></td>
+                        <td>{{ image.size_bytes|formatBytes if image.size_bytes else 'Unknown' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Layers:</strong></td>
+                        <td>{{ image.layers if image.layers else 'Unknown' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Created:</strong></td>
+                        <td>{{ image.created_date[:10] if image.created_date else 'Unknown' }}</td>
+                    </tr>
+                    {% if image.digest %}
+                    <tr>
+                        <td><strong>Digest:</strong></td>
+                        <td><code class="small">{{ image.digest[:20] }}...</code></td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Overview -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-shield-exclamation"></i> Security Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="stat-card p-2">
+                            <h4 class="text-danger">{{ image.critical_vulnerabilities or 0 }}</h4>
+                            <small class="text-muted">Critical</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-card p-2">
+                            <h4 class="text-warning">{{ image.high_vulnerabilities or 0 }}</h4>
+                            <small class="text-muted">High</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-card p-2">
+                            <h4 class="text-info">{{ image.medium_vulnerabilities or 0 }}</h4>
+                            <small class="text-muted">Medium</small>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="stat-card p-2">
+                            <h5 class="text-secondary">{{ image.low_vulnerabilities or 0 }}</h5>
+                            <small class="text-muted">Low</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card p-2">
+                            <h5 class="text-muted">{{ image.negligible_vulnerabilities or 0 }}</h5>
+                            <small class="text-muted">Negligible</small>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if image.vulnerability_scan_timestamp %}
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-clock"></i> Last scanned: {{ image.vulnerability_scan_timestamp[:10] }}
+                        {% if image.comprehensive_scanner and image.comprehensive_scan_timestamp %}
+                            by {{ image.vulnerability_scanner }} + {{ image.comprehensive_scanner }} (comprehensive)
+                        {% elif image.vulnerability_scanner %}
+                            by {{ image.vulnerability_scanner }}
+                        {% endif %}
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Languages and Capabilities -->
+<div class="row">
+    <!-- Languages -->
+    {% if image.languages %}
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-code"></i> Programming Languages</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for lang in image.languages %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="bi bi-chevron-right text-primary"></i>
+                                    {{ lang.language }}
+                                </h6>
+                                {% if lang.version %}
+                                <p class="card-text">
+                                    <strong>Version:</strong> {{ lang.version }}<br>
+                                    {% if lang.major_minor %}
+                                    <strong>Major.Minor:</strong> {{ lang.major_minor }}<br>
+                                    {% endif %}
+                                    {% if lang.package_name %}
+                                    <strong>Package:</strong> {{ lang.package_name }}<br>
+                                    {% endif %}
+                                    {% if lang.architecture %}
+                                    <strong>Architecture:</strong> {{ lang.architecture }}<br>
+                                    {% endif %}
+                                    {% if lang.vendor %}
+                                    <strong>Vendor:</strong> {{ lang.vendor }}<br>
+                                    {% endif %}
+                                    {% if lang.verified %}
+                                    <span class="badge bg-success">Verified</span>
+                                    {% endif %}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Package Managers -->
+    {% if image.package_managers %}
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-box-seam"></i> Package Managers</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for pm in image.package_managers %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="bi bi-gear text-info"></i>
+                                    {{ pm.name }}
+                                </h6>
+                                <p class="card-text">
+                                    {% if pm.version %}
+                                    <strong>Version:</strong> {{ pm.version }}<br>
+                                    {% endif %}
+                                    {% if pm.language %}
+                                    <strong>Language:</strong> {{ pm.language }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- System Packages -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-cpu"></i> System Packages</h5>
+                <small class="text-light">
+                    Loading packages...
+                </small>
+            </div>
+            <div class="card-body">
+                <div id="systemPackages">
+                    <!-- System packages will be loaded here -->
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading system packages...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Capabilities -->
+    {% if image.capabilities %}
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-shield-lock"></i> Container Capabilities</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for capability in image.capabilities %}
+                    <div class="col-md-6 col-lg-4 mb-2">
+                        <span class="badge bg-secondary">
+                            <i class="bi bi-key"></i> {{ capability }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Vulnerabilities -->
+{% if image.vulnerability_details %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-bug"></i> Security Vulnerabilities (Top 20)</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>CVE ID</th>
+                                <th>Severity</th>
+                                <th>Package</th>
+                                <th>Version</th>
+                                <th>Fixed Version</th>
+                                <th>CVSS Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vuln in image.vulnerability_details %}
+                            <tr>
+                                <td>
+                                    {% if vuln.vulnerability_id %}
+                                    <code>{{ vuln.vulnerability_id }}</code>
+                                    {% else %}
+                                    <em>Unknown</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set severity_class = 'danger' if vuln.severity == 'critical' else 'warning' if vuln.severity == 'high' else 'info' if vuln.severity == 'medium' else 'secondary' %}
+                                    <span class="badge bg-{{ severity_class }}">{{ vuln.severity|upper }}</span>
+                                </td>
+                                <td>{{ vuln.package_name or 'Unknown' }}</td>
+                                <td><code>{{ vuln.package_version or 'Unknown' }}</code></td>
+                                <td>
+                                    {% if vuln.fixed_version %}
+                                    <code class="text-success">{{ vuln.fixed_version }}</code>
+                                    {% else %}
+                                    <em class="text-muted">Not fixed</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if vuln.cvss_score %}
+                                    <strong>{{ vuln.cvss_score }}</strong>
+                                    {% else %}
+                                    <em>N/A</em>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Security Findings -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-shield-exclamation"></i> Additional Security Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="bi bi-key-fill display-4 text-warning"></i>
+                            <h6 class="mt-2">Secrets Found</h6>
+                            <span class="badge bg-{{ 'danger' if image.secrets_found > 0 else 'success' }} fs-6">
+                                {{ image.secrets_found or 0 }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="bi bi-gear-fill display-4 text-info"></i>
+                            <h6 class="mt-2">Config Issues</h6>
+                            <span class="badge bg-{{ 'warning' if image.config_issues > 0 else 'success' }} fs-6">
+                                {{ image.config_issues or 0 }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="bi bi-file-text-fill display-4 text-secondary"></i>
+                            <h6 class="mt-2">License Issues</h6>
+                            <span class="badge bg-{{ 'info' if image.license_issues > 0 else 'success' }} fs-6">
+                                {{ image.license_issues or 0 }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if image.vulnerability_scan_timestamp %}
+                <div class="mt-3 text-center text-muted small">
+                    <i class="bi bi-clock"></i> 
+                    Last vulnerability scan: {{ image.vulnerability_scan_timestamp[:19] }}
+                    {% if image.comprehensive_scanner and image.comprehensive_scan_timestamp %}
+                        using {{ image.vulnerability_scanner }} + {{ image.comprehensive_scanner }} (comprehensive)
+                    {% elif image.vulnerability_scanner %}
+                        using {{ image.vulnerability_scanner }}
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                {% if image.comprehensive_scanner and image.comprehensive_scan_timestamp %}
+                <div class="text-center text-muted small">
+                    <i class="bi bi-shield-check"></i> 
+                    Comprehensive security scan: {{ image.comprehensive_scan_timestamp[:19] }} using {{ image.comprehensive_scanner }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6>Actions</h6>
+                <a href="/images" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-arrow-left"></i> Back to Images
+                </a>
+                <button class="btn btn-outline-info me-2" onclick="copyImageName()">
+                    <i class="bi bi-clipboard"></i> Copy Image Name
+                </button>
+                <a href="/recommend" class="btn btn-outline-success">
+                    <i class="bi bi-search"></i> Find Similar Images
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyImageName() {
+    const imageName = '{{ image.name }}';
+    navigator.clipboard.writeText(imageName).then(() => {
+        showAlert('Image name copied to clipboard!', 'success');
+    }).catch(() => {
+        showAlert('Failed to copy image name', 'error');
+    });
+}
+
+// Load system packages
+function loadSystemPackages() {
+    const imageId = {{ image.id }};
+    
+    // First, try to load from existing data if available
+    {% if image.system_packages %}
+    const systemPackages = {{ image.system_packages|tojson }};
+    displaySystemPackages(systemPackages);
+    {% else %}
+    // If no system packages in image data, show alternative message
+    const container = document.getElementById('systemPackages');
+    container.innerHTML = '<p class="text-muted">System package information not available for this image. This may be because the image was scanned with basic mode only.</p>';
+    {% endif %}
+}
+
+function displaySystemPackages(packages) {
+    const container = document.getElementById('systemPackages');
+    
+    if (!packages || packages.length === 0) {
+        container.innerHTML = '<p class="text-muted">No system packages found or package information not available.</p>';
+        return;
+    }
+    
+    // Group packages by type for better organization
+    const packagesByType = {};
+    packages.forEach(pkg => {
+        const type = pkg.package_type || 'Other';
+        if (!packagesByType[type]) {
+            packagesByType[type] = [];
+        }
+        packagesByType[type].push(pkg);
+    });
+    
+    let html = '<div class="row">';
+    
+    // Display packages grouped by type
+    Object.keys(packagesByType).sort().forEach(type => {
+        const typePackages = packagesByType[type];
+        html += `
+            <div class="col-12 mb-3">
+                <h6 class="text-primary"><i class="bi bi-box"></i> ${type} Packages (${typePackages.length})</h6>
+                <div class="row">
+        `;
+        
+        typePackages.slice(0, 20).forEach(pkg => { // Limit to 20 per type
+            html += `
+                <div class="col-md-6 col-lg-4 mb-2">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body py-2">
+                            <h6 class="card-title mb-1 small">${pkg.name}</h6>
+                            ${pkg.version ? `<p class="card-text small mb-0"><strong>Version:</strong> ${pkg.version}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        if (typePackages.length > 20) {
+            html += `
+                <div class="col-12">
+                    <p class="text-muted small">... and ${typePackages.length - 20} more ${type} packages</p>
+                </div>
+            `;
+        }
+        
+        html += `
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+    
+    // Update header with count
+    const header = document.querySelector('#systemPackages').closest('.card').querySelector('.card-header small');
+    if (header) {
+        header.textContent = `Showing ${Math.min(packages.length, Object.values(packagesByType).reduce((sum, arr) => sum + Math.min(arr.length, 20), 0))} of ${packages.length} packages`;
+    }
+}
+
+// Copy text to clipboard function
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.select();
+        element.setSelectionRange(0, 99999); // For mobile devices
+        
+        try {
+            document.execCommand('copy');
+            // Visual feedback
+            const button = element.nextElementSibling;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-check"></i>';
+            button.classList.add('btn-success');
+            button.classList.remove('btn-outline-secondary');
+            
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-secondary');
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        }
+    }
+}
+
+// Load system packages when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadSystemPackages();
+});
+</script>
+{% endblock %}

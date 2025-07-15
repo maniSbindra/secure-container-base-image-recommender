@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block title %}Images - Container Image Recommendations and Analysis{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-list text-primary"></i>
+            Container Images Database
+        </h1>
+        <p class="lead text-muted">
+            Browse and search container base images in the database
+        </p>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="row mb-4">
+    <!-- Search Box -->
+    <div class="col-12 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-8">
+                        <label for="search" class="form-label">Search Images</label>
+                        <input type="text" name="search" id="search" class="form-control" 
+                               placeholder="Search by image name (e.g., python, base/node)" 
+                               value="{{ search_query }}">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                        {% if search_query %}
+                        <a href="/images" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Clear Search
+                        </a>
+                        {% endif %}
+                    </div>
+                    <!-- Hidden inputs to preserve other filters -->
+                    {% if language_filter %}
+                        <input type="hidden" name="language" value="{{ language_filter }}">
+                    {% endif %}
+                    {% if security_filter and security_filter != 'all' %}
+                        <input type="hidden" name="security" value="{{ security_filter }}">
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="language" class="form-label">Language Filter</label>
+                        <select name="language" id="language" class="form-select">
+                            <option value="">All Languages</option>
+                            <option value="python" {{ 'selected' if language_filter == 'python' }}>Python</option>
+                            <option value="node" {{ 'selected' if language_filter == 'node' }}>Node.js</option>
+                            <option value="java" {{ 'selected' if language_filter == 'java' }}>Java</option>
+                            <option value="go" {{ 'selected' if language_filter == 'go' }}>Go</option>
+                            <option value="dotnet" {{ 'selected' if language_filter == 'dotnet' }}>.NET</option>
+                            <option value="php" {{ 'selected' if language_filter == 'php' }}>PHP</option>
+                            <option value="ruby" {{ 'selected' if language_filter == 'ruby' }}>Ruby</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="security" class="form-label">Security Filter</label>
+                        <select name="security" id="security" class="form-select">
+                            <option value="all" {{ 'selected' if security_filter == 'all' }}>All Images</option>
+                            <option value="secure" {{ 'selected' if security_filter == 'secure' }}>Zero Vulnerabilities</option>
+                            <option value="safe" {{ 'selected' if security_filter == 'safe' }}>No Critical/High</option>
+                            <option value="vulnerable" {{ 'selected' if security_filter == 'vulnerable' }}>Has Vulnerabilities</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-funnel"></i> Apply Filters
+                        </button>
+                        <a href="/images" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Clear
+                        </a>
+                    </div>
+                    <!-- Hidden search input to preserve search -->
+                    {% if search_query %}
+                        <input type="hidden" name="search" value="{{ search_query }}">
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Showing Results</h6>
+                <p class="mb-2">
+                    <strong>{{ images|length }}</strong> images on this page<br>
+                    <strong>{{ total_count }}</strong> total matching images
+                </p>
+                {% if search_query %}
+                    <span class="badge bg-primary">Search: "{{ search_query }}"</span>
+                {% endif %}
+                {% if language_filter %}
+                    <span class="badge bg-info">Language: {{ language_filter }}</span>
+                {% endif %}
+                {% if security_filter != 'all' %}
+                    <span class="badge bg-warning">Security: {{ security_filter }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Images List -->
+<div class="row">
+    {% for image in images %}
+    <div class="col-12 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="mb-2">
+                            <a href="/image/{{ image.id }}" class="text-decoration-none">
+                                {{ image.name }}
+                            </a>
+                        </h6>
+                        
+                        <div class="row g-2 mb-2">
+                            <div class="col-sm-6">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar"></i>
+                                    Scanned: {{ image.scan_timestamp[:10] if image.scan_timestamp else 'Unknown' }}
+                                </small>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="text-muted">
+                                    <i class="bi bi-hdd"></i>
+                                    Size: {{ image.size_bytes|formatBytes if image.size_bytes else 'Unknown' }}
+                                </small>
+                            </div>
+                        </div>
+                        
+                        {% if image.languages %}
+                        <div class="mb-2">
+                            {% for lang in image.languages.split(',') %}
+                                {% set lang_parts = lang.split(':') %}
+                                <span class="badge bg-secondary me-1">
+                                    {{ lang_parts[0] }} {{ lang_parts[1] if lang_parts|length > 1 else '' }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-4 text-md-end">
+                        <div class="mb-2">
+                            {% set vuln_class = 'success' if image.total_vulnerabilities == 0 else 'danger' if (image.critical_vulnerabilities > 0 or image.high_vulnerabilities > 0) else 'warning' %}
+                            <span class="badge bg-{{ vuln_class }}">
+                                {% if image.total_vulnerabilities == 0 %}
+                                    <i class="bi bi-shield-check"></i> No Vulnerabilities
+                                {% elif image.critical_vulnerabilities > 0 or image.high_vulnerabilities > 0 %}
+                                    <i class="bi bi-exclamation-triangle"></i> 
+                                    {{ image.total_vulnerabilities }} Total 
+                                    ({{ image.critical_vulnerabilities + image.high_vulnerabilities }} Critical/High)
+                                {% else %}
+                                    <i class="bi bi-info-circle"></i> 
+                                    {{ image.total_vulnerabilities }} Low/Medium
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="/image/{{ image.id }}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="addToComparison({{ image.id }}, '{{ image.name|replace("'", "\\'") }}')">
+                                <i class="bi bi-arrow-left-right"></i> Compare
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    {% if not images %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-search display-1 text-muted"></i>
+                <h5 class="text-muted mt-3">No images found</h5>
+                <p class="text-muted">
+                    Try adjusting your filters or 
+                    <a href="/scan">scan the registry</a> to populate the database.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Pagination -->
+{% if total_count > per_page %}
+<nav aria-label="Image pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% set total_pages = (total_count + per_page - 1) // per_page %}
+        
+        <!-- Previous -->
+        {% if page > 1 %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page - 1 }}&language={{ language_filter }}&security={{ security_filter }}&search={{ search_query or '' }}">
+                <i class="bi bi-chevron-left"></i> Previous
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span>
+        </li>
+        {% endif %}
+        
+        <!-- Page numbers -->
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+            <li class="page-item active">
+                <span class="page-link">{{ p }}</span>
+            </li>
+            {% elif p <= 3 or p > total_pages - 3 or (p >= page - 2 and p <= page + 2) %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ p }}&language={{ language_filter }}&security={{ security_filter }}&search={{ search_query or '' }}">{{ p }}</a>
+            </li>
+            {% elif p == 4 or p == total_pages - 3 %}
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+            {% endif %}
+        {% endfor %}
+        
+        <!-- Next -->
+        {% if page < total_pages %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page + 1 }}&language={{ language_filter }}&security={{ security_filter }}&search={{ search_query or '' }}">
+                Next <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Next <i class="bi bi-chevron-right"></i></span>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add formatBytes function for template use
+function formatBytes(bytes) {
+    if (!bytes || bytes === 0) return 'Unknown';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Comparison functionality
+let comparisonImages = JSON.parse(localStorage.getItem('comparisonImages') || '[]');
+
+function addToComparison(imageId, imageName) {
+    // Check if image is already in comparison
+    if (comparisonImages.find(img => img.id === imageId)) {
+        showAlert('Image is already selected for comparison', 'warning');
+        return;
+    }
+    
+    // Add to comparison
+    comparisonImages.push({ id: imageId, name: imageName });
+    
+    // Limit to 2 images
+    if (comparisonImages.length > 2) {
+        comparisonImages.shift(); // Remove first image
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('comparisonImages', JSON.stringify(comparisonImages));
+    
+    if (comparisonImages.length === 1) {
+        showAlert(`Added "${imageName}" to comparison. Select one more image to compare.`, 'info');
+    } else if (comparisonImages.length === 2) {
+        showAlert(`Added "${imageName}" to comparison. Ready to compare!`, 'success');
+        
+        // Show option to go to comparison page
+        setTimeout(() => {
+            if (confirm(`Compare "${comparisonImages[0].name}" with "${comparisonImages[1].name}"?`)) {
+                window.location.href = '/compare';
+            }
+        }, 1000);
+    }
+    
+    updateComparisonUI();
+}
+
+function updateComparisonUI() {
+    // Update compare buttons to show selected state
+    const buttons = document.querySelectorAll('button[onclick*="addToComparison"]');
+    buttons.forEach(button => {
+        const imageId = parseInt(button.getAttribute('onclick').match(/addToComparison\((\d+)/)[1]);
+        if (comparisonImages.find(img => img.id === imageId)) {
+            button.innerHTML = '<i class="bi bi-check-circle"></i> Selected';
+            button.classList.remove('btn-outline-secondary');
+            button.classList.add('btn-success');
+        }
+    });
+}
+
+// Quick search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    updateComparisonUI();
+    
+    // Show comparison status if images are selected
+    if (comparisonImages.length > 0) {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'alert alert-info sticky-top';
+        statusDiv.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Comparison Selection:</strong> 
+                    ${comparisonImages.map(img => img.name.substring(0, 30) + (img.name.length > 30 ? '...' : '')).join(' vs ')}
+                    ${comparisonImages.length === 1 ? ' (Select 1 more)' : ''}
+                </div>
+                <div>
+                    ${comparisonImages.length === 2 ? `
+                        <a href="/compare" class="btn btn-sm btn-primary me-2">
+                            <i class="bi bi-arrow-left-right"></i> Compare Now
+                        </a>
+                    ` : ''}
+                    <button class="btn btn-sm btn-outline-secondary" onclick="clearComparison()">
+                        Clear
+                    </button>
+                </div>
+            </div>
+        `;
+        document.querySelector('.container').insertBefore(statusDiv, document.querySelector('.container').firstChild);
+    }
+});
+
+function clearComparison() {
+    comparisonImages = [];
+    localStorage.removeItem('comparisonImages');
+    location.reload();
+}
+</script>
+{% endblock %}

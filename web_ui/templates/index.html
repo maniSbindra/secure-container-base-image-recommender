@@ -1,0 +1,454 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Container Image Recommendations and Analysis{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-shield-check text-primary"></i>
+            Container Image Recommendations and Analysis Dashboard
+        </h1>
+        <p class="lead text-muted">
+            Security-focused container base image analysis and recommendations
+        </p>
+    </div>
+</div>
+
+<!-- Quick Search -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="mb-2"><i class="bi bi-search"></i> Quick Image Search</h6>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="quickSearch" 
+                                   placeholder="Enter exact image name (e.g., azurelinux/base/python) or search term">
+                            <button class="btn btn-primary" type="button" id="searchButton">
+                                <i class="bi bi-search"></i> Search
+                            </button>
+                        </div>
+                        <small class="text-muted mt-1 d-block">
+                            <i class="bi bi-info-circle"></i> 
+                            Exact matches will be shown first, followed by similar images
+                        </small>
+                    </div>
+                    <div class="col-md-4 mt-2 mt-md-0">
+                        <select class="form-select" id="searchLanguage">
+                            <option value="">All Languages</option>
+                            <option value="python">Python</option>
+                            <option value="node">Node.js</option>
+                            <option value="java">Java</option>
+                            <option value="go">Go</option>
+                            <option value="dotnet">.NET</option>
+                            <option value="php">PHP</option>
+                            <option value="ruby">Ruby</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Search Results -->
+                <div id="searchResults" class="mt-3" style="display: none;">
+                    <hr>
+                    <h6><i class="bi bi-list-check"></i> Search Results</h6>
+                    <div id="searchResultsList">
+                        <!-- Results will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-layers display-4 text-primary"></i>
+                <h3 class="mt-2">{{ stats.total_images }}</h3>
+                <p class="text-muted">Total Images</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-shield-check display-4 text-success"></i>
+                <h3 class="mt-2">{{ stats.zero_vuln_images }}</h3>
+                <p class="text-muted">Zero Vulnerabilities</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-shield-exclamation display-4 text-warning"></i>
+                <h3 class="mt-2">{{ stats.safe_images }}</h3>
+                <p class="text-muted">Safe Images</p>
+                <small class="text-muted">(No Critical/High)</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-graph-up display-4 text-info"></i>
+                <h3 class="mt-2">{{ "%.1f"|format(stats.avg_vulnerabilities) }}</h3>
+                <p class="text-muted">Avg Vulnerabilities</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Quick Actions -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <a href="/recommend" class="btn btn-primary btn-lg">
+                        <i class="bi bi-search"></i> Find Recommended Image
+                    </a>
+                    <a href="/images?security=secure" class="btn btn-success">
+                        <i class="bi bi-shield-check"></i> View Secure Images
+                    </a>
+                    <a href="/scan" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-clockwise"></i> Update Image Database
+                    </a>
+                    <a href="/analytics" class="btn btn-outline-info">
+                        <i class="bi bi-graph-up"></i> View Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Language Distribution -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-code"></i> Language Distribution</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Language</th>
+                                <th>Images</th>
+                                <th>Avg Vulns</th>
+                                <th>Security</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lang in language_stats %}
+                            <tr>
+                                <td>
+                                    <strong>{{ lang.language }}</strong>
+                                </td>
+                                <td>{{ lang.image_count }}</td>
+                                <td>{{ "%.1f"|format(lang.avg_vulnerabilities) }}</td>
+                                <td>
+                                    {% if lang.avg_vulnerabilities == 0 %}
+                                        <span class="badge bg-success">Excellent</span>
+                                    {% elif lang.avg_vulnerabilities < 5 %}
+                                        <span class="badge bg-warning">Good</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Needs Review</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-3">
+                    <a href="/images" class="btn btn-sm btn-outline-primary">
+                        View All Images <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity or Featured Images (if we had such data) -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-star"></i> Security Best Practices</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-check-circle text-success"></i> Recommendations</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-shield-check text-success"></i>
+                                Always choose images with zero critical/high vulnerabilities
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-arrow-clockwise text-info"></i>
+                                Regularly update your base images to get latest security patches
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-layers text-primary"></i>
+                                Prefer distroless images for production workloads
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-exclamation-triangle text-warning"></i> Security Notes</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-eye text-warning"></i>
+                                Monitor vulnerability reports for your chosen images
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-lock text-danger"></i>
+                                Scan your application dependencies separately
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-clipboard-check text-info"></i>
+                                Follow your organization's security policies
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Quick Search functionality
+    function performSearch() {
+        const query = document.getElementById('quickSearch').value.trim();
+        const language = document.getElementById('searchLanguage').value;
+        const resultsDiv = document.getElementById('searchResults');
+        const resultsList = document.getElementById('searchResultsList');
+        
+        if (!query) {
+            resultsDiv.style.display = 'none';
+            return;
+        }
+        
+        // Show loading state
+        resultsList.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div> Searching...</div>';
+        resultsDiv.style.display = 'block';
+        
+        // First, try to find an exact match
+        fetch(`/api/image/${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.found) {
+                    // Exact match found, show it prominently
+                    displayExactMatch(data.image, query);
+                } else {
+                    // No exact match, do partial search
+                    performPartialSearch(query, language);
+                }
+            })
+            .catch(error => {
+                console.error('Exact search error:', error);
+                // Fallback to partial search
+                performPartialSearch(query, language);
+            });
+    }
+    
+    function performPartialSearch(query, language) {
+        const resultsList = document.getElementById('searchResultsList');
+        
+        // Build search URL for partial matching
+        let searchUrl = `/api/search?q=${encodeURIComponent(query)}`;
+        if (language) {
+            searchUrl += `&language=${encodeURIComponent(language)}`;
+        }
+        
+        fetch(searchUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.images) {
+                    displaySearchResults(data.images, query);
+                } else {
+                    resultsList.innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> No images found matching your search criteria.</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                resultsList.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-circle"></i> Error performing search. Please try again.</div>';
+            });
+    }
+    
+    function displayExactMatch(image, query) {
+        const resultsList = document.getElementById('searchResultsList');
+        const vulnBadge = getVulnerabilityBadge(image.total_vulnerabilities, image.critical_vulnerabilities, image.high_vulnerabilities);
+        const sizeMB = image.size_bytes ? (image.size_bytes / (1024 * 1024)).toFixed(1) : 'N/A';
+        
+        const html = `
+            <div class="alert alert-success d-flex align-items-center mb-3">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span><strong>Exact Match Found!</strong> Found the image you're looking for.</span>
+            </div>
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-box"></i> ${image.image_name || image.name}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong><i class="bi bi-tag"></i> Tag:</strong> ${image.tag || 'latest'}
+                            </p>
+                            <p class="mb-2">
+                                <strong><i class="bi bi-hdd"></i> Size:</strong> ${sizeMB} MB
+                            </p>
+                            ${image.languages ? `<p class="mb-2"><strong><i class="bi bi-code"></i> Languages:</strong> ${image.languages}</p>` : ''}
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong><i class="bi bi-shield"></i> Security:</strong> ${vulnBadge}
+                            </p>
+                            ${image.description ? `<p class="mb-2"><strong><i class="bi bi-info-circle"></i> Description:</strong> ${image.description}</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <a href="/image/${image.id}" class="btn btn-primary">
+                            <i class="bi bi-eye"></i> View Details
+                        </a>
+                        <a href="/images?search=${encodeURIComponent(query)}" class="btn btn-outline-secondary">
+                            <i class="bi bi-search"></i> See Similar Images
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        resultsList.innerHTML = html;
+    }
+    
+    function displaySearchResults(images, query) {
+        const resultsList = document.getElementById('searchResultsList');
+        
+        if (images.length === 0) {
+            resultsList.innerHTML = '<div class="alert alert-info"><i class="bi bi-info-circle"></i> No images found matching your search criteria.</div>';
+            return;
+        }
+        
+        let html = `
+            <div class="alert alert-info d-flex align-items-center mb-3">
+                <i class="bi bi-info-circle me-2"></i>
+                <span><strong>Similar Images:</strong> Found ${images.length} images containing "${query}"</span>
+            </div>
+            <div class="row">
+        `;
+        
+        images.slice(0, 6).forEach(image => {  // Limit to 6 results for dashboard
+            const vulnBadge = getVulnerabilityBadge(image.total_vulnerabilities, image.critical_vulnerabilities, image.high_vulnerabilities);
+            const sizeMB = image.size_bytes ? (image.size_bytes / (1024 * 1024)).toFixed(1) : 'N/A';
+            
+            html += `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title text-truncate" title="${image.image_name || image.name}">
+                                <i class="bi bi-box text-primary"></i>
+                                ${image.image_name || image.name}
+                            </h6>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="bi bi-tag"></i> ${image.tag || 'latest'}
+                                    <br>
+                                    <i class="bi bi-hdd"></i> ${sizeMB} MB
+                                    ${image.languages ? `<br><i class="bi bi-code"></i> ${image.languages}` : ''}
+                                </small>
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                ${vulnBadge}
+                                <a href="/image/${image.id}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+        
+        if (images.length > 6) {
+            html += `
+                <div class="text-center mt-3">
+                    <a href="/images?search=${encodeURIComponent(query)}" class="btn btn-primary">
+                        <i class="bi bi-list-ul"></i> View All ${images.length} Results
+                    </a>
+                </div>
+            `;
+        }
+        
+        resultsList.innerHTML = html;
+    }
+    
+    function getVulnerabilityBadge(total, critical, high) {
+        if (total === 0) {
+            return '<span class="badge security-safe"><i class="bi bi-shield-check"></i> Clean</span>';
+        } else if (critical > 0) {
+            return `<span class="badge security-danger"><i class="bi bi-shield-x"></i> ${total} vuln</span>`;
+        } else if (high > 0) {
+            return `<span class="badge security-warning"><i class="bi bi-shield-exclamation"></i> ${total} vuln</span>`;
+        } else {
+            return `<span class="badge security-safe"><i class="bi bi-shield-check"></i> ${total} vuln</span>`;
+        }
+    }
+    
+    // Event listeners
+    document.getElementById('searchButton').addEventListener('click', performSearch);
+    document.getElementById('quickSearch').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+    
+    // Clear results when search is cleared
+    document.getElementById('quickSearch').addEventListener('input', function(e) {
+        if (e.target.value.trim() === '') {
+            document.getElementById('searchResults').style.display = 'none';
+        }
+    });
+    
+    // Language filter change triggers new search if there's a query
+    document.getElementById('searchLanguage').addEventListener('change', function() {
+        const query = document.getElementById('quickSearch').value.trim();
+        if (query) {
+            performSearch();
+        }
+    });
+    
+    // Auto-refresh stats every 30 seconds (optional)
+    // setInterval(() => {
+    //     fetch('/api/stats')
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             if (data.success) {
+    //                 // Update stats in place
+    //                 console.log('Stats updated');
+    //             }
+    //         })
+    //         .catch(console.error);
+    // }, 30000);
+</script>
+{% endblock %}

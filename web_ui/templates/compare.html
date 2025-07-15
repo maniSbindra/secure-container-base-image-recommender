@@ -1,0 +1,1065 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Images - Container Image Recommendations and Analysis{% endblock %}
+
+{% block styles %}
+<style>
+.comparison-card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+}
+
+.comparison-card:hover {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.winner-highlight {
+    border: 2px solid #28a745;
+    background-color: #f8fff9;
+}
+
+.loser-highlight {
+    border: 2px solid #dc3545;
+    background-color: #fff5f5;
+}
+
+.metric-card {
+    background: #f8f9fa;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.diff-positive {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.diff-negative {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.diff-neutral {
+    color: #6c757d;
+}
+
+.package-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.image-selector {
+    min-height: 200px;
+    border: 2px dashed #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.image-selector:hover {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.image-selector.selected {
+    border-color: #28a745;
+    background-color: #f8fff9;
+}
+
+.vulnerability-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-arrow-left-right text-primary"></i>
+            Compare Container Images
+        </h1>
+        <p class="lead text-muted">
+            Select two images to compare their security, size, and package differences
+        </p>
+    </div>
+</div>
+
+<!-- Image Selection Section -->
+<div id="selectionSection">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-box text-primary"></i>
+                        Select First Image
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="image1Selector" class="image-selector" onclick="showImagePicker(1)">
+                        <div>
+                            <i class="bi bi-plus-circle display-4 text-muted"></i>
+                            <h6 class="mt-2 text-muted">Click to select an image</h6>
+                        </div>
+                    </div>
+                    <div id="image1Info" style="display: none;" class="mt-3">
+                        <!-- Selected image info will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-box text-primary"></i>
+                        Select Second Image
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="image2Selector" class="image-selector" onclick="showImagePicker(2)">
+                        <div>
+                            <i class="bi bi-plus-circle display-4 text-muted"></i>
+                            <h6 class="mt-2 text-muted">Click to select an image</h6>
+                        </div>
+                    </div>
+                    <div id="image2Info" style="display: none;" class="mt-3">
+                        <!-- Selected image info will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12 text-center">
+            <button id="compareButton" class="btn btn-primary btn-lg" onclick="compareImages()" disabled>
+                <i class="bi bi-arrow-left-right"></i>
+                Compare Images
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Comparison Results Section -->
+<div id="comparisonSection" style="display: none;">
+    <hr class="my-5">
+    
+    <!-- Header with overall recommendation -->
+    <div id="comparisonHeader" class="row mb-4">
+        <!-- Will be populated by JavaScript -->
+    </div>
+    
+    <!-- Side-by-side comparison -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div id="image1Comparison" class="comparison-card p-3">
+                <!-- Image 1 details -->
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div id="image2Comparison" class="comparison-card p-3">
+                <!-- Image 2 details -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detailed comparison metrics -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-exclamation text-warning"></i>
+                        Security Comparison
+                    </h5>
+                </div>
+                <div class="card-body" id="securityComparison">
+                    <!-- Security comparison details -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-hdd text-info"></i>
+                        Size Comparison
+                    </h5>
+                </div>
+                <div class="card-body" id="sizeComparison">
+                    <!-- Size comparison details -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-box-seam text-success"></i>
+                        Package Comparison
+                    </h5>
+                </div>
+                <div class="card-body" id="packageComparison">
+                    <!-- Package comparison details -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detailed package differences -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul"></i>
+                        Package Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="packageTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="common-tab" data-bs-toggle="tab" data-bs-target="#common" type="button" role="tab">
+                                Common Packages
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="different-tab" data-bs-toggle="tab" data-bs-target="#different" type="button" role="tab">
+                                Different Versions
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="unique1-tab" data-bs-toggle="tab" data-bs-target="#unique1" type="button" role="tab">
+                                Unique to Image 1
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="unique2-tab" data-bs-toggle="tab" data-bs-target="#unique2" type="button" role="tab">
+                                Unique to Image 2
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3" id="packageTabContent">
+                        <div class="tab-pane fade show active" id="common" role="tabpanel">
+                            <div id="commonPackages" class="package-list">
+                                <!-- Common packages list -->
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="different" role="tabpanel">
+                            <div id="differentPackages" class="package-list">
+                                <!-- Different versions list -->
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="unique1" role="tabpanel">
+                            <div id="unique1Packages" class="package-list">
+                                <!-- Unique to image 1 list -->
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="unique2" role="tabpanel">
+                            <div id="unique2Packages" class="package-list">
+                                <!-- Unique to image 2 list -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <button class="btn btn-outline-primary" onclick="resetComparison()">
+                <i class="bi bi-arrow-clockwise"></i>
+                Compare Different Images
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Image Picker Modal -->
+<div class="modal fade" id="imagePickerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select an Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="imageSearchInput" placeholder="Search images...">
+                </div>
+                <div id="imageList" style="max-height: 400px; overflow-y: auto;">
+                    <div class="text-center" id="imageListLoading">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="mt-2">Loading images...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let selectedImages = {
+    image1: null,
+    image2: null
+};
+
+let currentPickerSlot = null;
+let allImages = [];
+
+// Load images on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Compare page loaded, loading images...');
+    loadImages();
+    
+    // Check for URL parameters first
+    const urlParams = new URLSearchParams(window.location.search);
+    const sourceImage = urlParams.get('source');
+    const targetImage = urlParams.get('target');
+    
+    if (sourceImage) {
+        console.log('=== URL PARAMETER PROCESSING ===');
+        console.log('Raw source image from URL:', sourceImage);
+        console.log('Raw target image from URL:', targetImage);
+        console.log('URL-decoded source image:', decodeURIComponent(sourceImage));
+        console.log('URL-decoded target image:', targetImage ? decodeURIComponent(targetImage) : 'None');
+        
+        // Wait for images to load, then find and select them
+        setTimeout(() => {
+            console.log('=== IMAGE LOOKUP STARTING ===');
+            console.log('Total images loaded:', allImages.length);
+            console.log('First 5 image names in database:');
+            allImages.slice(0, 5).forEach((img, idx) => {
+                console.log(`  ${idx + 1}: "${img.name}" (ID: ${img.id})`);
+            });
+            
+            // Try both original and decoded versions
+            const decodedSourceImage = decodeURIComponent(sourceImage);
+            console.log('Looking for source image:', decodedSourceImage);
+            
+            let sourceImg = allImages.find(img => img.name === sourceImage);
+            if (!sourceImg) {
+                console.log('Source image not found with original name, trying decoded...');
+                sourceImg = allImages.find(img => img.name === decodedSourceImage);
+            }
+            
+            if (sourceImg) {
+                console.log('✅ Found source image in database:', sourceImg.name, '(ID:', sourceImg.id, ')');
+                selectedImages.image1 = sourceImg;
+                updateImageSelector(1, sourceImg);
+                updateCompareButton();
+                
+                if (targetImage) {
+                    const decodedTargetImage = decodeURIComponent(targetImage);
+                    console.log('Looking for target image:', decodedTargetImage);
+                    
+                    let targetImg = allImages.find(img => img.name === targetImage);
+                    if (!targetImg) {
+                        console.log('Target image not found with original name, trying decoded...');
+                        targetImg = allImages.find(img => img.name === decodedTargetImage);
+                    }
+                    
+                    if (targetImg) {
+                        console.log('✅ Found target image in database:', targetImg.name, '(ID:', targetImg.id, ')');
+                        selectedImages.image2 = targetImg;
+                        updateImageSelector(2, targetImg);
+                        updateCompareButton();
+                        
+                        // Automatically trigger comparison
+                        setTimeout(() => {
+                            const compareButton = document.getElementById('compareButton');
+                            console.log('Compare button state:', {
+                                exists: !!compareButton,
+                                disabled: compareButton ? compareButton.disabled : 'N/A',
+                                innerHTML: compareButton ? compareButton.innerHTML.substring(0, 50) : 'N/A'
+                            });
+                            
+                            if (compareButton && !compareButton.disabled) {
+                                console.log('🚀 Auto-triggering comparison...');
+                                compareButton.click();
+                            } else {
+                                console.log('❌ Cannot auto-trigger comparison - button not ready');
+                            }
+                        }, 500);
+                    } else {
+                        console.log('❌ Target image not found in database');
+                        console.log('Searched for:', targetImage, 'and', decodedTargetImage);
+                        console.log('Available image names containing "' + decodedTargetImage.split('/').pop().split(':')[0] + '":');
+                        allImages.filter(img => img.name.includes(decodedTargetImage.split('/').pop().split(':')[0]))
+                                 .forEach(img => console.log(`  - "${img.name}"`));
+                    }
+                }
+            } else {
+                console.log('❌ Source image not found in database');
+                console.log('Searched for:', sourceImage, 'and', decodedSourceImage);
+                console.log('Available image names containing "' + decodedSourceImage.split('/').pop().split(':')[0] + '":');
+                allImages.filter(img => img.name.includes(decodedSourceImage.split('/').pop().split(':')[0]))
+                         .forEach(img => console.log(`  - "${img.name}"`));
+            }
+        }, 2000); // Increased timeout to ensure images are loaded
+        
+        // Clear URL parameters to clean up the URL after processing
+        setTimeout(() => {
+            if (window.history.replaceState) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }, 3000);
+    } else {
+        // Check for pre-selected images from localStorage (existing functionality)
+        const preSelected = JSON.parse(localStorage.getItem('comparisonImages') || '[]');
+        console.log('Pre-selected images from localStorage:', preSelected);
+        
+        if (preSelected.length > 0) {
+            console.log('Found pre-selected images, will auto-select them');
+            // Auto-select images if they were chosen from the images page
+            preSelected.forEach((img, index) => {
+                if (index < 2) {
+                    // Find the image in allImages (we'll need to wait for them to load)
+                    setTimeout(() => {
+                        console.log(`Looking for image ${img.id} in loaded images...`);
+                        const image = allImages.find(fullImg => fullImg.id === img.id);
+                        if (image) {
+                            console.log(`Found and selecting image ${img.id}`);
+                            selectedImages[`image${index + 1}`] = image;
+                            updateImageSelector(index + 1, image);
+                            updateCompareButton();
+                        } else {
+                            console.log(`Image ${img.id} not found in loaded images`);
+                        }
+                    }, 2000); // Increased timeout to ensure images are loaded
+                }
+            });
+        }
+        
+        // Clear the localStorage after using
+        localStorage.removeItem('comparisonImages');
+    }
+});
+
+function updateImageSelector(slot, image) {
+    console.log(`=== UPDATING IMAGE SELECTOR ${slot} ===`);
+    console.log('Image data:', {
+        name: image.name,
+        id: image.id,
+        size_bytes: image.size_bytes,
+        total_vulnerabilities: image.total_vulnerabilities
+    });
+    
+    const selector = document.getElementById(`image${slot}Selector`);
+    const info = document.getElementById(`image${slot}Info`);
+    
+    console.log('Selector element:', !!selector);
+    console.log('Info element:', !!info);
+    
+    if (!selector || !info) {
+        console.error('❌ Required DOM elements not found');
+        return;
+    }
+    
+    selector.classList.add('selected');
+    selector.innerHTML = `
+        <div>
+            <i class="bi bi-check-circle display-4 text-success"></i>
+            <h6 class="mt-2 text-success">Image Selected</h6>
+        </div>
+    `;
+    
+    info.style.display = 'block';
+    info.innerHTML = `
+        <h6>${escapeHtml(image.name)}</h6>
+        <div class="row">
+            <div class="col-6">
+                <small class="text-muted">Size: ${formatBytes(image.size_bytes)}</small>
+            </div>
+            <div class="col-6">
+                <small class="text-muted">Vulnerabilities: ${image.total_vulnerabilities || 0}</small>
+            </div>
+        </div>
+        ${getVulnerabilityBadges(image)}
+    `;
+    
+    console.log('✅ Image selector updated successfully');
+}
+
+async function loadImages() {
+    console.log('=== LOADING IMAGES ===');
+    console.log('Making API call to /api/images/all...');
+    
+    try {
+        const response = await fetch('/api/images/all?per_page=1000');
+        console.log('API response status:', response.status);
+        console.log('API response headers:', [...response.headers.entries()]);
+        
+        const data = await response.json();
+        console.log('API response data:', data);
+        
+        if (data.success) {
+            allImages = data.images;
+            console.log(`✅ Successfully loaded ${allImages.length} images for comparison`);
+            
+            if (allImages.length > 0) {
+                console.log('Sample image structure:', JSON.stringify(allImages[0], null, 2));
+                console.log('All image names:');
+                allImages.forEach((img, idx) => {
+                    console.log(`  ${idx + 1}: "${img.name}" (ID: ${img.id})`);
+                });
+            } else {
+                console.log('⚠️ No images returned from API');
+            }
+        } else {
+            console.error('❌ API returned error:', data.error);
+            showAlert('Failed to load images: ' + data.error, 'danger');
+        }
+    } catch (error) {
+        console.error('❌ Network error loading images:', error);
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack
+        });
+        showAlert('Error loading images: ' + error.message, 'danger');
+    }
+}
+
+function showImagePicker(slot) {
+    currentPickerSlot = slot;
+    
+    // Check if images are loaded
+    if (allImages.length === 0) {
+        showAlert('Loading images... Please wait a moment and try again.', 'info');
+        
+        // Try to reload images and then show picker
+        loadImages().then(() => {
+            if (allImages.length > 0) {
+                displayImages(allImages);
+                const modal = new bootstrap.Modal(document.getElementById('imagePickerModal'));
+                modal.show();
+            } else {
+                showAlert('No images available. Please scan some images first.', 'warning');
+            }
+        });
+        return;
+    }
+    
+    displayImages(allImages);
+    
+    const modal = new bootstrap.Modal(document.getElementById('imagePickerModal'));
+    modal.show();
+}
+
+function displayImages(images) {
+    const imageList = document.getElementById('imageList');
+    const loadingDiv = document.getElementById('imageListLoading');
+    
+    // Hide loading indicator if it exists
+    if (loadingDiv) {
+        loadingDiv.style.display = 'none';
+    }
+    
+    if (images.length === 0) {
+        imageList.innerHTML = '<div class="text-center text-muted">No images found. <a href="/scan">Scan the registry</a> to add images.</div>';
+        return;
+    }
+    
+    console.log(`Displaying ${images.length} images`);
+    
+    imageList.innerHTML = images.map(image => `
+        <div class="card mb-2" style="cursor: pointer;" onclick="selectImage(${image.id}, '${escapeHtml(image.name)}')">
+            <div class="card-body py-2">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="mb-1">${escapeHtml(image.name)}</h6>
+                        <small class="text-muted">
+                            Size: ${formatBytes(image.size_bytes)} | 
+                            Vulns: ${image.total_vulnerabilities || 0}
+                            ${image.languages ? ` | Languages: ${Array.isArray(image.languages) ? 
+                                image.languages.map(lang => typeof lang === 'string' ? lang : lang.language || 'unknown').slice(0, 2).join(', ') : 
+                                image.languages.split(',').slice(0, 2).join(', ')}` : ''}
+                        </small>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        ${getVulnerabilityBadges(image)}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function selectImage(imageId, imageName) {
+    console.log(`Selecting image: ID=${imageId}, Name=${imageName}`);
+    
+    // Find the full image data
+    const image = allImages.find(img => img.id === imageId);
+    if (!image) {
+        console.error('Image not found in allImages array');
+        showAlert('Error selecting image. Please try again.', 'danger');
+        return;
+    }
+    
+    console.log('Found image:', image);
+    
+    selectedImages[`image${currentPickerSlot}`] = image;
+    
+    // Update the selector display using the helper function
+    updateImageSelector(currentPickerSlot, image);
+    
+    // Enable compare button if both images are selected
+    updateCompareButton();
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('imagePickerModal'));
+    if (modal) {
+        modal.hide();
+    }
+    
+    console.log('Image selection completed');
+}
+
+function updateCompareButton() {
+    console.log('=== UPDATING COMPARE BUTTON ===');
+    console.log('Selected images:', {
+        image1: selectedImages.image1 ? {name: selectedImages.image1.name, id: selectedImages.image1.id} : null,
+        image2: selectedImages.image2 ? {name: selectedImages.image2.name, id: selectedImages.image2.id} : null
+    });
+    
+    const compareButton = document.getElementById('compareButton');
+    const canCompare = selectedImages.image1 && selectedImages.image2;
+    
+    console.log('Compare button element:', !!compareButton);
+    console.log('Can compare:', canCompare);
+    
+    compareButton.disabled = !canCompare;
+    
+    if (canCompare) {
+        const buttonText = `Compare "${selectedImages.image1.name.substring(0, 20)}..." with "${selectedImages.image2.name.substring(0, 20)}..."`;
+        console.log('Setting button text:', buttonText);
+        compareButton.innerHTML = `
+            <i class="bi bi-arrow-left-right"></i>
+            ${buttonText}
+        `;
+    } else {
+        console.log('Setting default button text');
+        compareButton.innerHTML = `
+            <i class="bi bi-arrow-left-right"></i>
+            Compare Images
+        `;
+    }
+    
+    console.log('Button final state:', {
+        disabled: compareButton.disabled,
+        innerHTML: compareButton.innerHTML.substring(0, 100)
+    });
+}
+
+async function compareImages() {
+    if (!selectedImages.image1 || !selectedImages.image2) {
+        showAlert('Please select two images to compare', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/compare', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                image1_id: selectedImages.image1.id,
+                image2_id: selectedImages.image2.id
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayComparison(data.comparison);
+        } else {
+            showAlert('Comparison failed: ' + data.error, 'danger');
+        }
+        
+    } catch (error) {
+        showAlert('Error during comparison: ' + error.message, 'danger');
+    }
+}
+
+function displayComparison(comparison) {
+    const selectionSection = document.getElementById('selectionSection');
+    const comparisonSection = document.getElementById('comparisonSection');
+    
+    selectionSection.style.display = 'none';
+    comparisonSection.style.display = 'block';
+    
+    // Display header with overall recommendation
+    displayComparisonHeader(comparison);
+    
+    // Display side-by-side comparison
+    displaySideBySideComparison(comparison);
+    
+    // Display detailed metrics
+    displaySecurityComparison(comparison.vulnerability_comparison);
+    displaySizeComparison(comparison.size_comparison);
+    displayPackageComparison(comparison.package_comparison);
+    
+    // Display package details
+    displayPackageDetails(comparison.package_comparison.details);
+    
+    // Scroll to comparison section
+    comparisonSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+function displayComparisonHeader(comparison) {
+    const header = document.getElementById('comparisonHeader');
+    const rec = comparison.recommendation;
+    
+    let recommendationText = '';
+    let recommendationClass = '';
+    
+    if (rec.overall_recommendation === 'image1') {
+        recommendationText = `<strong>${comparison.image1.name}</strong> is recommended overall`;
+        recommendationClass = 'alert-success';
+    } else if (rec.overall_recommendation === 'image2') {
+        recommendationText = `<strong>${comparison.image2.name}</strong> is recommended overall`;
+        recommendationClass = 'alert-success';
+    } else {
+        recommendationText = 'Both images have similar characteristics';
+        recommendationClass = 'alert-info';
+    }
+    
+    header.innerHTML = `
+        <div class="col-12">
+            <div class="alert ${recommendationClass}">
+                <h4 class="alert-heading">
+                    <i class="bi bi-trophy"></i>
+                    Comparison Result
+                </h4>
+                <p class="mb-0">${recommendationText}</p>
+            </div>
+        </div>
+    `;
+}
+
+function displaySideBySideComparison(comparison) {
+    const image1Div = document.getElementById('image1Comparison');
+    const image2Div = document.getElementById('image2Comparison');
+    
+    // Apply winner highlighting
+    if (comparison.recommendation.overall_recommendation === 'image1') {
+        image1Div.classList.add('winner-highlight');
+        image2Div.classList.add('loser-highlight');
+    } else if (comparison.recommendation.overall_recommendation === 'image2') {
+        image2Div.classList.add('winner-highlight');
+        image1Div.classList.add('loser-highlight');
+    }
+    
+    image1Div.innerHTML = generateImageComparisonCard(comparison.image1, '1');
+    image2Div.innerHTML = generateImageComparisonCard(comparison.image2, '2');
+}
+
+function generateImageComparisonCard(image, imageNumber) {
+    return `
+        <h5 class="mb-3">
+            <i class="bi bi-box"></i>
+            Image ${imageNumber}
+        </h5>
+        <h6 class="text-primary">${escapeHtml(image.name)}</h6>
+        
+        <div class="metric-card">
+            <strong>Size:</strong> ${formatBytes(image.size_bytes)}
+        </div>
+        
+        <div class="metric-card">
+            <strong>Total Vulnerabilities:</strong> ${image.total_vulnerabilities || 0}
+            <div class="mt-2">
+                ${getVulnerabilityBadges(image)}
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <strong>Languages:</strong>
+            <div class="mt-1">
+                ${image.languages && image.languages.length > 0 ? 
+                    image.languages.map(lang => {
+                        const langName = typeof lang === 'string' ? lang : lang.language || 'unknown';
+                        const langVersion = typeof lang === 'object' && lang.version ? ` ${lang.version}` : '';
+                        return `<span class="badge bg-secondary me-1">${langName}${langVersion}</span>`;
+                    }).join('') : 'None detected'}
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <strong>Created:</strong> ${image.created_date ? new Date(image.created_date).toLocaleDateString() : 'Unknown'}
+        </div>
+    `;
+}
+
+function displaySecurityComparison(vulnComparison) {
+    const securityDiv = document.getElementById('securityComparison');
+    const diffs = vulnComparison.differences;
+    
+    securityDiv.innerHTML = `
+        <div class="metric-card">
+            <strong>Total Vulnerabilities:</strong>
+            <span class="${getDiffClass(diffs.total)}">${formatDiff(diffs.total)}</span>
+        </div>
+        
+        <div class="metric-card">
+            <strong>Critical:</strong>
+            <span class="${getDiffClass(diffs.critical)}">${formatDiff(diffs.critical)}</span>
+        </div>
+        
+        <div class="metric-card">
+            <strong>High:</strong>
+            <span class="${getDiffClass(diffs.high)}">${formatDiff(diffs.high)}</span>
+        </div>
+        
+        <div class="metric-card">
+            <strong>Medium:</strong>
+            <span class="${getDiffClass(diffs.medium)}">${formatDiff(diffs.medium)}</span>
+        </div>
+        
+        <div class="metric-card">
+            <strong>Low:</strong>
+            <span class="${getDiffClass(diffs.low)}">${formatDiff(diffs.low)}</span>
+        </div>
+        
+        <div class="mt-3">
+            <small class="text-muted">
+                <strong>Winner:</strong> 
+                ${vulnComparison.winner === 'image1' ? 'Image 1' : vulnComparison.winner === 'image2' ? 'Image 2' : 'Tie'}
+                ${vulnComparison.winner !== 'tie' ? ' (fewer vulnerabilities)' : ''}
+            </small>
+        </div>
+    `;
+}
+
+function displaySizeComparison(sizeComparison) {
+    const sizeDiv = document.getElementById('sizeComparison');
+    
+    sizeDiv.innerHTML = `
+        <div class="metric-card">
+            <strong>Size Difference:</strong>
+            <div class="${getDiffClass(sizeComparison.difference_bytes)}">
+                ${formatBytes(Math.abs(sizeComparison.difference_bytes))} 
+                ${sizeComparison.difference_bytes > 0 ? 'larger' : sizeComparison.difference_bytes < 0 ? 'smaller' : 'same'}
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <strong>Percentage Difference:</strong>
+            <span class="${getDiffClass(sizeComparison.difference_bytes)}">
+                ${Math.abs(sizeComparison.difference_percent).toFixed(1)}%
+                ${sizeComparison.difference_percent > 0 ? 'larger' : sizeComparison.difference_percent < 0 ? 'smaller' : 'same'}
+            </span>
+        </div>
+        
+        <div class="mt-3">
+            <small class="text-muted">
+                <strong>Winner:</strong> 
+                ${sizeComparison.winner === 'image1' ? 'Image 1' : sizeComparison.winner === 'image2' ? 'Image 2' : 'Tie'}
+                ${sizeComparison.winner !== 'tie' ? ' (smaller size)' : ''}
+            </small>
+        </div>
+    `;
+}
+
+function displayPackageComparison(packageComparison) {
+    const packageDiv = document.getElementById('packageComparison');
+    
+    packageDiv.innerHTML = `
+        <div class="metric-card">
+            <strong>Common Packages:</strong> ${packageComparison.common_packages}
+        </div>
+        
+        <div class="metric-card">
+            <strong>Different Versions:</strong> ${packageComparison.different_versions}
+        </div>
+        
+        <div class="metric-card">
+            <strong>Unique to Image 1:</strong> ${packageComparison.unique_to_image1}
+        </div>
+        
+        <div class="metric-card">
+            <strong>Unique to Image 2:</strong> ${packageComparison.unique_to_image2}
+        </div>
+    `;
+}
+
+function displayPackageDetails(details) {
+    // Common packages
+    const commonDiv = document.getElementById('commonPackages');
+    commonDiv.innerHTML = details.common.length > 0 ? 
+        details.common.map(pkg => `
+            <div class="d-flex justify-content-between border-bottom py-2">
+                <span>${escapeHtml(pkg.name)}</span>
+                <code class="text-muted">${escapeHtml(pkg.version)}</code>
+            </div>
+        `).join('') : 
+        '<div class="text-muted">No common packages found</div>';
+    
+    // Different versions
+    const differentDiv = document.getElementById('differentPackages');
+    differentDiv.innerHTML = details.different_versions.length > 0 ?
+        details.different_versions.map(pkg => `
+            <div class="border-bottom py-2">
+                <div class="fw-bold">${escapeHtml(pkg.name)}</div>
+                <div class="small">
+                    <span class="text-primary">Image 1:</span> <code>${escapeHtml(pkg.version1)}</code>
+                    <span class="text-warning ms-3">Image 2:</span> <code>${escapeHtml(pkg.version2)}</code>
+                </div>
+            </div>
+        `).join('') :
+        '<div class="text-muted">No packages with different versions</div>';
+    
+    // Unique to image 1
+    const unique1Div = document.getElementById('unique1Packages');
+    unique1Div.innerHTML = details.unique_image1.length > 0 ?
+        details.unique_image1.map(pkg => `
+            <div class="d-flex justify-content-between border-bottom py-2">
+                <span>${escapeHtml(pkg.name)}</span>
+                <code class="text-muted">${escapeHtml(pkg.version)}</code>
+            </div>
+        `).join('') :
+        '<div class="text-muted">No packages unique to Image 1</div>';
+    
+    // Unique to image 2
+    const unique2Div = document.getElementById('unique2Packages');
+    unique2Div.innerHTML = details.unique_image2.length > 0 ?
+        details.unique_image2.map(pkg => `
+            <div class="d-flex justify-content-between border-bottom py-2">
+                <span>${escapeHtml(pkg.name)}</span>
+                <code class="text-muted">${escapeHtml(pkg.version)}</code>
+            </div>
+        `).join('') :
+        '<div class="text-muted">No packages unique to Image 2</div>';
+    
+    // Update tab labels with counts
+    document.getElementById('common-tab').innerHTML = `Common Packages (${details.common.length})`;
+    document.getElementById('different-tab').innerHTML = `Different Versions (${details.different_versions.length})`;
+    document.getElementById('unique1-tab').innerHTML = `Unique to Image 1 (${details.unique_image1.length})`;
+    document.getElementById('unique2-tab').innerHTML = `Unique to Image 2 (${details.unique_image2.length})`;
+}
+
+function resetComparison() {
+    selectedImages = { image1: null, image2: null };
+    
+    // Reset selectors
+    document.getElementById('image1Selector').classList.remove('selected');
+    document.getElementById('image2Selector').classList.remove('selected');
+    document.getElementById('image1Selector').innerHTML = `
+        <div>
+            <i class="bi bi-plus-circle display-4 text-muted"></i>
+            <h6 class="mt-2 text-muted">Click to select an image</h6>
+        </div>
+    `;
+    document.getElementById('image2Selector').innerHTML = `
+        <div>
+            <i class="bi bi-plus-circle display-4 text-muted"></i>
+            <h6 class="mt-2 text-muted">Click to select an image</h6>
+        </div>
+    `;
+    
+    // Hide info sections
+    document.getElementById('image1Info').style.display = 'none';
+    document.getElementById('image2Info').style.display = 'none';
+    
+    // Show selection section, hide comparison
+    document.getElementById('selectionSection').style.display = 'block';
+    document.getElementById('comparisonSection').style.display = 'none';
+    
+    // Reset compare button
+    updateCompareButton();
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Search functionality
+document.getElementById('imageSearchInput').addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    const filteredImages = allImages.filter(image => {
+        // Search in image name
+        if (image.name.toLowerCase().includes(query)) {
+            return true;
+        }
+        
+        // Search in languages
+        if (image.languages) {
+            const languages = Array.isArray(image.languages) 
+                ? image.languages.map(lang => typeof lang === 'string' ? lang : lang.language || 'unknown')
+                : image.languages.split(',');
+            return languages.some(lang => lang.toLowerCase().includes(query));
+        }
+        
+        return false;
+    });
+    displayImages(filteredImages);
+});
+
+// Utility functions
+function getDiffClass(value) {
+    if (value > 0) return 'diff-positive';
+    if (value < 0) return 'diff-negative';
+    return 'diff-neutral';
+}
+
+function formatDiff(value) {
+    if (value > 0) return `+${value}`;
+    if (value < 0) return `${value}`;
+    return '0';
+}
+
+function getVulnerabilityBadges(image) {
+    const badges = [];
+    if (image.critical_vulnerabilities > 0) {
+        badges.push(`<span class="badge bg-danger vulnerability-badge">Critical: ${image.critical_vulnerabilities}</span>`);
+    }
+    if (image.high_vulnerabilities > 0) {
+        badges.push(`<span class="badge bg-warning vulnerability-badge">High: ${image.high_vulnerabilities}</span>`);
+    }
+    if (image.medium_vulnerabilities > 0) {
+        badges.push(`<span class="badge bg-info vulnerability-badge">Medium: ${image.medium_vulnerabilities}</span>`);
+    }
+    if (image.low_vulnerabilities > 0) {
+        badges.push(`<span class="badge bg-secondary vulnerability-badge">Low: ${image.low_vulnerabilities}</span>`);
+    }
+    if (badges.length === 0 && (image.total_vulnerabilities === 0 || image.total_vulnerabilities === undefined)) {
+        badges.push(`<span class="badge bg-success vulnerability-badge">Secure</span>`);
+    }
+    return badges.join(' ');
+}
+
+function formatBytes(bytes) {
+    if (!bytes || bytes === 0) return 'Unknown';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+{% endblock %}
