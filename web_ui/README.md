@@ -40,7 +40,6 @@ A user-friendly web interface for the Azure Linux Base Image Recommendation Tool
 
 ```bash
 cd web_ui
-pip install -r requirements.txt
 ```
 
 ### 2. Start the Web Server
