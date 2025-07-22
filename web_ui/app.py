@@ -247,13 +247,19 @@ def api_recommend():
                         if package.lower() in installed_packages_and_managers:
                             packages_found += 1
             
+            # Calculate the correct package compatibility percentage based on actual found packages
+            if total_required > 0:
+                package_compatibility_corrected = packages_found / total_required
+            else:
+                package_compatibility_corrected = rec.package_compatibility
+            
             result.append({
                 'image_name': rec.image_name,
                 'score': round(rec.score, 3),
                 'reasoning': rec.reasoning,
                 'language_match': rec.language_match,
                 'version_match': rec.version_match,
-                'package_compatibility': round(rec.package_compatibility, 3),
+                'package_compatibility': round(package_compatibility_corrected, 3),
                 'packages_found': packages_found,
                 'total_required_packages': total_required,
                 'size_score': round(rec.size_score, 3),
@@ -1033,9 +1039,9 @@ def api_scan_image_streaming():
                 
                 # Add vulnerability scanning
                 if comprehensive:
-                    log_handler.emit("🔍 Running comprehensive security scan (Grype + Trivy)...")
+                    log_handler.emit("🔍 Running comprehensive security scan (Trivy with secrets & misconfigurations)...")
                 else:
-                    log_handler.emit("⚡ Running fast vulnerability scan (Grype only)...")
+                    log_handler.emit("⚡ Running fast vulnerability scan (Trivy vulnerabilities only)...")
                     
                 vulnerability_data = scanner.scan_vulnerabilities(image_name, comprehensive)
                 analysis.update(vulnerability_data)
@@ -1185,13 +1191,19 @@ def api_analyze_and_recommend():
                         if package.lower() in installed_packages_and_managers:
                             packages_found += 1
             
+            # Calculate the correct package compatibility percentage based on actual found packages
+            if total_required > 0:
+                package_compatibility_corrected = packages_found / total_required
+            else:
+                package_compatibility_corrected = rec.package_compatibility
+            
             result.append({
                 'image_name': rec.image_name,
                 'score': round(rec.score, 3),
                 'reasoning': rec.reasoning,
                 'language_match': rec.language_match,
                 'version_match': rec.version_match,
-                'package_compatibility': round(rec.package_compatibility, 3),
+                'package_compatibility': round(package_compatibility_corrected, 3),
                 'packages_found': packages_found,
                 'total_required_packages': total_required,
                 'size_score': round(rec.size_score, 3),

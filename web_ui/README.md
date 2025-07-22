@@ -28,12 +28,6 @@ A user-friendly web interface for the Azure Linux Base Image Recommendation Tool
 - Configurable scan options
 - Automatic cleanup of temporary Docker images
 
-### 📊 Analytics & Reporting
-- Vulnerability distribution charts
-- Language-based security statistics
-- Size distribution analysis
-- Export functionality for data backup
-
 ## Quick Start
 
 ### 1. Install Dependencies
@@ -89,15 +83,6 @@ Open your browser and navigate to: http://localhost:8080
    - Set maximum tags per repository
 3. Click "Start Scan" and monitor progress
 4. View results and updated statistics
-
-### Viewing Analytics
-
-1. Navigate to the **Analytics** page
-2. Explore various charts and statistics:
-   - Vulnerability distribution
-   - Language-based security metrics
-   - Image size distribution
-3. Use insights to make informed decisions about base images
 
 ## API Endpoints
 
