@@ -727,9 +727,9 @@ def handle_scan_image(args) -> int:
         
         # Add vulnerability scanning
         if args.comprehensive:
-            print("🔍 Running comprehensive security scan (Grype + Trivy)...")
+            print("🔍 Running comprehensive security scan (Trivy with secrets & misconfigurations)...")
         else:
-            print("⚡ Running fast vulnerability scan (Grype only)...")
+            print("⚡ Running fast vulnerability scan (Trivy vulnerabilities only)...")
             
         vulnerability_data = scanner.scan_vulnerabilities(args.scan_image, args.comprehensive)
         analysis.update(vulnerability_data)

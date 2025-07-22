@@ -30,16 +30,10 @@ A comprehensive tool for analyzing and recommending secure Azure Linux base imag
    # Or using Homebrew (macOS)
    brew install syft
    ```
-3. **Trivy**: Required for vulnerability scanning
+3. **Trivy**: Required for vulnerability scanning and security analysis
    ```bash
    # Install Trivy
    brew install trivy
-   ```     
-
-4. **Gripe**: Required for language version verification
-   ```bash
-   # Install Gripe
-   brew install gripe
    ```
 
 ## Quick Start

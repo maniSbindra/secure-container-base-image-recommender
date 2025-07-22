@@ -870,79 +870,53 @@ class MCRRegistryScanner:
     
     def scan_vulnerabilities(self, image_name: str, comprehensive: bool = False) -> Dict:
         """
-        Scan image for vulnerabilities using hybrid approach:
-        - Grype for fast vulnerability detection (always)
-        - Trivy for comprehensive security analysis (optional)
+        Scan image for vulnerabilities using Trivy only.
+        - Always runs Trivy for vulnerability detection
+        - If comprehensive=True, includes additional security checks (secrets, misconfigurations)
         """
         self.logger.info(f"Starting vulnerability scanning for {image_name}")
         result = {}
         
-        # Always run Grype for fast vulnerability scanning
-        self.logger.debug(f"Running Grype scan for {image_name}")
-        grype_data = self.scan_with_grype(image_name)
-        result.update(grype_data)
-        
-        # Optionally run Trivy for comprehensive analysis
-        if comprehensive:
-            self.logger.debug(f"Running comprehensive Trivy scan for {image_name}")
-            trivy_data = self.scan_with_trivy(image_name)
-            result['comprehensive_security'] = trivy_data
+        # Always run Trivy for vulnerability scanning
+        self.logger.debug(f"Running Trivy scan for {image_name}")
+        trivy_data = self.scan_with_trivy(image_name, comprehensive)
+        result.update(trivy_data)
         
         self.logger.info(f"Vulnerability scanning completed for {image_name}")
         return result
     
-    def scan_with_grype(self, image_name: str) -> Dict:
-        """Fast vulnerability scanning with Grype"""
+    def scan_with_trivy(self, image_name: str, comprehensive: bool = False) -> Dict:
+        """Vulnerability and security scanning with Trivy"""
         try:
-            self.logger.info(f"Running Grype vulnerability scan for {image_name}")
-            print(f"    Scanning vulnerabilities with Grype for {image_name}")
-            
-            # Run Grype vulnerability scan
-            result = subprocess.run([
-                'grype', image_name, '-o', 'json'
-            ], capture_output=True, text=True, timeout=180)
-            
-            if result.returncode == 0:
-                grype_result = self.parse_grype_output(result.stdout)
-                total_vulns = grype_result.get('vulnerabilities', {}).get('total', 0)
-                self.logger.info(f"Grype scan completed for {image_name}: {total_vulns} vulnerabilities found")
-                return grype_result
+            if comprehensive:
+                self.logger.info(f"Running comprehensive Trivy scan for {image_name}")
+                print(f"    Running comprehensive security scan with Trivy for {image_name}")
+                
+                # Run Trivy comprehensive scan (vulnerabilities + secrets + misconfigurations)
+                result = subprocess.run([
+                    'trivy', 'image', '--format', 'json', 
+                    '--security-checks', 'vuln,secret,config',
+                    image_name
+                ], capture_output=True, text=True, timeout=300)
             else:
-                self.logger.error(f"Grype scan failed for {image_name}: {result.stderr}")
-                print(f"    Grype scan failed: {result.stderr}")
-                return self.get_default_vulnerability_data()
-        
-        except FileNotFoundError:
-            self.logger.warning(f"Grype not found, skipping vulnerability scan for {image_name}")
-            print("    Warning: Grype not found, skipping vulnerability scan")
-            return self.get_default_vulnerability_data()
-        except subprocess.TimeoutExpired:
-            self.logger.warning(f"Grype scan timed out for {image_name}")
-            print("    Warning: Grype scan timed out")
-            return self.get_default_vulnerability_data()
-        except Exception as e:
-            self.logger.error(f"Error during Grype scan for {image_name}: {e}")
-            print(f"    Error during Grype scan: {e}")
-            return self.get_default_vulnerability_data()
-    
-    def scan_with_trivy(self, image_name: str) -> Dict:
-        """Comprehensive security scanning with Trivy"""
-        try:
-            self.logger.info(f"Running comprehensive Trivy scan for {image_name}")
-            print(f"    Running comprehensive security scan with Trivy for {image_name}")
-            
-            # Run Trivy comprehensive scan
-            result = subprocess.run([
-                'trivy', 'image', '--format', 'json', 
-                '--security-checks', 'vuln,secret,config',
-                image_name
-            ], capture_output=True, text=True, timeout=300)
+                self.logger.info(f"Running Trivy vulnerability scan for {image_name}")
+                print(f"    Scanning vulnerabilities with Trivy for {image_name}")
+                
+                # Run Trivy vulnerability scan only
+                result = subprocess.run([
+                    'trivy', 'image', '--format', 'json', 
+                    '--security-checks', 'vuln',
+                    image_name
+                ], capture_output=True, text=True, timeout=300)
             
             if result.returncode == 0:
-                trivy_result = self.parse_trivy_output(result.stdout)
-                self.logger.info(f"Trivy scan completed for {image_name}: "
-                               f"{trivy_result.get('secrets_found', 0)} secrets, "
-                               f"{trivy_result.get('config_issues', 0)} config issues")
+                trivy_result = self.parse_trivy_output(result.stdout, comprehensive)
+                total_vulns = trivy_result.get('vulnerabilities', {}).get('total', 0)
+                self.logger.info(f"Trivy scan completed for {image_name}: {total_vulns} vulnerabilities found")
+                if comprehensive:
+                    self.logger.info(f"Comprehensive findings: "
+                                   f"{trivy_result.get('comprehensive_security', {}).get('secrets_found', 0)} secrets, "
+                                   f"{trivy_result.get('comprehensive_security', {}).get('config_issues', 0)} config issues")
                 return trivy_result
             else:
                 self.logger.error(f"Trivy scan failed for {image_name}: {result.stderr}")
@@ -950,8 +924,8 @@ class MCRRegistryScanner:
                 return self.get_default_trivy_data()
         
         except FileNotFoundError:
-            self.logger.warning(f"Trivy not found, skipping comprehensive scan for {image_name}")
-            print("    Warning: Trivy not found, skipping comprehensive scan")
+            self.logger.warning(f"Trivy not found, skipping vulnerability scan for {image_name}")
+            print("    Warning: Trivy not found, skipping vulnerability scan")
             return self.get_default_trivy_data()
         except subprocess.TimeoutExpired:
             self.logger.warning(f"Trivy scan timed out for {image_name}")
@@ -962,55 +936,34 @@ class MCRRegistryScanner:
             print(f"    Error during Trivy scan: {e}")
             return self.get_default_trivy_data()
     
-    def parse_grype_output(self, grype_json: str) -> Dict:
-        """Parse Grype JSON output to extract vulnerability counts"""
+    def extract_cvss_score_trivy(self, vulnerability: Dict) -> Optional[float]:
+        """Extract CVSS score from Trivy vulnerability data"""
         try:
-            data = json.loads(grype_json)
-            matches = data.get('matches', [])
+            # Try different possible locations for CVSS score in Trivy format
+            cvss_locations = [
+                ['CVSS', 'Score'],
+                ['CVSS', 'BaseScore'],
+                ['CvssScore'],
+                ['Score']
+            ]
             
-            vulnerability_counts = {
-                'total': len(matches),
-                'critical': 0,
-                'high': 0,
-                'medium': 0,
-                'low': 0,
-                'negligible': 0,
-                'unknown': 0,
-                'scan_timestamp': datetime.now().isoformat(),
-                'scanner': 'grype'
-            }
+            for location in cvss_locations:
+                try:
+                    value = vulnerability
+                    for key in location:
+                        if isinstance(value, dict):
+                            value = value.get(key, {})
+                        else:
+                            break
+                    
+                    if isinstance(value, (int, float)):
+                        return float(value)
+                except:
+                    continue
             
-            vulnerability_details = []
-            
-            for match in matches:
-                severity = match.get('vulnerability', {}).get('severity', 'unknown').lower()
-                
-                # Count by severity
-                if severity in vulnerability_counts:
-                    vulnerability_counts[severity] += 1
-                else:
-                    vulnerability_counts['unknown'] += 1
-                
-                # Store detailed vulnerability info
-                vuln_detail = {
-                    'id': match.get('vulnerability', {}).get('id'),
-                    'severity': severity,
-                    'package_name': match.get('artifact', {}).get('name'),
-                    'package_version': match.get('artifact', {}).get('version'),
-                    'fixed_version': match.get('vulnerability', {}).get('fix', {}).get('versions', []),
-                    'description': match.get('vulnerability', {}).get('description', ''),
-                    'cvss_score': self.extract_cvss_score(match.get('vulnerability', {}))
-                }
-                vulnerability_details.append(vuln_detail)
-            
-            return {
-                'vulnerabilities': vulnerability_counts,
-                'vulnerability_details': vulnerability_details[:100]  # Limit to 100 for storage
-            }
-            
-        except Exception as e:
-            print(f"    Error parsing Grype output: {e}")
-            return self.get_default_vulnerability_data()
+            return None
+        except:
+            return None
     
     def extract_cvss_score(self, vulnerability: Dict) -> Optional[float]:
         """Extract CVSS score from vulnerability data"""
@@ -1036,10 +989,14 @@ class MCRRegistryScanner:
         
         return None
     
-    def get_default_vulnerability_data(self) -> Dict:
-        """Return default vulnerability data when scanning fails"""
-        return {
-            'vulnerabilities': {
+    def parse_trivy_output(self, trivy_json: str, comprehensive: bool = False) -> Dict:
+        """Parse Trivy JSON output for vulnerability and security analysis"""
+        try:
+            data = json.loads(trivy_json)
+            results = data.get('Results', [])
+            
+            # Initialize vulnerability counts
+            vulnerability_counts = {
                 'total': 0,
                 'critical': 0,
                 'high': 0,
@@ -1047,18 +1004,13 @@ class MCRRegistryScanner:
                 'low': 0,
                 'negligible': 0,
                 'unknown': 0,
-                'scan_timestamp': None,
-                'scanner': None
-            },
-            'vulnerability_details': []
-        }
-    
-    def parse_trivy_output(self, trivy_json: str) -> Dict:
-        """Parse Trivy JSON output for comprehensive security analysis"""
-        try:
-            data = json.loads(trivy_json)
-            results = data.get('Results', [])
+                'scan_timestamp': datetime.now().isoformat(),
+                'scanner': 'trivy'
+            }
             
+            vulnerability_details = []
+            
+            # Initialize comprehensive security analysis
             security_analysis = {
                 'secrets_found': 0,
                 'config_issues': 0,
@@ -1071,41 +1023,79 @@ class MCRRegistryScanner:
             }
             
             for result in results:
-                # Process secrets
-                secrets = result.get('Secrets', [])
-                security_analysis['secrets_found'] += len(secrets)
-                for secret in secrets[:10]:  # Limit for storage
-                    security_analysis['secret_details'].append({
-                        'rule_id': secret.get('RuleID'),
-                        'category': secret.get('Category'),
-                        'severity': secret.get('Severity', 'unknown'),
-                        'title': secret.get('Title'),
-                        'file_path': secret.get('StartLine')
-                    })
+                # Process vulnerabilities
+                vulnerabilities = result.get('Vulnerabilities', [])
+                for vuln in vulnerabilities:
+                    severity = vuln.get('Severity', 'unknown').lower()
+                    
+                    # Count by severity
+                    if severity in vulnerability_counts:
+                        vulnerability_counts[severity] += 1
+                    else:
+                        vulnerability_counts['unknown'] += 1
+                    
+                    vulnerability_counts['total'] += 1
+                    
+                    # Store detailed vulnerability info (limit to 100 for storage)
+                    if len(vulnerability_details) < 100:
+                        vuln_detail = {
+                            'id': vuln.get('VulnerabilityID'),
+                            'severity': severity,
+                            'package_name': vuln.get('PkgName'),
+                            'package_version': vuln.get('InstalledVersion'),
+                            'fixed_version': vuln.get('FixedVersion'),
+                            'description': vuln.get('Description', ''),
+                            'cvss_score': self.extract_cvss_score_trivy(vuln)
+                        }
+                        vulnerability_details.append(vuln_detail)
                 
-                # Process misconfigurations
-                misconfigs = result.get('Misconfigurations', [])
-                security_analysis['config_issues'] += len(misconfigs)
-                for config in misconfigs[:10]:  # Limit for storage
-                    security_analysis['config_details'].append({
-                        'check_id': config.get('ID'),
-                        'title': config.get('Title'),
-                        'description': config.get('Description'),
-                        'severity': config.get('Severity', 'unknown'),
-                        'message': config.get('Message')
-                    })
-                
-                # Process licenses (if available)
-                licenses = result.get('Licenses', [])
-                security_analysis['license_issues'] += len(licenses)
-                for license_info in licenses[:10]:  # Limit for storage
-                    security_analysis['license_details'].append({
-                        'name': license_info.get('Name'),
-                        'confidence': license_info.get('Confidence'),
-                        'file_path': license_info.get('FilePath')
-                    })
+                # Process comprehensive security data only if requested
+                if comprehensive:
+                    # Process secrets
+                    secrets = result.get('Secrets', [])
+                    security_analysis['secrets_found'] += len(secrets)
+                    for secret in secrets[:10]:  # Limit for storage
+                        security_analysis['secret_details'].append({
+                            'rule_id': secret.get('RuleID'),
+                            'category': secret.get('Category'),
+                            'severity': secret.get('Severity', 'unknown'),
+                            'title': secret.get('Title'),
+                            'file_path': secret.get('StartLine')
+                        })
+                    
+                    # Process misconfigurations
+                    misconfigs = result.get('Misconfigurations', [])
+                    security_analysis['config_issues'] += len(misconfigs)
+                    for config in misconfigs[:10]:  # Limit for storage
+                        security_analysis['config_details'].append({
+                            'check_id': config.get('ID'),
+                            'title': config.get('Title'),
+                            'description': config.get('Description'),
+                            'severity': config.get('Severity', 'unknown'),
+                            'message': config.get('Message')
+                        })
+                    
+                    # Process licenses (if available)
+                    licenses = result.get('Licenses', [])
+                    security_analysis['license_issues'] += len(licenses)
+                    for license_info in licenses[:10]:  # Limit for storage
+                        security_analysis['license_details'].append({
+                            'name': license_info.get('Name'),
+                            'confidence': license_info.get('Confidence'),
+                            'file_path': license_info.get('FilePath')
+                        })
             
-            return security_analysis
+            # Build the result structure
+            result_data = {
+                'vulnerabilities': vulnerability_counts,
+                'vulnerability_details': vulnerability_details
+            }
+            
+            # Add comprehensive security data if requested
+            if comprehensive:
+                result_data['comprehensive_security'] = security_analysis
+            
+            return result_data
             
         except Exception as e:
             print(f"    Error parsing Trivy output: {e}")
@@ -1114,14 +1104,28 @@ class MCRRegistryScanner:
     def get_default_trivy_data(self) -> Dict:
         """Return default Trivy data when scanning fails"""
         return {
-            'secrets_found': 0,
-            'config_issues': 0,
-            'license_issues': 0,
-            'secret_details': [],
-            'config_details': [],
-            'license_details': [],
-            'scan_timestamp': None,
-            'scanner': None
+            'vulnerabilities': {
+                'total': 0,
+                'critical': 0,
+                'high': 0,
+                'medium': 0,
+                'low': 0,
+                'negligible': 0,
+                'unknown': 0,
+                'scan_timestamp': None,
+                'scanner': None
+            },
+            'vulnerability_details': [],
+            'comprehensive_security': {
+                'secrets_found': 0,
+                'config_issues': 0,
+                'license_issues': 0,
+                'secret_details': [],
+                'config_details': [],
+                'license_details': [],
+                'scan_timestamp': None,
+                'scanner': None
+            }
         }
     
     def _normalize_repository_path(self, repository: str) -> str:
@@ -1182,9 +1186,9 @@ def main():
     
     print("Starting Azure Linux base image scan...")
     if args.comprehensive:
-        print("🔍 Comprehensive security scanning enabled (Grype + Trivy)")
+        print("🔍 Comprehensive security scanning enabled (Trivy with secrets & misconfigurations)")
     else:
-        print("⚡ Fast vulnerability scanning enabled (Grype only)")
+        print("⚡ Fast vulnerability scanning enabled (Trivy vulnerabilities only)")
     print("This may take several minutes...")
     
     try:

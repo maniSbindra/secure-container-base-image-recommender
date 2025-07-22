@@ -1033,9 +1033,9 @@ def api_scan_image_streaming():
                 
                 # Add vulnerability scanning
                 if comprehensive:
-                    log_handler.emit("🔍 Running comprehensive security scan (Grype + Trivy)...")
+                    log_handler.emit("🔍 Running comprehensive security scan (Trivy with secrets & misconfigurations)...")
                 else:
-                    log_handler.emit("⚡ Running fast vulnerability scan (Grype only)...")
+                    log_handler.emit("⚡ Running fast vulnerability scan (Trivy vulnerabilities only)...")
                     
                 vulnerability_data = scanner.scan_vulnerabilities(image_name, comprehensive)
                 analysis.update(vulnerability_data)
