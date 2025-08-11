@@ -1,0 +1,75 @@
+{
+  "artifacts": [
+    {
+      "name": "python3.12",
+      "version": "3.12.0-1ubuntu1",
+      "type": "deb",
+      "foundBy": "dpkgdb-cataloger",
+      "locations": [
+        {
+          "path": "/var/lib/dpkg/status",
+          "layerID": "sha256:abc123"
+        }
+      ],
+      "metadata": {
+        "package": "python3.12",
+        "source": "python3.12",
+        "version": "3.12.0-1ubuntu1",
+        "architecture": "amd64",
+        "maintainer": "Ubuntu Developers",
+        "installedSize": "12345"
+      }
+    },
+    {
+      "name": "pip",
+      "version": "23.0.1",
+      "type": "python",
+      "foundBy": "python-package-cataloger",
+      "locations": [
+        {
+          "path": "/usr/lib/python3.12/site-packages",
+          "layerID": "sha256:def456"
+        }
+      ],
+      "metadata": {
+        "name": "pip",
+        "version": "23.0.1",
+        "author": "The pip developers"
+      }
+    },
+    {
+      "name": "bash",
+      "version": "5.1-6ubuntu1",
+      "type": "deb",
+      "foundBy": "dpkgdb-cataloger",
+      "locations": [
+        {
+          "path": "/var/lib/dpkg/status",
+          "layerID": "sha256:abc123"
+        }
+      ],
+      "metadata": {
+        "package": "bash",
+        "source": "bash",
+        "version": "5.1-6ubuntu1",
+        "architecture": "amd64"
+      }
+    }
+  ],
+  "source": {
+    "type": "image",
+    "target": "mcr.microsoft.com/azurelinux/base/python:3.12"
+  },
+  "distro": {
+    "name": "azurelinux",
+    "version": "3.0"
+  },
+  "descriptor": {
+    "name": "syft",
+    "version": "0.90.0"
+  },
+  "schema": {
+    "version": "5.0.0",
+    "url": "https://raw.githubusercontent.com/anchore/syft/main/schema/json/schema-5.0.0.json"
+  }
+}

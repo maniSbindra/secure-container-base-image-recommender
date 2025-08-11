@@ -24,8 +24,8 @@
                 <form method="GET" class="row g-3">
                     <div class="col-md-8">
                         <label for="search" class="form-label">Search Images</label>
-                        <input type="text" name="search" id="search" class="form-control" 
-                               placeholder="Search by image name (e.g., python, base/node)" 
+                        <input type="text" name="search" id="search" class="form-control"
+                               placeholder="Search by image name (e.g., python, base/node)"
                                value="{{ search_query }}">
                     </div>
                     <div class="col-md-4 d-flex align-items-end">
@@ -49,7 +49,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Filters -->
     <div class="col-md-6">
         <div class="card">
@@ -93,7 +93,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
@@ -129,7 +129,7 @@
                                 {{ image.name }}
                             </a>
                         </h6>
-                        
+
                         <div class="row g-2 mb-2">
                             <div class="col-sm-6">
                                 <small class="text-muted">
@@ -144,7 +144,7 @@
                                 </small>
                             </div>
                         </div>
-                        
+
                         {% if image.languages %}
                         <div class="mb-2">
                             {% for lang in image.languages.split(',') %}
@@ -156,7 +156,7 @@
                         </div>
                         {% endif %}
                     </div>
-                    
+
                     <div class="col-md-4 text-md-end">
                         <div class="mb-2">
                             {% set vuln_class = 'success' if image.total_vulnerabilities == 0 else 'danger' if (image.critical_vulnerabilities > 0 or image.high_vulnerabilities > 0) else 'warning' %}
@@ -164,16 +164,16 @@
                                 {% if image.total_vulnerabilities == 0 %}
                                     <i class="bi bi-shield-check"></i> No Vulnerabilities
                                 {% elif image.critical_vulnerabilities > 0 or image.high_vulnerabilities > 0 %}
-                                    <i class="bi bi-exclamation-triangle"></i> 
-                                    {{ image.total_vulnerabilities }} Total 
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ image.total_vulnerabilities }} Total
                                     ({{ image.critical_vulnerabilities + image.high_vulnerabilities }} Critical/High)
                                 {% else %}
-                                    <i class="bi bi-info-circle"></i> 
+                                    <i class="bi bi-info-circle"></i>
                                     {{ image.total_vulnerabilities }} Low/Medium
                                 {% endif %}
                             </span>
                         </div>
-                        
+
                         <div class="d-grid gap-2">
                             <a href="/image/{{ image.id }}" class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-eye"></i> View Details
@@ -188,7 +188,7 @@
         </div>
     </div>
     {% endfor %}
-    
+
     {% if not images %}
     <div class="col-12">
         <div class="card">
@@ -196,7 +196,7 @@
                 <i class="bi bi-search display-1 text-muted"></i>
                 <h5 class="text-muted mt-3">No images found</h5>
                 <p class="text-muted">
-                    Try adjusting your filters or 
+                    Try adjusting your filters or
                     <a href="/scan">scan the registry</a> to populate the database.
                 </p>
             </div>
@@ -210,7 +210,7 @@
 <nav aria-label="Image pagination" class="mt-4">
     <ul class="pagination justify-content-center">
         {% set total_pages = (total_count + per_page - 1) // per_page %}
-        
+
         <!-- Previous -->
         {% if page > 1 %}
         <li class="page-item">
@@ -223,7 +223,7 @@
             <span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span>
         </li>
         {% endif %}
-        
+
         <!-- Page numbers -->
         {% for p in range(1, total_pages + 1) %}
             {% if p == page %}
@@ -240,7 +240,7 @@
             </li>
             {% endif %}
         {% endfor %}
-        
+
         <!-- Next -->
         {% if page < total_pages %}
         <li class="page-item">
@@ -278,23 +278,23 @@ function addToComparison(imageId, imageName) {
         showAlert('Image is already selected for comparison', 'warning');
         return;
     }
-    
+
     // Add to comparison
     comparisonImages.push({ id: imageId, name: imageName });
-    
+
     // Limit to 2 images
     if (comparisonImages.length > 2) {
         comparisonImages.shift(); // Remove first image
     }
-    
+
     // Save to localStorage
     localStorage.setItem('comparisonImages', JSON.stringify(comparisonImages));
-    
+
     if (comparisonImages.length === 1) {
         showAlert(`Added "${imageName}" to comparison. Select one more image to compare.`, 'info');
     } else if (comparisonImages.length === 2) {
         showAlert(`Added "${imageName}" to comparison. Ready to compare!`, 'success');
-        
+
         // Show option to go to comparison page
         setTimeout(() => {
             if (confirm(`Compare "${comparisonImages[0].name}" with "${comparisonImages[1].name}"?`)) {
@@ -302,7 +302,7 @@ function addToComparison(imageId, imageName) {
             }
         }, 1000);
     }
-    
+
     updateComparisonUI();
 }
 
@@ -322,7 +322,7 @@ function updateComparisonUI() {
 // Quick search functionality
 document.addEventListener('DOMContentLoaded', function() {
     updateComparisonUI();
-    
+
     // Show comparison status if images are selected
     if (comparisonImages.length > 0) {
         const statusDiv = document.createElement('div');
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
         statusDiv.innerHTML = `
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <strong>Comparison Selection:</strong> 
+                    <strong>Comparison Selection:</strong>
                     ${comparisonImages.map(img => img.name.substring(0, 30) + (img.name.length > 30 ? '...' : '')).join(' vs ')}
                     ${comparisonImages.length === 1 ? ' (Select 1 more)' : ''}
                 </div>

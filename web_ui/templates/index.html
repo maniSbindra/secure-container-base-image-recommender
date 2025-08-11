@@ -24,14 +24,14 @@
                     <div class="col-md-8">
                         <h6 class="mb-2"><i class="bi bi-search"></i> Quick Image Search</h6>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="quickSearch" 
+                            <input type="text" class="form-control" id="quickSearch"
                                    placeholder="Enter exact image name (e.g., azurelinux/base/python) or search term">
                             <button class="btn btn-primary" type="button" id="searchButton">
                                 <i class="bi bi-search"></i> Search
                             </button>
                         </div>
                         <small class="text-muted mt-1 d-block">
-                            <i class="bi bi-info-circle"></i> 
+                            <i class="bi bi-info-circle"></i>
                             Exact matches will be shown first, followed by similar images
                         </small>
                     </div>
@@ -48,7 +48,7 @@
                         </select>
                     </div>
                 </div>
-                
+
                 <!-- Search Results -->
                 <div id="searchResults" class="mt-3" style="display: none;">
                     <hr>
@@ -73,7 +73,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-3">
         <div class="card stat-card h-100">
             <div class="card-body text-center">
@@ -83,7 +83,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-3">
         <div class="card stat-card h-100">
             <div class="card-body text-center">
@@ -94,7 +94,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-3">
         <div class="card stat-card h-100">
             <div class="card-body text-center">
@@ -128,7 +128,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Language Distribution -->
     <div class="col-lg-6">
         <div class="card">
@@ -168,7 +168,7 @@
                         </tbody>
                     </table>
                 </div>
-                
+
                 <div class="mt-3">
                     <a href="/images" class="btn btn-sm btn-outline-primary">
                         View All Images <i class="bi bi-arrow-right"></i>
@@ -237,16 +237,16 @@
         const language = document.getElementById('searchLanguage').value;
         const resultsDiv = document.getElementById('searchResults');
         const resultsList = document.getElementById('searchResultsList');
-        
+
         if (!query) {
             resultsDiv.style.display = 'none';
             return;
         }
-        
+
         // Show loading state
         resultsList.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div> Searching...</div>';
         resultsDiv.style.display = 'block';
-        
+
         // First, try to find an exact match
         fetch(`/api/image/${encodeURIComponent(query)}`)
             .then(response => response.json())
@@ -265,16 +265,16 @@
                 performPartialSearch(query, language);
             });
     }
-    
+
     function performPartialSearch(query, language) {
         const resultsList = document.getElementById('searchResultsList');
-        
+
         // Build search URL for partial matching
         let searchUrl = `/api/search?q=${encodeURIComponent(query)}`;
         if (language) {
             searchUrl += `&language=${encodeURIComponent(language)}`;
         }
-        
+
         fetch(searchUrl)
             .then(response => response.json())
             .then(data => {
@@ -289,12 +289,12 @@
                 resultsList.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-circle"></i> Error performing search. Please try again.</div>';
             });
     }
-    
+
     function displayExactMatch(image, query) {
         const resultsList = document.getElementById('searchResultsList');
         const vulnBadge = getVulnerabilityBadge(image.total_vulnerabilities, image.critical_vulnerabilities, image.high_vulnerabilities);
         const sizeMB = image.size_bytes ? (image.size_bytes / (1024 * 1024)).toFixed(1) : 'N/A';
-        
+
         const html = `
             <div class="alert alert-success d-flex align-items-center mb-3">
                 <i class="bi bi-check-circle-fill me-2"></i>
@@ -333,18 +333,18 @@
                 </div>
             </div>
         `;
-        
+
         resultsList.innerHTML = html;
     }
-    
+
     function displaySearchResults(images, query) {
         const resultsList = document.getElementById('searchResultsList');
-        
+
         if (images.length === 0) {
             resultsList.innerHTML = '<div class="alert alert-info"><i class="bi bi-info-circle"></i> No images found matching your search criteria.</div>';
             return;
         }
-        
+
         let html = `
             <div class="alert alert-info d-flex align-items-center mb-3">
                 <i class="bi bi-info-circle me-2"></i>
@@ -352,11 +352,11 @@
             </div>
             <div class="row">
         `;
-        
+
         images.slice(0, 6).forEach(image => {  // Limit to 6 results for dashboard
             const vulnBadge = getVulnerabilityBadge(image.total_vulnerabilities, image.critical_vulnerabilities, image.high_vulnerabilities);
             const sizeMB = image.size_bytes ? (image.size_bytes / (1024 * 1024)).toFixed(1) : 'N/A';
-            
+
             html += `
                 <div class="col-md-6 col-lg-4 mb-3">
                     <div class="card h-100 border-0 shadow-sm">
@@ -384,9 +384,9 @@
                 </div>
             `;
         });
-        
+
         html += `</div>`;
-        
+
         if (images.length > 6) {
             html += `
                 <div class="text-center mt-3">
@@ -396,10 +396,10 @@
                 </div>
             `;
         }
-        
+
         resultsList.innerHTML = html;
     }
-    
+
     function getVulnerabilityBadge(total, critical, high) {
         if (total === 0) {
             return '<span class="badge security-safe"><i class="bi bi-shield-check"></i> Clean</span>';
@@ -411,7 +411,7 @@
             return `<span class="badge security-safe"><i class="bi bi-shield-check"></i> ${total} vuln</span>`;
         }
     }
-    
+
     // Event listeners
     document.getElementById('searchButton').addEventListener('click', performSearch);
     document.getElementById('quickSearch').addEventListener('keypress', function(e) {
@@ -419,14 +419,14 @@
             performSearch();
         }
     });
-    
+
     // Clear results when search is cleared
     document.getElementById('quickSearch').addEventListener('input', function(e) {
         if (e.target.value.trim() === '') {
             document.getElementById('searchResults').style.display = 'none';
         }
     });
-    
+
     // Language filter change triggers new search if there's a query
     document.getElementById('searchLanguage').addEventListener('change', function() {
         const query = document.getElementById('quickSearch').value.trim();
@@ -434,7 +434,7 @@
             performSearch();
         }
     });
-    
+
     // Auto-refresh stats every 30 seconds (optional)
     // setInterval(() => {
     //     fetch('/api/stats')

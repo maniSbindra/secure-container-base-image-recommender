@@ -12,17 +12,17 @@
         <p class="lead text-muted">
             Tell us about your requirements and we'll recommend the best container base images
         </p>
-        
+
         <!-- Tab Navigation -->
         <ul class="nav nav-tabs mb-4" id="recommendationTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="requirements-tab" data-bs-toggle="tab" 
+                <button class="nav-link active" id="requirements-tab" data-bs-toggle="tab"
                         data-bs-target="#requirements-pane" type="button" role="tab">
                     <i class="bi bi-gear"></i> By Requirements
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="image-analysis-tab" data-bs-toggle="tab" 
+                <button class="nav-link" id="image-analysis-tab" data-bs-toggle="tab"
                         data-bs-target="#image-analysis-pane" type="button" role="tab">
                     <i class="bi bi-image"></i> Analyze Existing Image
                 </button>
@@ -59,15 +59,15 @@
                                         <option value="ruby">Ruby</option>
                                     </select>
                                 </div>
-                                
+
                                 <!-- Version -->
                                 <div class="mb-3">
                                     <label for="version" class="form-label">Version (Optional)</label>
-                                    <input type="text" class="form-control" id="version" 
+                                    <input type="text" class="form-control" id="version"
                                            placeholder="e.g., 3.12, 18, 17">
                                     <div class="form-text">Leave empty for any version</div>
                                 </div>
-                                
+
                                 <!-- Packages -->
                                 <div class="mb-3">
                                     <label for="packages" class="form-label">Required Packages (Optional)</label>
@@ -75,7 +75,7 @@
                                               placeholder="flask&#10;pandas&#10;numpy"></textarea>
                                     <div class="form-text">Enter package names, one per line. We'll check if they're pre-installed or available via package managers.</div>
                                 </div>
-                                
+
                                 <!-- Size Preference -->
                                 <div class="mb-3">
                                     <label for="sizePreference" class="form-label">Size Preference</label>
@@ -85,7 +85,7 @@
                                         <option value="full">Full (Complete features)</option>
                                     </select>
                                 </div>
-                                
+
                                 <!-- Security Level -->
                                 <div class="mb-3">
                                     <label for="securityLevel" class="form-label">Security Level</label>
@@ -95,14 +95,14 @@
                                         <option value="standard">Standard (Limited vulnerabilities)</option>
                                     </select>
                                 </div>
-                                
+
                                 <!-- Advanced Options (Collapsible) -->
                                 <div class="mb-3">
-                                    <button class="btn btn-outline-secondary btn-sm w-100" type="button" 
+                                    <button class="btn btn-outline-secondary btn-sm w-100" type="button"
                                             data-bs-toggle="collapse" data-bs-target="#advancedOptions">
                                         <i class="bi bi-gear"></i> Advanced Options
                                     </button>
-                                    
+
                                     <div class="collapse mt-2" id="advancedOptions">
                                         <div class="mb-2">
                                             <label for="maxVulns" class="form-label">Max Total Vulnerabilities</label>
@@ -118,7 +118,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <button type="submit" class="btn btn-primary w-100">
                                     <i class="bi bi-search"></i> Get Recommendations
                                 </button>
@@ -126,7 +126,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Results -->
                 <div class="col-lg-8">
                     <div class="card">
@@ -145,25 +145,25 @@
                                 <h5 class="text-muted mt-3">Fill out the form to get recommendations</h5>
                                 <p class="text-muted">We'll analyze your requirements and suggest the best container base images</p>
                             </div>
-                            
+
                             <!-- Results container -->
                             <div id="resultsContainer" style="display: none;">
                                 <!-- Requirements summary -->
                                 <div id="requirementsSummary" class="alert alert-info mb-4" style="display: none;">
                                     <!-- Will be populated by JavaScript -->
                                 </div>
-                                
+
                                 <!-- Recommendations list -->
                                 <div id="recommendationsList">
                                     <!-- Will be populated by JavaScript -->
                                 </div>
                             </div>
-                            
+
                             <!-- Error state -->
                             <div id="errorState" class="alert alert-danger" style="display: none;">
                                 <!-- Will be populated by JavaScript -->
                             </div>
-                            
+
                             <!-- No results state -->
                             <div id="noResultsState" style="display: none;">
                                 <div class="text-center py-4">
@@ -183,7 +183,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Image Analysis Tab -->
         <div class="tab-pane fade" id="image-analysis-pane" role="tabpanel">
             <div class="row">
@@ -204,13 +204,13 @@
                                         Enter the full image name with tag. If no tag is specified, ":latest" will be used.
                                     </div>
                                 </div>
-                                
+
                                 <!-- Analysis Options -->
                                 <div class="mb-3">
                                     <label class="form-label">Analysis Options</label>
                                     <div class="form-text mb-2">Configure how to use the analysis results for recommendations:</div>
                                 </div>
-                                
+
                                 <!-- Size Preference -->
                                 <div class="mb-3">
                                     <label for="sizePreferenceAnalysis" class="form-label">Size Preference</label>
@@ -220,7 +220,7 @@
                                         <option value="full">Full (Complete features)</option>
                                     </select>
                                 </div>
-                                
+
                                 <!-- Security Level -->
                                 <div class="mb-3">
                                     <label for="securityLevelAnalysis" class="form-label">Security Level</label>
@@ -230,14 +230,14 @@
                                         <option value="standard">Standard (Limited vulnerabilities)</option>
                                     </select>
                                 </div>
-                                
+
                                 <!-- Advanced Options (Collapsible) -->
                                 <div class="mb-3">
-                                    <button class="btn btn-outline-secondary btn-sm w-100" type="button" 
+                                    <button class="btn btn-outline-secondary btn-sm w-100" type="button"
                                             data-bs-toggle="collapse" data-bs-target="#advancedOptionsAnalysis">
                                         <i class="bi bi-gear"></i> Advanced Options
                                     </button>
-                                    
+
                                     <div class="collapse mt-2" id="advancedOptionsAnalysis">
                                         <div class="mb-2">
                                             <label for="maxVulnsAnalysis" class="form-label">Max Total Vulnerabilities</label>
@@ -253,14 +253,14 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <button type="submit" class="btn btn-success w-100">
                                     <i class="bi bi-play-circle"></i> Analyze & Get Recommendations
                                 </button>
                             </form>
                         </div>
                     </div>
-                    
+
                     <!-- Analysis Info Card -->
                     <div class="card mt-3">
                         <div class="card-header">
@@ -279,7 +279,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Results -->
                 <div class="col-lg-8">
                     <div class="card">
@@ -298,35 +298,35 @@
                                 <h5 class="text-muted mt-3">Enter an image name to analyze</h5>
                                 <p class="text-muted">We'll analyze the image and recommend similar base images from our database</p>
                             </div>
-                            
+
                             <!-- Results container -->
                             <div id="resultsContainerAnalysis" style="display: none;">
                                 <!-- Analysis summary -->
                                 <div id="analysisSummary" class="alert alert-success mb-4" style="display: none;">
                                     <!-- Will be populated by JavaScript -->
                                 </div>
-                                
+
                                 <!-- Requirements summary -->
                                 <div id="requirementsSummaryAnalysis" class="alert alert-info mb-4" style="display: none;">
                                     <!-- Will be populated by JavaScript -->
                                 </div>
-                                
+
                                 <!-- Recommendations list -->
                                 <div id="recommendationsListAnalysis">
                                     <!-- Will be populated by JavaScript -->
                                 </div>
                             </div>
-                            
+
                             <!-- Error state -->
                             <div id="errorStateAnalysis" class="alert alert-danger" style="display: none;">
                                 <!-- Will be populated by JavaScript -->
                             </div>
-                            
+
                             <!-- No results state -->
                             <div id="noResultsStateAnalysis" style="display: none;">
                                 <!-- Analysis details for no results -->
                                 <div id="noResultsAnalysisDetails" style="display: none;"></div>
-                                
+
                                 <div class="text-center py-4">
                                     <i class="bi bi-search display-1 text-warning"></i>
                                     <h5 class="text-warning mt-3">No matching images found</h5>
@@ -352,20 +352,20 @@
 // Original recommendation form handler
 document.getElementById('recommendationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    
+
     // Show loading state
     const loadingSpinner = document.getElementById('loadingSpinner');
     const initialState = document.getElementById('initialState');
     const resultsContainer = document.getElementById('resultsContainer');
     const errorState = document.getElementById('errorState');
     const noResultsState = document.getElementById('noResultsState');
-    
+
     showLoading(loadingSpinner);
     initialState.style.display = 'none';
     resultsContainer.style.display = 'none';
     errorState.style.display = 'none';
     noResultsState.style.display = 'none';
-    
+
     // Collect form data
     const formData = {
         language: document.getElementById('language').value,
@@ -380,7 +380,7 @@ document.getElementById('recommendationForm').addEventListener('submit', async f
         max_critical_vulnerabilities: parseInt(document.getElementById('maxCritical').value),
         max_high_vulnerabilities: parseInt(document.getElementById('maxHigh').value)
     };
-    
+
     try {
         const response = await fetch('/api/recommend', {
             method: 'POST',
@@ -389,11 +389,11 @@ document.getElementById('recommendationForm').addEventListener('submit', async f
             },
             body: JSON.stringify(formData)
         });
-        
+
         const data = await response.json();
-        
+
         hideLoading(loadingSpinner);
-        
+
         if (data.success) {
             if (data.recommendations.length > 0) {
                 displayRecommendations(data.recommendations, data.requirement);
@@ -404,7 +404,7 @@ document.getElementById('recommendationForm').addEventListener('submit', async f
         } else {
             displayError(data.error);
         }
-        
+
     } catch (error) {
         hideLoading(loadingSpinner);
         displayError('Failed to get recommendations: ' + error.message);
@@ -414,20 +414,20 @@ document.getElementById('recommendationForm').addEventListener('submit', async f
 // New image analysis form handler
 document.getElementById('imageAnalysisForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    
+
     // Show loading state
     const loadingSpinner = document.getElementById('loadingSpinnerAnalysis');
     const initialState = document.getElementById('initialStateAnalysis');
     const resultsContainer = document.getElementById('resultsContainerAnalysis');
     const errorState = document.getElementById('errorStateAnalysis');
     const noResultsState = document.getElementById('noResultsStateAnalysis');
-    
+
     showLoading(loadingSpinner);
     initialState.style.display = 'none';
     resultsContainer.style.display = 'none';
     errorState.style.display = 'none';
     noResultsState.style.display = 'none';
-    
+
     // Collect form data
     const formData = {
         image_name: document.getElementById('imageName').value.trim(),
@@ -437,7 +437,7 @@ document.getElementById('imageAnalysisForm').addEventListener('submit', async fu
         max_critical_vulnerabilities: parseInt(document.getElementById('maxCriticalAnalysis').value),
         max_high_vulnerabilities: parseInt(document.getElementById('maxHighAnalysis').value)
     };
-    
+
     try {
         const response = await fetch('/api/analyze-and-recommend', {
             method: 'POST',
@@ -446,11 +446,11 @@ document.getElementById('imageAnalysisForm').addEventListener('submit', async fu
             },
             body: JSON.stringify(formData)
         });
-        
+
         const data = await response.json();
-        
+
         hideLoading(loadingSpinner);
-        
+
         if (data.success) {
             if (data.recommendations.length > 0) {
                 displayAnalysisResults(data.analyzed_image, data.analysis, data.recommendations, data.requirement);
@@ -468,7 +468,7 @@ document.getElementById('imageAnalysisForm').addEventListener('submit', async fu
                 displayErrorAnalysis(data.error);
             }
         }
-        
+
     } catch (error) {
         hideLoading(loadingSpinner);
         displayErrorAnalysis('Failed to analyze image: ' + error.message);
@@ -479,11 +479,11 @@ function displayAnalysisResults(analyzedImage, analysis, recommendations, requir
     // Display analysis summary
     const analysisDiv = document.getElementById('analysisSummary');
     const languagesText = analysis.languages.map(l => `${l.language} ${l.version || '(version unknown)'}`).join(', ');
-    
+
     // Get vulnerability info from analysis
     const vulns = analysis.vulnerabilities || {};
     const vulnBadge = getVulnerabilityBadge(vulns);
-    
+
     analysisDiv.innerHTML = `
         <h6><i class="bi bi-check-circle"></i> Analysis Complete</h6>
         <strong>Analyzed Image:</strong> ${analyzedImage}<br>
@@ -495,18 +495,18 @@ function displayAnalysisResults(analyzedImage, analysis, recommendations, requir
         <strong>Security Status:</strong> ${vulnBadge}
     `;
     analysisDiv.style.display = 'block';
-    
+
     // Display requirements summary (derived from analysis)
     const summaryDiv = document.getElementById('requirementsSummaryAnalysis');
     summaryDiv.innerHTML = `
         <h6><i class="bi bi-info-circle"></i> Derived Requirements</h6>
         <strong>Primary Language:</strong> ${requirement.language} ${requirement.version || '(any version)'}<br>
         ${requirement.packages.length > 0 ? `<strong>Packages (first 20):</strong> ${requirement.packages.join(', ')}<br>` : ''}
-        <strong>Size:</strong> ${requirement.size_preference} • 
+        <strong>Size:</strong> ${requirement.size_preference} •
         <strong>Security:</strong> ${requirement.security_level}
     `;
     summaryDiv.style.display = 'block';
-    
+
     // Display recommendations (reuse existing function)
     const listDiv = document.getElementById('recommendationsListAnalysis');
     listDiv.innerHTML = recommendations.map((rec, index) => `
@@ -518,19 +518,19 @@ function displayAnalysisResults(analyzedImage, analysis, recommendations, requir
                             <span class="badge bg-primary me-2">#${index + 1}</span>
                             <h6 class="mb-0">${rec.image_name}</h6>
                         </div>
-                        
+
                         <p class="text-muted mb-2">
                             ${rec.reasoning.join(' • ')}
-                            ${rec.total_required_packages > 0 ? 
-                                `<br><small><i class="bi bi-box"></i> Packages: ${rec.packages_found}/${rec.total_required_packages} pre-installed</small>` 
+                            ${rec.total_required_packages > 0 ?
+                                `<br><small><i class="bi bi-box"></i> Packages: ${rec.packages_found}/${rec.total_required_packages} pre-installed</small>`
                                 : ''
                             }
                         </p>
-                        
+
                         <div class="row g-2">
                             <div class="col-sm-6">
                                 <small class="text-muted">
-                                    <i class="bi bi-hdd"></i> 
+                                    <i class="bi bi-hdd"></i>
                                     Size: ${formatBytes(rec.size_bytes)}
                                 </small>
                             </div>
@@ -542,35 +542,35 @@ function displayAnalysisResults(analyzedImage, analysis, recommendations, requir
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-4 text-md-end">
                         <div class="mb-2">
                             <span class="badge score-badge ${getScoreClass(rec.score)}">
                                 ${(rec.score * 100).toFixed(0)}% Match
                             </span>
                         </div>
-                        
+
                         <div class="mb-2">
                             ${getVulnerabilityBadge(rec.vulnerabilities)}
                         </div>
-                        
+
                         <div class="row g-2">
                             <div class="col-12">
-                                <button class="btn btn-outline-primary btn-sm w-100" 
+                                <button class="btn btn-outline-primary btn-sm w-100"
                                         onclick="copyDockerCommand('${rec.image_name}')">
                                     <i class="bi bi-clipboard"></i> Copy Docker Command
                                 </button>
                             </div>
                             <div class="col-6">
-                                <button class="btn btn-outline-info btn-sm w-100" 
-                                        onclick="showImageDetails('${rec.image_name}')" 
+                                <button class="btn btn-outline-info btn-sm w-100"
+                                        onclick="showImageDetails('${rec.image_name}')"
                                         type="button">
                                     <i class="bi bi-eye"></i> View Details
                                 </button>
                             </div>
                             <div class="col-6">
-                                <button class="btn btn-outline-success btn-sm w-100" 
-                                        onclick="compareImages('${analyzedImage}', '${rec.image_name}')" 
+                                <button class="btn btn-outline-success btn-sm w-100"
+                                        onclick="compareImages('${analyzedImage}', '${rec.image_name}')"
                                         type="button">
                                     <i class="bi bi-arrow-left-right"></i> Compare
                                 </button>
@@ -578,7 +578,7 @@ function displayAnalysisResults(analyzedImage, analysis, recommendations, requir
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Detailed scores -->
                 <div class="mt-3">
                     <div class="row g-2">
@@ -620,11 +620,11 @@ function displayRecommendations(recommendations, requirement) {
         <h6><i class="bi bi-info-circle"></i> Your Requirements</h6>
         <strong>Language:</strong> ${requirement.language} ${requirement.version || '(any version)'}<br>
         ${requirement.packages.length > 0 ? `<strong>Packages:</strong> ${requirement.packages.join(', ')}<br>` : ''}
-        <strong>Size:</strong> ${requirement.size_preference} • 
+        <strong>Size:</strong> ${requirement.size_preference} •
         <strong>Security:</strong> ${requirement.security_level}
     `;
     summaryDiv.style.display = 'block';
-    
+
     // Display recommendations
     const listDiv = document.getElementById('recommendationsList');
     listDiv.innerHTML = recommendations.map((rec, index) => `
@@ -636,19 +636,19 @@ function displayRecommendations(recommendations, requirement) {
                             <span class="badge bg-primary me-2">#${index + 1}</span>
                             <h6 class="mb-0">${rec.image_name}</h6>
                         </div>
-                        
+
                         <p class="text-muted mb-2">
                             ${rec.reasoning.join(' • ')}
-                            ${rec.total_required_packages > 0 ? 
-                                `<br><small><i class="bi bi-box"></i> Packages: ${rec.packages_found}/${rec.total_required_packages} pre-installed</small>` 
+                            ${rec.total_required_packages > 0 ?
+                                `<br><small><i class="bi bi-box"></i> Packages: ${rec.packages_found}/${rec.total_required_packages} pre-installed</small>`
                                 : ''
                             }
                         </p>
-                        
+
                         <div class="row g-2">
                             <div class="col-sm-6">
                                 <small class="text-muted">
-                                    <i class="bi bi-hdd"></i> 
+                                    <i class="bi bi-hdd"></i>
                                     Size: ${formatBytes(rec.size_bytes)}
                                 </small>
                             </div>
@@ -660,35 +660,35 @@ function displayRecommendations(recommendations, requirement) {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-4 text-md-end">
                         <div class="mb-2">
                             <span class="badge score-badge ${getScoreClass(rec.score)}">
                                 ${(rec.score * 100).toFixed(0)}% Match
                             </span>
                         </div>
-                        
+
                         <div class="mb-2">
                             ${getVulnerabilityBadge(rec.vulnerabilities)}
                         </div>
-                        
+
                         <div class="row g-2">
                             <div class="col-12">
-                                <button class="btn btn-outline-primary btn-sm w-100" 
+                                <button class="btn btn-outline-primary btn-sm w-100"
                                         onclick="copyDockerCommand('${rec.image_name}')">
                                     <i class="bi bi-clipboard"></i> Copy Docker Command
                                 </button>
                             </div>
                             <div class="col-6">
-                                <button class="btn btn-outline-info btn-sm w-100" 
-                                        onclick="showImageDetails('${rec.image_name}')" 
+                                <button class="btn btn-outline-info btn-sm w-100"
+                                        onclick="showImageDetails('${rec.image_name}')"
                                         type="button">
                                     <i class="bi bi-eye"></i> View Details
                                 </button>
                             </div>
                             <div class="col-6">
-                                <button class="btn btn-outline-secondary btn-sm w-100" 
-                                        onclick="compareImages('${rec.image_name}')" 
+                                <button class="btn btn-outline-secondary btn-sm w-100"
+                                        onclick="compareImages('${rec.image_name}')"
                                         type="button">
                                     <i class="bi bi-arrow-left-right"></i> Compare
                                 </button>
@@ -696,7 +696,7 @@ function displayRecommendations(recommendations, requirement) {
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Detailed scores (always visible) -->
                 <div class="mt-3">
                     <div class="row g-2">
@@ -781,7 +781,7 @@ function copyImageName(imageName) {
         button.innerHTML = '<i class="bi bi-check"></i> Copied!';
         button.classList.remove('btn-outline-secondary');
         button.classList.add('btn-success');
-        
+
         setTimeout(function() {
             button.innerHTML = originalText;
             button.classList.remove('btn-success');
@@ -802,15 +802,15 @@ function getVulnerabilityBadge(vulns) {
     const total = vulns.total || 0;
     const critical = vulns.critical || 0;
     const high = vulns.high || 0;
-    
+
     if (total === 0) {
         return '<span class="badge bg-success"><i class="bi bi-shield-check"></i> No Vulnerabilities</span>';
     }
-    
+
     if (critical > 0 || high > 0) {
         return `<span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> ${total} Total (${critical + high} Critical/High)</span>`;
     }
-    
+
     return `<span class="badge bg-warning"><i class="bi bi-info-circle"></i> ${total} Total (Low/Medium)</span>`;
 }
 
@@ -825,7 +825,7 @@ function copyDockerCommand(imageName) {
 
 function showImageDetails(imageName) {
     console.log('showImageDetails called with:', imageName);
-    
+
     // Get image details by name to find the image ID
     fetch(`/api/image/${encodeURIComponent(imageName)}`)
         .then(response => {
@@ -855,7 +855,7 @@ function showImageDetails(imageName) {
 
 function compareImages(sourceImage, targetImage) {
     console.log('compareImages called with:', sourceImage, 'vs', targetImage);
-    
+
     if (targetImage) {
         // Navigate to compare page with both images pre-selected as URL parameters
         const compareUrl = `/compare?source=${encodeURIComponent(sourceImage)}&target=${encodeURIComponent(targetImage)}`;
@@ -898,7 +898,7 @@ function showAlert(message, type) {
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
     document.body.appendChild(alertDiv);
-    
+
     // Auto remove after 5 seconds
     setTimeout(() => {
         if (alertDiv.parentNode) {
@@ -910,13 +910,13 @@ function showAlert(message, type) {
 function displayAnalysisWithNoRecommendations(analyzedImage, analysis, requirement) {
     // Display analysis summary in the no results state
     const noResultsDiv = document.getElementById('noResultsStateAnalysis');
-    
+
     const languagesText = analysis.languages.map(l => `${l.language} ${l.version || '(version unknown)'}`).join(', ');
-    
+
     // Get vulnerability info from analysis
     const vulns = analysis.vulnerabilities || {};
     const vulnBadge = getVulnerabilityBadge(vulns);
-    
+
     noResultsDiv.innerHTML = `
         <!-- Analysis Details -->
         <div class="alert alert-success mb-4">
@@ -929,16 +929,16 @@ function displayAnalysisWithNoRecommendations(analyzedImage, analysis, requireme
             <strong>Image Size:</strong> ${formatBytes(analysis.size_bytes || 0)}<br>
             <strong>Security Status:</strong> ${vulnBadge}
         </div>
-        
+
         <!-- Derived Requirements -->
         <div class="alert alert-info mb-4">
             <h6><i class="bi bi-info-circle"></i> Derived Requirements</h6>
             <strong>Primary Language:</strong> ${requirement.language} ${requirement.version || '(any version)'}<br>
             ${requirement.packages.length > 0 ? `<strong>Packages (first 20):</strong> ${requirement.packages.join(', ')}<br>` : ''}
-            <strong>Size:</strong> ${requirement.size_preference} • 
+            <strong>Size:</strong> ${requirement.size_preference} •
             <strong>Security:</strong> ${requirement.security_level}
         </div>
-        
+
         <!-- No Results Message -->
         <div class="text-center py-4">
             <i class="bi bi-search display-1 text-warning"></i>
