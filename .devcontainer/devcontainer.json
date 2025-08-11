@@ -1,0 +1,27 @@
+{
+  "name": "secure-container-base-image-recommender",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker",
+        "github.vscode-github-actions",
+        "ms-toolsai.jupyter",
+        "charliermarsh.ruff",
+        "tamasfe.even-better-toml"
+      ]
+    }
+  },
+  "forwardPorts": [5000],
+  "remoteUser": "vscode"
+}

@@ -6,10 +6,8 @@ container image analysis data with vulnerability information.
 """
 
 import sqlite3
-import json
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime
-from pathlib import Path
 
 
 class ImageDatabase:
@@ -194,7 +192,7 @@ class ImageDatabase:
                 has_name_unique = 'name TEXT UNIQUE' in sql
                 has_composite_unique = 'unique_image_location UNIQUE (registry, repository, tag)' in sql.lower()
                 
-                print(f"📊 Database constraint status:")
+                print("📊 Database constraint status:")
                 print(f"   Name uniqueness: {'✅' if has_name_unique else '❌'}")
                 print(f"   Composite uniqueness: {'✅' if has_composite_unique else '❌'}")
                 
@@ -419,7 +417,7 @@ class ImageDatabase:
         except sqlite3.IntegrityError as e:
             if "UNIQUE constraint failed" in str(e):
                 # Handle duplicate entry
-                print(f"    🔄 Image already exists, updating existing record...")
+                print("    🔄 Image already exists, updating existing record...")
                 # Update existing record
                 cursor = self.conn.execute("""
                     UPDATE images SET 
@@ -820,7 +818,7 @@ class ImageDatabase:
             SELECT 
                 l.language,
                 COUNT(DISTINCT i.id) as image_count,
-                GROUP_CONCAT(DISTINCT l.version ORDER BY l.version) as versions,
+                GROUP_CONCAT(DISTINCT l.version) as versions,
                 AVG(i.total_vulnerabilities) as avg_vulnerabilities,
                 AVG(i.size_bytes) as avg_size_bytes
             FROM languages l
