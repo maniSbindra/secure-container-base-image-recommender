@@ -30,3 +30,10 @@ venv/
 *.orig
 *.zip
 *.tar.gz
+.lvenv
+
+.files-to-ignore/
+commands.sh
+copilot-command-output.txt
+CVE_insert_errors
+query_examples.sql

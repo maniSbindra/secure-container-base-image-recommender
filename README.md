@@ -26,7 +26,7 @@ A comprehensive tool for analyzing and recommending secure Azure Linux base imag
    ```bash
    # Install Syft
    curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-   
+
    # Or using Homebrew (macOS)
    brew install syft
    ```
@@ -40,9 +40,8 @@ A comprehensive tool for analyzing and recommending secure Azure Linux base imag
 
 ### Web UI
 
-To use the web interface, [follow these steps](web_ui/README.md).: 
+To use the web interface, [follow these steps](web_ui/README.md).:
 
 ### Command Line Interface (CLI)
 
 TODO: Add CLI usage instructions
-
