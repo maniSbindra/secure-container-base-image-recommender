@@ -196,18 +196,18 @@ class ImageAnalyzer:
 
                             # Special handling for Python versions
                             if lang == "python":
-                                runtime_info[
-                                    "major_minor"
-                                ] = self.extract_python_version(package_name, version)
+                                runtime_info["major_minor"] = (
+                                    self.extract_python_version(package_name, version)
+                                )
                                 print(
                                     f"      🐍 Extracted Python major.minor: {runtime_info['major_minor']}"
                                 )
 
                             # Special handling for Node.js versions
                             elif lang == "node":
-                                runtime_info[
-                                    "major_minor"
-                                ] = self.extract_nodejs_version(package_name, version)
+                                runtime_info["major_minor"] = (
+                                    self.extract_nodejs_version(package_name, version)
+                                )
                                 print(
                                     f"      🟢 Extracted Node.js major.minor: {runtime_info['major_minor']}"
                                 )

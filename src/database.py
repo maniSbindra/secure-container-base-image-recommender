@@ -345,7 +345,9 @@ class ImageDatabase:
         # Prepare the data for insertion with proper type conversion
         layers_value = manifest.get("layers", 0)
         if isinstance(layers_value, list):
-            print(f"    🐛 DEBUG: layers is a list: {layers_value}, converting to count")
+            print(
+                f"    🐛 DEBUG: layers is a list: {layers_value}, converting to count"
+            )
             layers_value = len(layers_value)
         elif not isinstance(layers_value, (int, float)):
             print(

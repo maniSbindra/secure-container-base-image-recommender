@@ -694,9 +694,7 @@ def api_compare_images():
             "security_winner": (
                 "image1"
                 if security_score1 < security_score2
-                else "image2"
-                if security_score2 < security_score1
-                else "tie"
+                else "image2" if security_score2 < security_score1 else "tie"
             ),
             "size_winner": (
                 "image1"
@@ -1031,9 +1029,7 @@ def api_scan_repo_streaming():
                     )
 
                     if len(results) == 0:
-                        log_handler.emit(
-                            "⚠️  No images were analyzed. This could mean:"
-                        )
+                        log_handler.emit("⚠️  No images were analyzed. This could mean:")
                         log_handler.emit(
                             "   • Repository doesn't exist or has no accessible tags"
                         )

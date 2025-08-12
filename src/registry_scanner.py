@@ -1007,7 +1007,9 @@ class MCRRegistryScanner:
             self.logger.info(
                 f"Processing repository {i}/{len(self.image_patterns)}: {repo}"
             )
-            print(f"\n📦 [{i}/{len(self.image_patterns)}] Processing repository: {repo}")
+            print(
+                f"\n📦 [{i}/{len(self.image_patterns)}] Processing repository: {repo}"
+            )
             try:
                 start_time = datetime.now()
                 results = self.scan_repository(repo)
