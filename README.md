@@ -26,7 +26,7 @@ A comprehensive tool for analyzing and recommending secure Azure Linux base imag
    ```bash
    # Install Syft
    curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-   
+
    # Or using Homebrew (macOS)
    brew install syft
    ```
@@ -40,9 +40,37 @@ A comprehensive tool for analyzing and recommending secure Azure Linux base imag
 
 ### Web UI
 
-To use the web interface, [follow these steps](web_ui/README.md).: 
+To use the web interface, [follow these steps](web_ui/README.md).
+
+#### Running in VS Code Dev Container
+
+If you're using VS Code with the provided dev container:
+
+1. **Open in Dev Container**:
+   - Ensure you have the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed
+   - Open the project in VS Code and select "Reopen in Container" when prompted
+   - Or use Command Palette (`Ctrl+Shift+P`) → "Dev Containers: Reopen in Container"
+
+2. **Start the Web UI**:
+   ```bash
+   cd web_ui
+   ./start.sh
+   ```
+
+3. **Access the Application**:
+   - The web server will start on `http://localhost:8080`
+   - In VS Code, you'll see a notification to open the port in your browser
+   - Click "Open in Browser" or manually navigate to `http://localhost:8080`
+   - You can also use the VS Code "Ports" tab to manage forwarded ports
+
+4. **Development Benefits**:
+   - All dependencies (Docker, Syft, Trivy) are pre-installed in the container
+   - Database will be automatically created if it doesn't exist
+   - Hot reload is enabled for development
+   - VS Code debugging is fully configured
+
+**Note**: The dev container includes all required tools (Docker, Syft, Trivy) pre-installed, so you can immediately start using the application without additional setup.
 
 ### Command Line Interface (CLI)
 
 TODO: Add CLI usage instructions
-

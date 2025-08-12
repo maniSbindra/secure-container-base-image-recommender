@@ -2,7 +2,7 @@ requests>=2.31.0
 packaging>=23.0
 
 # Note: Additional security scanning tools required (install separately):
-# 
+#
 # Required for basic functionality:
 # - syft: curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh
 # - grype: curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh

@@ -117,7 +117,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
@@ -140,7 +140,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="row">
         <div class="col-12 text-center">
             <button id="compareButton" class="btn btn-primary btn-lg" onclick="compareImages()" disabled>
@@ -154,12 +154,12 @@
 <!-- Comparison Results Section -->
 <div id="comparisonSection" style="display: none;">
     <hr class="my-5">
-    
+
     <!-- Header with overall recommendation -->
     <div id="comparisonHeader" class="row mb-4">
         <!-- Will be populated by JavaScript -->
     </div>
-    
+
     <!-- Side-by-side comparison -->
     <div class="row mb-4">
         <div class="col-md-6">
@@ -173,7 +173,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Detailed comparison metrics -->
     <div class="row">
         <div class="col-md-4">
@@ -189,7 +189,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
@@ -203,7 +203,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
@@ -218,7 +218,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Detailed package differences -->
     <div class="row mt-4">
         <div class="col-12">
@@ -278,7 +278,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="row mt-4">
         <div class="col-12 text-center">
             <button class="btn btn-outline-primary" onclick="resetComparison()">
@@ -329,19 +329,19 @@ let allImages = [];
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Compare page loaded, loading images...');
     loadImages();
-    
+
     // Check for URL parameters first
     const urlParams = new URLSearchParams(window.location.search);
     const sourceImage = urlParams.get('source');
     const targetImage = urlParams.get('target');
-    
+
     if (sourceImage) {
         console.log('=== URL PARAMETER PROCESSING ===');
         console.log('Raw source image from URL:', sourceImage);
         console.log('Raw target image from URL:', targetImage);
         console.log('URL-decoded source image:', decodeURIComponent(sourceImage));
         console.log('URL-decoded target image:', targetImage ? decodeURIComponent(targetImage) : 'None');
-        
+
         // Wait for images to load, then find and select them
         setTimeout(() => {
             console.log('=== IMAGE LOOKUP STARTING ===');
@@ -350,39 +350,39 @@ document.addEventListener('DOMContentLoaded', function() {
             allImages.slice(0, 5).forEach((img, idx) => {
                 console.log(`  ${idx + 1}: "${img.name}" (ID: ${img.id})`);
             });
-            
+
             // Try both original and decoded versions
             const decodedSourceImage = decodeURIComponent(sourceImage);
             console.log('Looking for source image:', decodedSourceImage);
-            
+
             let sourceImg = allImages.find(img => img.name === sourceImage);
             if (!sourceImg) {
                 console.log('Source image not found with original name, trying decoded...');
                 sourceImg = allImages.find(img => img.name === decodedSourceImage);
             }
-            
+
             if (sourceImg) {
                 console.log('✅ Found source image in database:', sourceImg.name, '(ID:', sourceImg.id, ')');
                 selectedImages.image1 = sourceImg;
                 updateImageSelector(1, sourceImg);
                 updateCompareButton();
-                
+
                 if (targetImage) {
                     const decodedTargetImage = decodeURIComponent(targetImage);
                     console.log('Looking for target image:', decodedTargetImage);
-                    
+
                     let targetImg = allImages.find(img => img.name === targetImage);
                     if (!targetImg) {
                         console.log('Target image not found with original name, trying decoded...');
                         targetImg = allImages.find(img => img.name === decodedTargetImage);
                     }
-                    
+
                     if (targetImg) {
                         console.log('✅ Found target image in database:', targetImg.name, '(ID:', targetImg.id, ')');
                         selectedImages.image2 = targetImg;
                         updateImageSelector(2, targetImg);
                         updateCompareButton();
-                        
+
                         // Automatically trigger comparison
                         setTimeout(() => {
                             const compareButton = document.getElementById('compareButton');
@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 disabled: compareButton ? compareButton.disabled : 'N/A',
                                 innerHTML: compareButton ? compareButton.innerHTML.substring(0, 50) : 'N/A'
                             });
-                            
+
                             if (compareButton && !compareButton.disabled) {
                                 console.log('🚀 Auto-triggering comparison...');
                                 compareButton.click();
@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
                          .forEach(img => console.log(`  - "${img.name}"`));
             }
         }, 2000); // Increased timeout to ensure images are loaded
-        
+
         // Clear URL parameters to clean up the URL after processing
         setTimeout(() => {
             if (window.history.replaceState) {
@@ -426,7 +426,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check for pre-selected images from localStorage (existing functionality)
         const preSelected = JSON.parse(localStorage.getItem('comparisonImages') || '[]');
         console.log('Pre-selected images from localStorage:', preSelected);
-        
+
         if (preSelected.length > 0) {
             console.log('Found pre-selected images, will auto-select them');
             // Auto-select images if they were chosen from the images page
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
-        
+
         // Clear the localStorage after using
         localStorage.removeItem('comparisonImages');
     }
@@ -462,18 +462,18 @@ function updateImageSelector(slot, image) {
         size_bytes: image.size_bytes,
         total_vulnerabilities: image.total_vulnerabilities
     });
-    
+
     const selector = document.getElementById(`image${slot}Selector`);
     const info = document.getElementById(`image${slot}Info`);
-    
+
     console.log('Selector element:', !!selector);
     console.log('Info element:', !!info);
-    
+
     if (!selector || !info) {
         console.error('❌ Required DOM elements not found');
         return;
     }
-    
+
     selector.classList.add('selected');
     selector.innerHTML = `
         <div>
@@ -481,7 +481,7 @@ function updateImageSelector(slot, image) {
             <h6 class="mt-2 text-success">Image Selected</h6>
         </div>
     `;
-    
+
     info.style.display = 'block';
     info.innerHTML = `
         <h6>${escapeHtml(image.name)}</h6>
@@ -495,26 +495,26 @@ function updateImageSelector(slot, image) {
         </div>
         ${getVulnerabilityBadges(image)}
     `;
-    
+
     console.log('✅ Image selector updated successfully');
 }
 
 async function loadImages() {
     console.log('=== LOADING IMAGES ===');
     console.log('Making API call to /api/images/all...');
-    
+
     try {
         const response = await fetch('/api/images/all?per_page=1000');
         console.log('API response status:', response.status);
         console.log('API response headers:', [...response.headers.entries()]);
-        
+
         const data = await response.json();
         console.log('API response data:', data);
-        
+
         if (data.success) {
             allImages = data.images;
             console.log(`✅ Successfully loaded ${allImages.length} images for comparison`);
-            
+
             if (allImages.length > 0) {
                 console.log('Sample image structure:', JSON.stringify(allImages[0], null, 2));
                 console.log('All image names:');
@@ -540,11 +540,11 @@ async function loadImages() {
 
 function showImagePicker(slot) {
     currentPickerSlot = slot;
-    
+
     // Check if images are loaded
     if (allImages.length === 0) {
         showAlert('Loading images... Please wait a moment and try again.', 'info');
-        
+
         // Try to reload images and then show picker
         loadImages().then(() => {
             if (allImages.length > 0) {
@@ -557,9 +557,9 @@ function showImagePicker(slot) {
         });
         return;
     }
-    
+
     displayImages(allImages);
-    
+
     const modal = new bootstrap.Modal(document.getElementById('imagePickerModal'));
     modal.show();
 }
@@ -567,19 +567,19 @@ function showImagePicker(slot) {
 function displayImages(images) {
     const imageList = document.getElementById('imageList');
     const loadingDiv = document.getElementById('imageListLoading');
-    
+
     // Hide loading indicator if it exists
     if (loadingDiv) {
         loadingDiv.style.display = 'none';
     }
-    
+
     if (images.length === 0) {
         imageList.innerHTML = '<div class="text-center text-muted">No images found. <a href="/scan">Scan the registry</a> to add images.</div>';
         return;
     }
-    
+
     console.log(`Displaying ${images.length} images`);
-    
+
     imageList.innerHTML = images.map(image => `
         <div class="card mb-2" style="cursor: pointer;" onclick="selectImage(${image.id}, '${escapeHtml(image.name)}')">
             <div class="card-body py-2">
@@ -587,10 +587,10 @@ function displayImages(images) {
                     <div class="col-md-8">
                         <h6 class="mb-1">${escapeHtml(image.name)}</h6>
                         <small class="text-muted">
-                            Size: ${formatBytes(image.size_bytes)} | 
+                            Size: ${formatBytes(image.size_bytes)} |
                             Vulns: ${image.total_vulnerabilities || 0}
-                            ${image.languages ? ` | Languages: ${Array.isArray(image.languages) ? 
-                                image.languages.map(lang => typeof lang === 'string' ? lang : lang.language || 'unknown').slice(0, 2).join(', ') : 
+                            ${image.languages ? ` | Languages: ${Array.isArray(image.languages) ?
+                                image.languages.map(lang => typeof lang === 'string' ? lang : lang.language || 'unknown').slice(0, 2).join(', ') :
                                 image.languages.split(',').slice(0, 2).join(', ')}` : ''}
                         </small>
                     </div>
@@ -605,7 +605,7 @@ function displayImages(images) {
 
 function selectImage(imageId, imageName) {
     console.log(`Selecting image: ID=${imageId}, Name=${imageName}`);
-    
+
     // Find the full image data
     const image = allImages.find(img => img.id === imageId);
     if (!image) {
@@ -613,23 +613,23 @@ function selectImage(imageId, imageName) {
         showAlert('Error selecting image. Please try again.', 'danger');
         return;
     }
-    
+
     console.log('Found image:', image);
-    
+
     selectedImages[`image${currentPickerSlot}`] = image;
-    
+
     // Update the selector display using the helper function
     updateImageSelector(currentPickerSlot, image);
-    
+
     // Enable compare button if both images are selected
     updateCompareButton();
-    
+
     // Close modal
     const modal = bootstrap.Modal.getInstance(document.getElementById('imagePickerModal'));
     if (modal) {
         modal.hide();
     }
-    
+
     console.log('Image selection completed');
 }
 
@@ -639,15 +639,15 @@ function updateCompareButton() {
         image1: selectedImages.image1 ? {name: selectedImages.image1.name, id: selectedImages.image1.id} : null,
         image2: selectedImages.image2 ? {name: selectedImages.image2.name, id: selectedImages.image2.id} : null
     });
-    
+
     const compareButton = document.getElementById('compareButton');
     const canCompare = selectedImages.image1 && selectedImages.image2;
-    
+
     console.log('Compare button element:', !!compareButton);
     console.log('Can compare:', canCompare);
-    
+
     compareButton.disabled = !canCompare;
-    
+
     if (canCompare) {
         const buttonText = `Compare "${selectedImages.image1.name.substring(0, 20)}..." with "${selectedImages.image2.name.substring(0, 20)}..."`;
         console.log('Setting button text:', buttonText);
@@ -662,7 +662,7 @@ function updateCompareButton() {
             Compare Images
         `;
     }
-    
+
     console.log('Button final state:', {
         disabled: compareButton.disabled,
         innerHTML: compareButton.innerHTML.substring(0, 100)
@@ -674,7 +674,7 @@ async function compareImages() {
         showAlert('Please select two images to compare', 'warning');
         return;
     }
-    
+
     try {
         const response = await fetch('/api/compare', {
             method: 'POST',
@@ -686,15 +686,15 @@ async function compareImages() {
                 image2_id: selectedImages.image2.id
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             displayComparison(data.comparison);
         } else {
             showAlert('Comparison failed: ' + data.error, 'danger');
         }
-        
+
     } catch (error) {
         showAlert('Error during comparison: ' + error.message, 'danger');
     }
@@ -703,24 +703,24 @@ async function compareImages() {
 function displayComparison(comparison) {
     const selectionSection = document.getElementById('selectionSection');
     const comparisonSection = document.getElementById('comparisonSection');
-    
+
     selectionSection.style.display = 'none';
     comparisonSection.style.display = 'block';
-    
+
     // Display header with overall recommendation
     displayComparisonHeader(comparison);
-    
+
     // Display side-by-side comparison
     displaySideBySideComparison(comparison);
-    
+
     // Display detailed metrics
     displaySecurityComparison(comparison.vulnerability_comparison);
     displaySizeComparison(comparison.size_comparison);
     displayPackageComparison(comparison.package_comparison);
-    
+
     // Display package details
     displayPackageDetails(comparison.package_comparison.details);
-    
+
     // Scroll to comparison section
     comparisonSection.scrollIntoView({ behavior: 'smooth' });
 }
@@ -728,10 +728,10 @@ function displayComparison(comparison) {
 function displayComparisonHeader(comparison) {
     const header = document.getElementById('comparisonHeader');
     const rec = comparison.recommendation;
-    
+
     let recommendationText = '';
     let recommendationClass = '';
-    
+
     if (rec.overall_recommendation === 'image1') {
         recommendationText = `<strong>${comparison.image1.name}</strong> is recommended overall`;
         recommendationClass = 'alert-success';
@@ -742,7 +742,7 @@ function displayComparisonHeader(comparison) {
         recommendationText = 'Both images have similar characteristics';
         recommendationClass = 'alert-info';
     }
-    
+
     header.innerHTML = `
         <div class="col-12">
             <div class="alert ${recommendationClass}">
@@ -759,7 +759,7 @@ function displayComparisonHeader(comparison) {
 function displaySideBySideComparison(comparison) {
     const image1Div = document.getElementById('image1Comparison');
     const image2Div = document.getElementById('image2Comparison');
-    
+
     // Apply winner highlighting
     if (comparison.recommendation.overall_recommendation === 'image1') {
         image1Div.classList.add('winner-highlight');
@@ -768,7 +768,7 @@ function displaySideBySideComparison(comparison) {
         image2Div.classList.add('winner-highlight');
         image1Div.classList.add('loser-highlight');
     }
-    
+
     image1Div.innerHTML = generateImageComparisonCard(comparison.image1, '1');
     image2Div.innerHTML = generateImageComparisonCard(comparison.image2, '2');
 }
@@ -780,22 +780,22 @@ function generateImageComparisonCard(image, imageNumber) {
             Image ${imageNumber}
         </h5>
         <h6 class="text-primary">${escapeHtml(image.name)}</h6>
-        
+
         <div class="metric-card">
             <strong>Size:</strong> ${formatBytes(image.size_bytes)}
         </div>
-        
+
         <div class="metric-card">
             <strong>Total Vulnerabilities:</strong> ${image.total_vulnerabilities || 0}
             <div class="mt-2">
                 ${getVulnerabilityBadges(image)}
             </div>
         </div>
-        
+
         <div class="metric-card">
             <strong>Languages:</strong>
             <div class="mt-1">
-                ${image.languages && image.languages.length > 0 ? 
+                ${image.languages && image.languages.length > 0 ?
                     image.languages.map(lang => {
                         const langName = typeof lang === 'string' ? lang : lang.language || 'unknown';
                         const langVersion = typeof lang === 'object' && lang.version ? ` ${lang.version}` : '';
@@ -803,7 +803,7 @@ function generateImageComparisonCard(image, imageNumber) {
                     }).join('') : 'None detected'}
             </div>
         </div>
-        
+
         <div class="metric-card">
             <strong>Created:</strong> ${image.created_date ? new Date(image.created_date).toLocaleDateString() : 'Unknown'}
         </div>
@@ -813,36 +813,36 @@ function generateImageComparisonCard(image, imageNumber) {
 function displaySecurityComparison(vulnComparison) {
     const securityDiv = document.getElementById('securityComparison');
     const diffs = vulnComparison.differences;
-    
+
     securityDiv.innerHTML = `
         <div class="metric-card">
             <strong>Total Vulnerabilities:</strong>
             <span class="${getDiffClass(diffs.total)}">${formatDiff(diffs.total)}</span>
         </div>
-        
+
         <div class="metric-card">
             <strong>Critical:</strong>
             <span class="${getDiffClass(diffs.critical)}">${formatDiff(diffs.critical)}</span>
         </div>
-        
+
         <div class="metric-card">
             <strong>High:</strong>
             <span class="${getDiffClass(diffs.high)}">${formatDiff(diffs.high)}</span>
         </div>
-        
+
         <div class="metric-card">
             <strong>Medium:</strong>
             <span class="${getDiffClass(diffs.medium)}">${formatDiff(diffs.medium)}</span>
         </div>
-        
+
         <div class="metric-card">
             <strong>Low:</strong>
             <span class="${getDiffClass(diffs.low)}">${formatDiff(diffs.low)}</span>
         </div>
-        
+
         <div class="mt-3">
             <small class="text-muted">
-                <strong>Winner:</strong> 
+                <strong>Winner:</strong>
                 ${vulnComparison.winner === 'image1' ? 'Image 1' : vulnComparison.winner === 'image2' ? 'Image 2' : 'Tie'}
                 ${vulnComparison.winner !== 'tie' ? ' (fewer vulnerabilities)' : ''}
             </small>
@@ -852,16 +852,16 @@ function displaySecurityComparison(vulnComparison) {
 
 function displaySizeComparison(sizeComparison) {
     const sizeDiv = document.getElementById('sizeComparison');
-    
+
     sizeDiv.innerHTML = `
         <div class="metric-card">
             <strong>Size Difference:</strong>
             <div class="${getDiffClass(sizeComparison.difference_bytes)}">
-                ${formatBytes(Math.abs(sizeComparison.difference_bytes))} 
+                ${formatBytes(Math.abs(sizeComparison.difference_bytes))}
                 ${sizeComparison.difference_bytes > 0 ? 'larger' : sizeComparison.difference_bytes < 0 ? 'smaller' : 'same'}
             </div>
         </div>
-        
+
         <div class="metric-card">
             <strong>Percentage Difference:</strong>
             <span class="${getDiffClass(sizeComparison.difference_bytes)}">
@@ -869,10 +869,10 @@ function displaySizeComparison(sizeComparison) {
                 ${sizeComparison.difference_percent > 0 ? 'larger' : sizeComparison.difference_percent < 0 ? 'smaller' : 'same'}
             </span>
         </div>
-        
+
         <div class="mt-3">
             <small class="text-muted">
-                <strong>Winner:</strong> 
+                <strong>Winner:</strong>
                 ${sizeComparison.winner === 'image1' ? 'Image 1' : sizeComparison.winner === 'image2' ? 'Image 2' : 'Tie'}
                 ${sizeComparison.winner !== 'tie' ? ' (smaller size)' : ''}
             </small>
@@ -882,20 +882,20 @@ function displaySizeComparison(sizeComparison) {
 
 function displayPackageComparison(packageComparison) {
     const packageDiv = document.getElementById('packageComparison');
-    
+
     packageDiv.innerHTML = `
         <div class="metric-card">
             <strong>Common Packages:</strong> ${packageComparison.common_packages}
         </div>
-        
+
         <div class="metric-card">
             <strong>Different Versions:</strong> ${packageComparison.different_versions}
         </div>
-        
+
         <div class="metric-card">
             <strong>Unique to Image 1:</strong> ${packageComparison.unique_to_image1}
         </div>
-        
+
         <div class="metric-card">
             <strong>Unique to Image 2:</strong> ${packageComparison.unique_to_image2}
         </div>
@@ -905,15 +905,15 @@ function displayPackageComparison(packageComparison) {
 function displayPackageDetails(details) {
     // Common packages
     const commonDiv = document.getElementById('commonPackages');
-    commonDiv.innerHTML = details.common.length > 0 ? 
+    commonDiv.innerHTML = details.common.length > 0 ?
         details.common.map(pkg => `
             <div class="d-flex justify-content-between border-bottom py-2">
                 <span>${escapeHtml(pkg.name)}</span>
                 <code class="text-muted">${escapeHtml(pkg.version)}</code>
             </div>
-        `).join('') : 
+        `).join('') :
         '<div class="text-muted">No common packages found</div>';
-    
+
     // Different versions
     const differentDiv = document.getElementById('differentPackages');
     differentDiv.innerHTML = details.different_versions.length > 0 ?
@@ -927,7 +927,7 @@ function displayPackageDetails(details) {
             </div>
         `).join('') :
         '<div class="text-muted">No packages with different versions</div>';
-    
+
     // Unique to image 1
     const unique1Div = document.getElementById('unique1Packages');
     unique1Div.innerHTML = details.unique_image1.length > 0 ?
@@ -938,7 +938,7 @@ function displayPackageDetails(details) {
             </div>
         `).join('') :
         '<div class="text-muted">No packages unique to Image 1</div>';
-    
+
     // Unique to image 2
     const unique2Div = document.getElementById('unique2Packages');
     unique2Div.innerHTML = details.unique_image2.length > 0 ?
@@ -949,7 +949,7 @@ function displayPackageDetails(details) {
             </div>
         `).join('') :
         '<div class="text-muted">No packages unique to Image 2</div>';
-    
+
     // Update tab labels with counts
     document.getElementById('common-tab').innerHTML = `Common Packages (${details.common.length})`;
     document.getElementById('different-tab').innerHTML = `Different Versions (${details.different_versions.length})`;
@@ -959,7 +959,7 @@ function displayPackageDetails(details) {
 
 function resetComparison() {
     selectedImages = { image1: null, image2: null };
-    
+
     // Reset selectors
     document.getElementById('image1Selector').classList.remove('selected');
     document.getElementById('image2Selector').classList.remove('selected');
@@ -975,18 +975,18 @@ function resetComparison() {
             <h6 class="mt-2 text-muted">Click to select an image</h6>
         </div>
     `;
-    
+
     // Hide info sections
     document.getElementById('image1Info').style.display = 'none';
     document.getElementById('image2Info').style.display = 'none';
-    
+
     // Show selection section, hide comparison
     document.getElementById('selectionSection').style.display = 'block';
     document.getElementById('comparisonSection').style.display = 'none';
-    
+
     // Reset compare button
     updateCompareButton();
-    
+
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -999,15 +999,15 @@ document.getElementById('imageSearchInput').addEventListener('input', function(e
         if (image.name.toLowerCase().includes(query)) {
             return true;
         }
-        
+
         // Search in languages
         if (image.languages) {
-            const languages = Array.isArray(image.languages) 
+            const languages = Array.isArray(image.languages)
                 ? image.languages.map(lang => typeof lang === 'string' ? lang : lang.language || 'unknown')
                 : image.languages.split(',');
             return languages.some(lang => lang.toLowerCase().includes(query));
         }
-        
+
         return false;
     });
     displayImages(filteredImages);
@@ -1048,11 +1048,11 @@ function getVulnerabilityBadges(image) {
 
 function formatBytes(bytes) {
     if (!bytes || bytes === 0) return 'Unknown';
-    
+
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
