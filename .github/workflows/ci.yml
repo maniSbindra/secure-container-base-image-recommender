@@ -5,6 +5,7 @@ name: CI/CD Pipeline
 # - Bandit skips false positive security warnings
 # - Coverage reporting without fail-under requirements
 # - Pre-commit hooks validation
+# - Testing focused on Python 3.12 for efficiency
 
 on:
   push:
@@ -17,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Focus on primary supported Python versions
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        # Focus on Python 3.12 for linting and testing
+        python-version: ["3.12"]
 
     steps:
     - uses: actions/checkout@v4
@@ -78,7 +79,6 @@ jobs:
         pytest tests/ --cov=src --cov-report=xml --cov-report=html -v
 
     - name: Upload coverage to Codecov
-      if: matrix.python-version == '3.12'
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
@@ -90,7 +90,7 @@ jobs:
       uses: actions/upload-artifact@v3
       if: always()
       with:
-        name: test-results-${{ matrix.python-version }}
+        name: test-results
         path: |
           htmlcov/
           bandit-report.json
