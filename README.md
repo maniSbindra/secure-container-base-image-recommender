@@ -53,7 +53,7 @@ If you're using VS Code, you can use the provided dev container which has all de
 
 ### Web UI
 
-To use the web interface, [follow these steps](web_ui/README.md).
+To details on Web UI features and usage check [here](web_ui/README.md).
 
 #### Running in VS Code Dev Container
 
