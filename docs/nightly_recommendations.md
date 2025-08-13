@@ -1,7 +1,5 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-08-13T16:34:59.412669Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 3 per language._
-
 ## Java
 
 | Rank | Image | Version | Crit | High | Total | Size |
@@ -20,9 +18,14 @@ _Generated: 2025-08-13T16:34:59.412669Z from azure_linux_images.db. Criteria: lo
 
 | Rank | Image | Version | Crit | High | Total | Size |
 |------|-------|---------|------|------|-------|------|
+
 | 1 | `docker.io/library/python:3-slim` | 5.36.0 | 0 | 8 | 80 | 206.0 MB |
 | 2 | `docker.io/library/python:3.12-slim` | 5.36.0 | 0 | 8 | 96 | 211.0 MB |
 | 3 | `docker.io/library/node:20.0-slim` | 5.32.1 | 9 | 67 | 242 | 351.0 MB |
+
+| 1 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 0 | 52 | 119.0 MB |
+| 2 | `docker.io/library/python:3-slim` | 5.36.0 | 0 | 8 | 80 | 206.0 MB |
+| 3 | `docker.io/library/node:20.0-slim` | 5.32.1 | 6 | 39 | 216 | 250.0 MB |
 
 ## Python
 
