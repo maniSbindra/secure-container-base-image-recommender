@@ -24,9 +24,9 @@ jobs:
         with:
           lfs: true
           fetch-depth: 0
-
-      - name: Install Git LFS
-        uses: actions/setup-git-lfs@v1
+  # Git LFS is already available on GitHub-hosted runners; the removed
+  # actions/setup-git-lfs step referenced a non-existent action repo and
+  # caused the workflow failure.
 
       - name: Set up Python
         uses: actions/setup-python@v5
