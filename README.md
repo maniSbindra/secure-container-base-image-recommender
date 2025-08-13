@@ -172,3 +172,62 @@ The comprehensive scanning feature enables:
 - **Resource Management**: Efficient handling of large-scale scanning operations with progress monitoring
 
 These screenshots showcase how the web interface makes container security analysis accessible to both technical and non-technical users, providing powerful features through an intuitive interface.
+
+## SQLite Database & Nightly Updates
+
+The project ships with a SQLite database (`azure_linux_images.db`) that is updated nightly via a GitHub Actions workflow:
+
+- The nightly job performs a comprehensive scan (`--scan --comprehensive --update-existing --max-tags 0`).
+- The updated SQLite file is committed using Git LFS to avoid repository bloat from daily binary diffs.
+- Legacy JSON export is intentionally skipped in the nightly job (only the SQLite DB is maintained).
+
+### Minimal (Empty) DB Fallback
+
+If you clone the repository without Git LFS installed, you'll get a small text pointer file instead of the real database. The application detects this and will create an empty schema automatically so you can still run scans or tests.
+
+You will see a message like:
+
+```
+⚠️  Detected Git LFS pointer instead of actual SQLite DB: azure_linux_images.db
+   Run 'git lfs install && git lfs pull' to download the full database, or proceed with empty DB.
+```
+
+### Getting the Full Pre-Scanned Database
+
+Install Git LFS once per machine and pull the real object:
+
+```bash
+git lfs install
+git clone https://github.com/<owner>/<repo>.git
+cd <repo>
+git lfs pull  # downloads the actual sqlite database
+```
+
+If you already cloned without LFS:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+### Regenerating Locally (Optional)
+
+If you prefer to build from scratch or the DB is missing:
+
+```bash
+python src/cli.py --scan --comprehensive --update-existing --max-tags 10 --database azure_linux_images.json
+```
+
+Increase or set `--max-tags 0` to scan all tags (can be slow).
+
+### Why Git LFS?
+
+Daily binary commits would otherwise inflate clone size over time. Git LFS stores only a pointer in the Git history and fetches the actual binary on demand.
+
+### Summary
+
+| Scenario | What You Get | Action |
+|----------|--------------|--------|
+| Clone without LFS | Pointer + empty schema auto-created | Install LFS if you need full data |
+| Clone with LFS | Full pre-scanned database | Ready to query immediately |
+| Want fresh scan | Run scan CLI | Adjust flags for depth/performance |

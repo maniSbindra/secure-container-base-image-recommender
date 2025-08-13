@@ -13,6 +13,15 @@ python -m pip install --upgrade pip
 if [ -f requirements.txt ]; then
   pip install -r requirements.txt
 fi
+if [ -f requirements-dev.txt ]; then
+  pip install -r requirements-dev.txt
+fi
+
+# Install git pre-commit hooks if pre-commit is available
+if command -v pre-commit >/dev/null 2>&1; then
+  echo "[post-create] Installing pre-commit hooks..."
+  pre-commit install --install-hooks || true
+fi
 if [ -f web_ui/requirements.txt ]; then
   pip install -r web_ui/requirements.txt
 fi
@@ -53,3 +62,14 @@ grype version || true
 trivy --version || true
 
 echo "[post-create] Done."
+
+# Git LFS setup & ensure large files (like azure_linux_images.db) are fetched
+if command -v git >/dev/null 2>&1 && command -v git-lfs >/dev/null 2>&1; then
+  echo "[post-create] Ensuring Git LFS is initialized..."
+  git lfs install --local || true
+  # If repo already cloned with pointer only, pull the real content
+  if grep -q "git-lfs" azure_linux_images.db 2>/dev/null; then
+    echo "[post-create] LFS pointer detected for azure_linux_images.db, pulling real file..."
+    git lfs pull --include=azure_linux_images.db || true
+  fi
+fi

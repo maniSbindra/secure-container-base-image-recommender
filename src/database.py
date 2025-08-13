@@ -5,6 +5,7 @@ This module handles SQLite database operations for storing and querying
 container image analysis data with vulnerability information.
 """
 
+import os
 import sqlite3
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
@@ -20,6 +21,26 @@ class ImageDatabase:
 
     def _initialize_database(self):
         """Initialize database connection and create tables if they don't exist"""
+        # Detect if the file looks like a Git LFS pointer (text file with version & oid)
+        if os.path.exists(self.db_path):
+            try:
+                with open(self.db_path, "rb") as f:
+                    head = f.read(200)
+                # Heuristic: LFS pointer files are small and start with 'version https://git-lfs.github.com/spec/v1' and contain 'oid sha256:'
+                if (
+                    b"version https://git-lfs.github.com/spec/v1" in head
+                    and b"oid sha256:" in head
+                ):
+                    print(
+                        "⚠️  Detected Git LFS pointer instead of actual SQLite DB:",
+                        self.db_path,
+                    )
+                    print(
+                        "   Run 'git lfs install && git lfs pull' to download the full database, or proceed with empty DB."
+                    )
+            except Exception as e:
+                print(f"⚠️  Could not inspect database file for LFS pointer: {e}")
+
         self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row  # Enable dict-like access to rows
         self._create_tables()
