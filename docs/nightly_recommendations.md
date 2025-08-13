@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-08-13T17:08:57.834130Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 3 per language._
+_Generated: 2025-08-13T17:25:36.098619Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
 
 ## Java
 
@@ -15,6 +15,9 @@ _Generated: 2025-08-13T17:08:57.834130Z from azure_linux_images.db. Criteria: lo
 | 1 | `mcr.microsoft.com/azurelinux/base/nodejs:20` | 20.14.0 | 0 | 0 | 0 | 146.0 MB |
 | 2 | `mcr.microsoft.com/azurelinux/base/nodejs:20.14` | 20.14.0 | 0 | 0 | 0 | 146.0 MB |
 | 3 | `mcr.microsoft.com/azurelinux/distroless/nodejs:20` | 20.14.0 | 0 | 1 | 3 | 164.0 MB |
+| 4 | `mcr.microsoft.com/azurelinux/distroless/nodejs:20-nonroot` | 20.14.0 | 0 | 1 | 3 | 164.0 MB |
+| 5 | `mcr.microsoft.com/azurelinux/distroless/nodejs:20.14` | 20.14.0 | 0 | 1 | 3 | 164.0 MB |
+| 6 | `mcr.microsoft.com/azurelinux/distroless/nodejs:20.14-nonroot` | 20.14.0 | 0 | 1 | 3 | 164.0 MB |
 
 ## Perl
 
@@ -31,3 +34,6 @@ _Generated: 2025-08-13T17:08:57.834130Z from azure_linux_images.db. Criteria: lo
 | 1 | `mcr.microsoft.com/azurelinux/distroless/python:3` | 3.12.9 | 0 | 0 | 0 | 83.8 MB |
 | 2 | `mcr.microsoft.com/azurelinux/distroless/python:3-nonroot` | 3.12.9 | 0 | 0 | 0 | 83.8 MB |
 | 3 | `mcr.microsoft.com/azurelinux/distroless/python:3.12` | 3.12.9 | 0 | 0 | 0 | 83.8 MB |
+| 4 | `mcr.microsoft.com/azurelinux/distroless/python:3.12-nonroot` | 3.12.9 | 0 | 0 | 0 | 83.8 MB |
+| 5 | `mcr.microsoft.com/azurelinux/base/python:3` | 3.12.9 | 0 | 0 | 0 | 138.0 MB |
+| 6 | `mcr.microsoft.com/azurelinux/base/python:3.12` | 3.12.9 | 0 | 0 | 0 | 138.0 MB |
