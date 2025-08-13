@@ -1,0 +1,96 @@
+name: Nightly Azure Linux Registry Scan
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 02:00 UTC nightly
+  workflow_dispatch: {}
+
+concurrency:
+  group: nightly-registry-scan
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # required to push updated database
+  actions: read
+
+jobs:
+  scan-and-update-db:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout repository (with LFS)
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Install Git LFS
+        uses: actions/setup-git-lfs@v1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Install Trivy (for vulnerability scanning)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -y
+          sudo apt-get install -y trivy
+
+      - name: Docker info
+        run: docker info
+      - name: Run comprehensive registry scan (all tags, update existing) (DB only)
+        run: |
+          # Use --scan to process all configured repositories in code (see registry_scanner.py image_patterns)
+          # Store DB in root (tracked with LFS). We skip --update-db to avoid legacy JSON export.
+          # --max-tags 0 means all tags; --comprehensive enables full Trivy scan; --update-existing rescans entries
+          python src/cli.py --scan --database azure_linux_images.json --max-tags 0 --comprehensive --update-existing
+
+      - name: Show database stats
+        run: |
+          ls -lh azure_linux_images.* || true
+          sqlite3 azure_linux_images.db 'SELECT COUNT(*) FROM images;' || true
+
+      - name: Commit & push updated database (no JSON export)
+        if: success()
+        run: |
+          git config user.name 'github-actions'
+          git config user.email 'github-actions@github.com'
+          git add azure_linux_images.db || true
+          if git diff --cached --quiet; then
+            echo 'No database changes to commit.'
+          else
+            git commit -m 'chore: nightly registry scan & DB update [skip ci]'
+            git push
+          fi
+
+      - name: Upload database artifact (SQLite only)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-database
+          path: |
+            azure_linux_images.db
+          retention-days: 5
