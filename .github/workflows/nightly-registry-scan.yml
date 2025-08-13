@@ -73,16 +73,24 @@ jobs:
           ls -lh azure_linux_images.* || true
           sqlite3 azure_linux_images.db 'SELECT COUNT(*) FROM images;' || true
 
-      - name: Commit & push updated database (no JSON export)
+      - name: Generate nightly recommendations markdown
+        run: |
+          python scripts/generate_nightly_recommendations_md.py || true
+          if [ -f docs/nightly_recommendations.md ]; then
+            echo "Generated docs/nightly_recommendations.md"
+            head -n 20 docs/nightly_recommendations.md || true
+          fi
+
+      - name: Commit & push updated database & recommendations (no JSON export)
         if: success()
         run: |
           git config user.name 'github-actions'
           git config user.email 'github-actions@github.com'
-          git add azure_linux_images.db || true
+          git add azure_linux_images.db docs/nightly_recommendations.md || true
           if git diff --cached --quiet; then
             echo 'No database changes to commit.'
           else
-            git commit -m 'chore: nightly registry scan & DB update [skip ci]'
+            git commit -m 'chore: nightly registry scan, DB update & recommendations [skip ci]'
             git push
           fi
 

@@ -7,6 +7,7 @@ Azure Linux base images and builds a database of their capabilities.
 
 import json
 import logging
+import os
 import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -57,21 +58,18 @@ class MCRRegistryScanner:
             self.logger.addHandler(console_handler)
             self.logger.setLevel(logging.INFO)
 
-        # Common Azure Linux image patterns to scan
-        self.image_patterns = [
-            # "azurelinux/base/core",
+        # Default Azure Linux image repositories (MCR) used if config file absent/empty
+        self.default_image_patterns = [
             "azurelinux/base/python",
             "azurelinux/base/nodejs",
-            # "mcr.microsoft.com/openjdk/jdk",
-            # "mcr.microsoft.com/azurelinux/distroless/base",
-            # "mcr.microsoft.com/dotnet/runtime",
             "azurelinux/distroless/base",
             "azurelinux/distroless/python",
             "azurelinux/distroless/node",
             "azurelinux/distroless/java",
         ]
-        # "azurelinux/base/php",
-        # "azurelinux/base/ruby",
+
+        # Load external repository/image configuration if present
+        self.image_patterns = self._load_repository_config()
 
     def get_image_tags(self, repository: str) -> List[str]:
         """Get all available tags for a repository"""
@@ -990,40 +988,81 @@ class MCRRegistryScanner:
             return None
 
     def scan_all_repositories(self, max_workers: int = 1) -> List[Dict]:
-        """Scan all configured repositories sequentially to avoid SQLite threading issues"""
+        """Scan all configured repositories/images.
+
+        Supports three entry types in self.image_patterns:
+          1. Plain repository path (e.g. azurelinux/base/python) -> enumerate tags from MCR
+          2. Full repository path with mcr.microsoft.com prefix (no tag) -> enumerate tags
+          3. Fully qualified image reference with a tag (any registry) -> scan single image
+
+        Non-MCR repositories WITHOUT an explicit tag are currently skipped (enumeration
+        not implemented yet).
+        """
         self.logger.info(f"=== Starting scan of all repositories ===")
         self.logger.info(f"Configuration:")
-        self.logger.info(f"  Repositories to scan: {len(self.image_patterns)}")
+        self.logger.info(f"  Entries to process: {len(self.image_patterns)}")
         self.logger.info(f"  Comprehensive scan: {self.comprehensive_scan}")
         self.logger.info(f"  Cleanup images: {self.cleanup_images}")
         self.logger.info(f"  Update existing: {self.update_existing}")
         self.logger.info(f"  Max tags per repo: {self.max_tags_per_repo}")
 
         all_results = []
+        print(f"🔍 Processing {len(self.image_patterns)} configured entries...")
 
-        print(f"🔍 Scanning {len(self.image_patterns)} repositories sequentially...")
+        for i, entry in enumerate(self.image_patterns, 1):
+            print(f"\n📦 [{i}/{len(self.image_patterns)}] {entry}")
+            self.logger.info(f"Processing entry {i}: {entry}")
 
-        for i, repo in enumerate(self.image_patterns, 1):
-            self.logger.info(
-                f"Processing repository {i}/{len(self.image_patterns)}: {repo}"
+            # Determine if entry is a single image (has a tag component)
+            is_single_image = ":" in entry.split("@")[0]  # ignore digest form for now
+
+            # Entry has registry hostname?
+            has_registry_prefix = any(
+                entry.startswith(prefix)
+                for prefix in (
+                    "mcr.microsoft.com/",
+                    "docker.io/",
+                    "ghcr.io/",
+                    "quay.io/",
+                    "registry.k8s.io/",
+                )
             )
-            print(
-                f"\n📦 [{i}/{len(self.image_patterns)}] Processing repository: {repo}"
-            )
+
             try:
+                if is_single_image:
+                    # Treat as fully-qualified image reference scan
+                    print(f"  🔹 Single image detected -> {entry}")
+                    results = self.scan_image(entry)
+                    all_results.extend(results)
+                    print(f"    ✅ Image scanned: {len(results)} record(s)")
+                    continue
+
+                # Multi-tag repository cases
+                if has_registry_prefix and not entry.startswith("mcr.microsoft.com/"):
+                    # Non-MCR repo without tag -> skip (not implemented)
+                    msg = (
+                        "Skipping non-MCR repository without explicit tag: "
+                        f"{entry} (multi-tag enumeration not implemented)"
+                    )
+                    self.logger.warning(msg)
+                    print(f"  ⚠️  {msg}")
+                    continue
+
+                # At this point treat as MCR repository path (with or without prefix)
+                repo_path = entry.replace("mcr.microsoft.com/", "")
+                print(f"  🔹 Repository detected -> {repo_path} (enumerating tags)")
                 start_time = datetime.now()
-                results = self.scan_repository(repo)
+                results = self.scan_repository(repo_path)
                 end_time = datetime.now()
                 duration = (end_time - start_time).total_seconds()
-
                 all_results.extend(results)
                 self.logger.info(
-                    f"Completed {repo}: {len(results)} images analyzed in {duration:.1f}s"
+                    f"Completed {entry}: {len(results)} images analyzed in {duration:.1f}s"
                 )
-                print(f"    ✅ Completed {repo}: {len(results)} images analyzed")
+                print(f"    ✅ Completed {entry}: {len(results)} images analyzed")
             except Exception as e:
-                self.logger.error(f"Error scanning repository {repo}: {e}")
-                print(f"    ❌ Error scanning repository {repo}: {e}")
+                self.logger.error(f"Error processing entry {entry}: {e}")
+                print(f"    ❌ Error processing entry {entry}: {e}")
 
         total_images = len(all_results)
         self.logger.info(f"=== Completed scan of all repositories ===")
@@ -1042,6 +1081,44 @@ class MCRRegistryScanner:
             self.logger.info(f"  {repo}: {count} images")
 
         return all_results
+
+    # ------------------------------------------------------------------
+    # Configuration loading helpers
+    # ------------------------------------------------------------------
+    def _load_repository_config(self) -> List[str]:
+        """Load repository/image entries from config/repositories.txt if present.
+
+        Returns default patterns if file missing or yields zero valid entries.
+        """
+        config_path = os.path.join("config", "repositories.txt")
+        entries: List[str] = []
+        try:
+            if os.path.exists(config_path):
+                with open(config_path, "r", encoding="utf-8") as f:
+                    for raw_line in f:
+                        line = raw_line.strip()
+                        if not line or line.startswith("#"):
+                            continue
+                        entries.append(line)
+                if entries:
+                    self.logger.info(
+                        f"Loaded {len(entries)} repository/image entries from {config_path}"
+                    )
+                    return entries
+                else:
+                    # Note: use dash instead of semicolon to avoid style warning (E702 false positive)
+                    self.logger.warning(
+                        f"Configuration file {config_path} contained no valid entries - using defaults"
+                    )
+            else:
+                self.logger.info(
+                    f"No repository configuration file found at {config_path} - using defaults"
+                )
+        except Exception as e:
+            self.logger.error(
+                f"Error loading repository configuration from {config_path}: {e} - using defaults"
+            )
+        return self.default_image_patterns.copy()
 
     def save_database(
         self, results: List[Dict], filename: str = "azure_linux_images.json"

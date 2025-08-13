@@ -1,0 +1,37 @@
+#!/usr/bin/env text
+# Repository/image scan list for --scan (scan all configured) operations.
+#
+# Each non-comment line can be one of:
+#   1. A repository path under the Microsoft Container Registry (MCR) Azure Linux namespace
+#        Example: azurelinux/base/python
+#        (Will be expanded to mcr.microsoft.com/azurelinux/base/python and all tags enumerated)
+#   2. A full repository path including a registry hostname (MCR, Docker Hub, GHCR, etc.) WITHOUT a tag
+#        Example: mcr.microsoft.com/azurelinux/distroless/base
+#        (If the hostname is mcr.microsoft.com tags are enumerated. Other registries: tag enumeration not yet implemented.)
+#   3. A fully qualified image reference INCLUDING a tag
+#        Examples:
+#           mcr.microsoft.com/azurelinux/base/python:3.12
+#           docker.io/library/python:3.12-slim
+#           ghcr.io/someorg/custom-base:1.0.0
+#        (These are treated as single images and scanned directly.)
+#
+# Notes:
+# - Lines starting with # or blank lines are ignored.
+# - For non-MCR repositories without a tag, multi-tag enumeration is currently NOT implemented and the entry will be skipped.
+#   To scan such images, list explicit tags as individual fully-qualified image references.
+# - If this file is missing or empty, built-in defaults in code are used.
+
+azurelinux/base/python
+azurelinux/base/nodejs
+azurelinux/distroless/base
+azurelinux/distroless/python
+azurelinux/distroless/node
+azurelinux/distroless/java
+docker.io/library/python:3.12-slim
+docker.io/library/python:3-
+docker.io/library/node:20.0-slim
+
+# Example additional entries (uncomment to use):
+# mcr.microsoft.com/azurelinux/base/core
+# docker.io/library/python:3.12-slim
+# ghcr.io/someorg/custom-runtime:1.0.0

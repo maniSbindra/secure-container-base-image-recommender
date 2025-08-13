@@ -231,3 +231,53 @@ Daily binary commits would otherwise inflate clone size over time. Git LFS store
 | Clone without LFS | Pointer + empty schema auto-created | Install LFS if you need full data |
 | Clone with LFS | Full pre-scanned database | Ready to query immediately |
 | Want fresh scan | Run scan CLI | Adjust flags for depth/performance |
+
+## Configuring Which Repositories / Images Are Scanned
+
+The list of repositories and/or individual images processed by `--scan` (scan all) is loaded from `config/repositories.txt` if that file exists and contains valid entries. Otherwise a built-in default list of Azure Linux repositories is used.
+
+Supported entry formats (one per non-comment line):
+
+1. Plain Azure Linux repository path (MCR) – e.g. `azurelinux/base/python`.
+   * Treated as `mcr.microsoft.com/azurelinux/base/python` with tag enumeration via the MCR API.
+2. Fully qualified MCR repository path (no tag) – e.g. `mcr.microsoft.com/azurelinux/distroless/base`.
+   * Tag enumeration is performed.
+3. Fully qualified image reference with a tag (any registry) – e.g. `docker.io/library/python:3.12-slim`, `ghcr.io/org/runtime:1.0.0`.
+   * Scanned as a single image (no tag enumeration).
+
+Notes:
+* Lines starting with `#` or blank lines are ignored.
+* Non-MCR repositories WITHOUT an explicit tag are currently skipped (multi-tag enumeration not yet implemented). List specific tags instead.
+* After editing `config/repositories.txt`, commit the change so CI/nightly scans pick it up.
+
+Example snippet:
+
+```
+azurelinux/base/python
+azurelinux/distroless/base
+docker.io/library/python:3.12-slim
+ghcr.io/example/custom-base:1.0.0
+```
+
+## Nightly Recommendations Markdown
+
+The nightly scan workflow now generates `docs/nightly_recommendations.md` summarizing the top (default 3) images per detected language, ranked by:
+
+1. Lowest critical vulnerabilities
+2. Lowest high vulnerabilities
+3. Lowest total vulnerabilities
+4. Smallest size
+
+Generation details:
+* Script: `scripts/generate_nightly_recommendations_md.py`
+* Runs after the nightly database update
+* Committed along with the updated SQLite database when changes are present
+
+You can regenerate locally after a scan:
+
+```bash
+python scripts/generate_nightly_recommendations_md.py
+less docs/nightly_recommendations.md
+```
+
+Adjust the script if you want a different ranking strategy or number of results (`TOP_N`).
