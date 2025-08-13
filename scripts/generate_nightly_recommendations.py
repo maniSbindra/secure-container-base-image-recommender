@@ -16,7 +16,7 @@ from typing import List, Tuple
 
 DB_PATH = os.environ.get("IMAGE_DB", "azure_linux_images.db")
 OUTPUT_PATH = Path("docs/nightly_recommendations.md")
-TOP_N = int(os.environ.get("TOP_N_PER_LANGUAGE", "3"))
+TOP_N = int(os.environ.get("TOP_N_PER_LANGUAGE", "6"))
 
 
 def query_languages(conn: sqlite3.Connection) -> List[str]:
