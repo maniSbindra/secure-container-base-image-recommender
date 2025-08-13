@@ -47,12 +47,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
+        pip install pre-commit
         # Install additional flake8 plugins to match pre-commit config
         pip install flake8-docstrings flake8-bugbear
 
     - name: Run pre-commit hooks
       run: |
-        pip install pre-commit
         pre-commit run --all-files
 
     - name: Lint with flake8

@@ -1,7 +1,5 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-08-13T15:02:14.188711Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 3 per language._
-
 ## Java
 
 | Rank | Image | Version | Crit | High | Total | Size |
@@ -20,6 +18,11 @@ _Generated: 2025-08-13T15:02:14.188711Z from azure_linux_images.db. Criteria: lo
 
 | Rank | Image | Version | Crit | High | Total | Size |
 |------|-------|---------|------|------|-------|------|
+
+| 1 | `docker.io/library/python:3-slim` | 5.36.0 | 0 | 8 | 80 | 206.0 MB |
+| 2 | `docker.io/library/python:3.12-slim` | 5.36.0 | 0 | 8 | 96 | 211.0 MB |
+| 3 | `docker.io/library/node:20.0-slim` | 5.32.1 | 9 | 67 | 242 | 351.0 MB |
+
 | 1 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 0 | 52 | 119.0 MB |
 | 2 | `docker.io/library/python:3-slim` | 5.36.0 | 0 | 8 | 80 | 206.0 MB |
 | 3 | `docker.io/library/node:20.0-slim` | 5.32.1 | 6 | 39 | 216 | 250.0 MB |
@@ -31,4 +34,3 @@ _Generated: 2025-08-13T15:02:14.188711Z from azure_linux_images.db. Criteria: lo
 | 1 | `mcr.microsoft.com/azurelinux/distroless/python:3` | 3.12.9 | 0 | 0 | 0 | 83.8 MB |
 | 2 | `mcr.microsoft.com/azurelinux/distroless/python:3-nonroot` | 3.12.9 | 0 | 0 | 0 | 83.8 MB |
 | 3 | `mcr.microsoft.com/azurelinux/distroless/python:3.12` | 3.12.9 | 0 | 0 | 0 | 83.8 MB |
-

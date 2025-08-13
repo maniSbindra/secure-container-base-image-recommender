@@ -28,7 +28,6 @@ A user-friendly web interface for the Azure Linux Base Image Recommendation Tool
 - Configurable scan options
 - Automatic cleanup of temporary Docker images
 
-
 ## Usage Guide
 
 ### Getting Recommendations
@@ -63,45 +62,93 @@ A user-friendly web interface for the Azure Linux Base Image Recommendation Tool
 3. Click "Start Scan" and monitor progress
 4. View results and updated statistics
 
-## API Endpoints
+## Web UI Screenshots & Feature Walkthrough
 
-The web UI exposes several API endpoints for programmatic access:
+### Dashboard Overview
+![Dashboard](../docs/images/dashboard.png)
 
-### GET /api/stats
-Returns database statistics and language summary.
+The dashboard provides a comprehensive overview of your container image database, including:
+- **Database Statistics**: Total images scanned, package counts, and security metrics
+- **Language Distribution**: Visual breakdown of programming language support across images
+- **Security Overview**: Summary of vulnerability counts and security levels
+- **Quick Navigation**: Easy access to major features (Recommend, Browse Images, Scan Registry)
 
-### POST /api/recommend
-Accepts recommendation requirements and returns ranked suggestions.
+### Existing Image Analysis & Recommendations
+![Existing Image Recommendations](../docs/images/existing-image-recommendations.png)
 
-**Request Body:**
-```json
-{
-  "language": "python",
-  "version": "3.12",
-  "packages": ["flask", "pandas"],
-  "size_preference": "balanced",
-  "security_level": "high",
-  "max_vulnerabilities": 10,
-  "max_critical_vulnerabilities": 0,
-  "max_high_vulnerabilities": 0
-}
-```
+The "Recommend based on existing image" feature allows you to analyze your current container image and get better alternatives:
+- **Existing Image Analysis**: Supply a Docker image reference to analyze its characteristics
+- **Automated Discovery**: Detects programming languages, packages, and vulnerabilities
+- **Intelligent Alternatives**: Ranked secure base image candidates
+- **Security Improvements**: Shows vulnerability reduction potential
+- **Seamless Migration**: Strives for compatibility while improving security posture
 
-### POST /api/scan
-Triggers a registry scan with specified options.
+### Custom Requirements Recommendation
+The default recommendation view provides a comprehensive form to specify exact requirements:
+- **Language Selection** (Python, Node.js, Java, Go, .NET, etc.)
+- **Version Specification** (optional constraints)
+- **Package Dependencies** list
+- **Size Preferences** (minimal / balanced / full)
+- **Security Level** thresholds
+- **Smart Matching** with detailed scoring breakdown
 
-**Request Body:**
-```json
-{
-  "comprehensive": true,
-  "update_existing": false,
-  "max_tags": 5
-}
-```
+### Recommendation Comparison
+![Compare Recommendations](../docs/images/existing-image-compare-with-recommended.png)
 
-### GET /api/search
-Search images by name or other criteria.
+Highlights differences between current and candidate images:
+- Side-by-side metrics
+- Vulnerability reduction insights
+- Size trade-offs
+- Migration guidance
 
-**Query Parameters:**
-- `q`: Search query
-- `language`: Language filter
+### Image Browser and Search
+![Browse Images](../docs/images/images.png)
+
+Browse & filter scanned images:
+- Pagination
+- Language / security filters
+- Free-text search
+- Quick metric overview + drill-down
+
+### Detailed Image Information
+![Image Details](../docs/images/image-details.png)
+
+In-depth details for a selected image:
+- Metadata (tags, size, registry, created date)
+- Vulnerability breakdown
+- Installed packages & runtimes
+- Detected languages + versions
+- Recommendation context stats
+
+### Registry Scanning Interface
+![Scan Single Image](../docs/images/scan-single-image.png)
+
+Interactive scanning:
+- Single image scan
+- Comprehensive vs quick mode
+- Progress logs
+- Error handling feedback
+
+### Repository Scanning
+![Scan Repository](../docs/images/scan-save-repository.png)
+
+Batch operations:
+- Multiple images / repos
+- Tag limits (`max_tags`)
+- Update existing control
+- Real-time progress
+
+### Comprehensive Registry Scanning
+![Scan All Repositories](../docs/images/scan-save-all-configured-repos.png)
+
+Full coverage features:
+- All configured repositories
+- Auto discovery of new versions
+- Scheduling potential (future)
+- Efficient resource usage
+
+---
+See also:
+- Nightly Recommendations: `../docs/nightly_recommendations.md`
+- Ranking Logic: `../docs/recommendations.md`
+- Architecture: `../docs/images/architecture.md`

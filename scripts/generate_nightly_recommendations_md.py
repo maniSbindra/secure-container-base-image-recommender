@@ -10,7 +10,7 @@ Output written to docs/nightly_recommendations.md
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 DB_PATH = Path("azure_linux_images.db")
@@ -85,7 +85,7 @@ def main() -> int:
         with OUTPUT_PATH.open("w", encoding="utf-8") as f:
             f.write("# Nightly Top Recommended Images by Language\n\n")
             f.write(
-                f"_Generated: {datetime.utcnow().isoformat()}Z from {DB_PATH.name}. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top {TOP_N} per language._\n\n"
+                f"_Generated: {datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')} from {DB_PATH.name}. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top {TOP_N} per language._\n\n"
             )
             for language in languages:
                 top_images = get_top_images_for_language(conn, language, TOP_N)
@@ -98,7 +98,10 @@ def main() -> int:
                     f.write(
                         f"| {idx} | `{rec['image']}` | {rec['version'] or ''} | {rec['critical']} | {rec['high']} | {rec['total']} | {human_size(rec['size'])} |\n"
                     )
-                f.write("\n")
+                # Add single newline after each language section
+                if language != languages[-1]:  # Not the last language
+                    f.write("\n")
+
         print(f"Wrote nightly recommendations markdown to {OUTPUT_PATH}")
         return 0
     finally:
