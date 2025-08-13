@@ -15,7 +15,7 @@ from pathlib import Path
 
 DB_PATH = Path("azure_linux_images.db")
 OUTPUT_PATH = Path("docs/nightly_recommendations.md")
-TOP_N = 3
+TOP_N = 6
 
 
 def human_size(num_bytes: int | None) -> str:
