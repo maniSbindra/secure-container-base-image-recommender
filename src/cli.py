@@ -9,6 +9,7 @@ based on language and package requirements.
 import argparse
 import json
 import logging
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -34,12 +35,14 @@ Examples:
   %(prog)s --scan-image mcr.microsoft.com/azurelinux/base/python:3.12
   %(prog)s --scan-image mcr.microsoft.com/azurelinux/base/python:3.12 --comprehensive
   %(prog)s --scan-image mcr.microsoft.com/azurelinux/base/python:3.12 --update-existing
-  %(prog)s --scan-repo mcr.microsoft.com/azurelinux/base/python --update-db --comprehensive
-  %(prog)s --scan-repo azurelinux/base/nodejs --update-db --max-tags 5
-  %(prog)s --scan --update-db --comprehensive
-  %(prog)s --scan --update-db --no-cleanup  # Keep Docker images locally
-  %(prog)s --scan --update-db --update-existing  # Rescan existing images
-  %(prog)s --scan --update-db --max-tags 0  # Scan ALL tags (can be slow)
+  %(prog)s --scan-repo mcr.microsoft.com/azurelinux/base/python --comprehensive
+  %(prog)s --scan-repo azurelinux/base/nodejs --max-tags 5
+  %(prog)s --scan --comprehensive
+  %(prog)s --scan --no-cleanup  # Keep Docker images locally
+  %(prog)s --scan --update-existing  # Rescan existing images
+  %(prog)s --scan --max-tags 0  # Scan ALL tags (can be slow)
+  %(prog)s --reset-database  # Clear all data and start fresh
+  %(prog)s --clear-database  # Same as --reset-database
         """,
     )
 
@@ -69,6 +72,16 @@ Examples:
         "--scan-image",
         metavar="IMAGE",
         help="Analyze and add a specific image to the database",
+    )
+    operation.add_argument(
+        "--reset-database",
+        action="store_true",
+        help="Reset the database by clearing all data (use with caution)",
+    )
+    operation.add_argument(
+        "--clear-database",
+        action="store_true",
+        help="Clear all data from the database (same as --reset-database)",
     )
 
     # Recommendation parameters
@@ -121,11 +134,8 @@ Examples:
     db_group.add_argument(
         "--database",
         "-d",
-        default="azure_linux_images.json",
-        help="Path to image database (default: azure_linux_images.json)",
-    )
-    db_group.add_argument(
-        "--update-db", action="store_true", help="Update database during scan"
+        default="azure_linux_images.db",
+        help="Path to SQLite database (default: azure_linux_images.db)",
     )
     db_group.add_argument(
         "--comprehensive",
@@ -265,6 +275,100 @@ def handle_analyze(args) -> int:
         return 1
 
 
+def handle_reset_database(args) -> int:
+    """Handle database reset requests"""
+
+    # Setup logging
+    logger = setup_logging(getattr(args, "verbose", False))
+    logger.info("CLI: Starting database reset operation")
+
+    db_path = args.database
+
+    print(f"🗑️  Resetting database: {db_path}")
+    print("⚠️  WARNING: This will permanently delete all data in the database!")
+
+    # Check if database exists
+    if not os.path.exists(db_path):
+        logger.info(f"Database file does not exist: {db_path}")
+        print(f"📝 Database file does not exist: {db_path}")
+        print("✅ No action needed - database is already clear")
+        return 0
+
+    # Ask for confirmation (unless running in non-interactive mode)
+    try:
+        if sys.stdin.isatty():  # Check if running interactively
+            confirmation = input("Type 'YES' to confirm database reset: ")
+            if confirmation != "YES":
+                logger.info("Database reset cancelled by user")
+                print("❌ Database reset cancelled")
+                return 0
+        else:
+            logger.info("Running in non-interactive mode, proceeding with reset")
+            print("🤖 Running in non-interactive mode, proceeding with reset...")
+    except (EOFError, KeyboardInterrupt):
+        logger.info("Database reset cancelled by user")
+        print("\n❌ Database reset cancelled")
+        return 0
+
+    try:
+        # Import here to avoid circular dependency
+        from database import ImageDatabase
+
+        # Connect to database and get statistics before clearing
+        logger.info(f"Connecting to database: {db_path}")
+        db = ImageDatabase(db_path)
+
+        # Get current statistics
+        try:
+            current_stats = db.get_vulnerability_statistics()
+            total_images = current_stats.get("total_images", 0)
+            logger.info(f"Current database contains {total_images} images")
+            print(f"📊 Current database contains {total_images} images")
+        except Exception as e:
+            logger.warning(f"Could not get current statistics: {e}")
+            print(f"⚠️  Could not get current statistics: {e}")
+            total_images = "unknown"
+
+        # Reset the database
+        logger.info("Performing database reset")
+        print("🔄 Clearing all data from database...")
+
+        reset_stats = db.reset_database()
+
+        # Log the results
+        cleared_records = reset_stats["clear_stats"]["total_records_cleared"]
+        logger.info(
+            f"Database reset completed. Cleared {cleared_records} total records"
+        )
+
+        print("✅ Database reset completed successfully!")
+        print(f"📊 Reset Summary:")
+        print(f"   🗑️  Total records cleared: {cleared_records}")
+
+        if reset_stats["clear_stats"]["stats_before"]:
+            stats_before = reset_stats["clear_stats"]["stats_before"]
+            print(f"   📋 Details:")
+            for table, count in stats_before.items():
+                if count > 0:
+                    print(f"      - {table}: {count}")
+
+        print(f"   🕐 Reset timestamp: {reset_stats['reset_timestamp']}")
+        print(f"   📁 Database location: {db_path}")
+        print("\n🎉 Database is now empty and ready for new data!")
+        print("💡 You can now run scans to populate it with fresh image data.")
+
+        # Close database connection
+        db.close()
+        logger.info("Database reset operation completed successfully")
+
+        return 0
+
+    except Exception as e:
+        logger.error(f"Error during database reset: {e}")
+        print(f"❌ Error during database reset: {e}")
+        return 1
+
+
 def handle_scan_image(args) -> int:
     """Handle scanning a single image"""
 
@@ -275,7 +379,7 @@ def handle_scan_image(args) -> int:
     print(f"Scanning image: {args.scan_image}")
 
     try:
-        db_path = args.database.replace(".json", ".db")  # Use SQLite DB
+        db_path = args.database
         logger.info(f"Using database path: {db_path}")
 
         scanner = MCRRegistryScanner(
@@ -299,12 +403,6 @@ def handle_scan_image(args) -> int:
         logger.info(f"Scan completed successfully: {len(results)} images processed")
         print(f"✅ Scan completed! Found {len(results)} images")
         print(f"📊 SQLite Database: {db_path}")
-
-        if args.update_db:
-            # Save legacy JSON for backward compatibility
-            database = scanner.save_database(results, args.database)
-            logger.info(f"Legacy JSON saved: {args.database}")
-            print(f"📄 Legacy JSON saved: {args.database}")
 
         # Show database statistics
         try:
@@ -375,7 +473,7 @@ def handle_scan_repo(args) -> int:
         return 1
 
     try:
-        db_path = args.database.replace(".json", ".db")  # Use SQLite DB
+        db_path = args.database
         logger.info(f"Using database path: {db_path}")
 
         scanner = MCRRegistryScanner(
@@ -395,12 +493,6 @@ def handle_scan_repo(args) -> int:
         logger.info(f"Repository scan completed: {len(results)} images processed")
         print(f"✅ Scan completed! Found {len(results)} images in {repository}")
         print(f"📊 SQLite Database: {db_path}")
-
-        if args.update_db:
-            # Save legacy JSON for backward compatibility
-            database = scanner.save_database(results, args.database)
-            logger.info(f"Legacy JSON saved: {args.database}")
-            print(f"📄 Legacy JSON saved: {args.database}")
 
         # Show database statistics
         try:
@@ -474,7 +566,7 @@ def handle_scan_all_mcr(args) -> int:
     print("This may take several minutes...")
 
     try:
-        db_path = args.database.replace(".json", ".db")  # Use SQLite DB
+        db_path = args.database
         # Handle special case of scanning all tags
         max_tags = None if args.max_tags == 0 else args.max_tags
 
@@ -493,12 +585,6 @@ def handle_scan_all_mcr(args) -> int:
         logger.info(f"All repositories scan completed: {len(results)} images processed")
         print(f"✅ Scan completed! Found {len(results)} images")
         print(f"📊 SQLite Database: {db_path}")
-
-        if args.update_db:
-            # Save legacy JSON for backward compatibility
-            database = scanner.save_database(results, args.database)
-            logger.info(f"Legacy JSON saved: {args.database}")
-            print(f"📄 Legacy JSON saved: {args.database}")
 
         # Show database statistics
         try:
@@ -733,7 +819,7 @@ def handle_scan_image(args) -> int:
 
     try:
         # Create scanner instance
-        db_path = args.database.replace(".json", ".db")  # Use SQLite DB
+        db_path = args.database
         scanner = MCRRegistryScanner(
             db_path=db_path,
             comprehensive_scan=args.comprehensive,
@@ -950,6 +1036,8 @@ def main():
         return handle_scan_repo(args)
     elif args.scan_image:
         return handle_scan_image(args)
+    elif args.reset_database or args.clear_database:
+        return handle_reset_database(args)
     else:
         # Default to recommend mode
         args.recommend = True

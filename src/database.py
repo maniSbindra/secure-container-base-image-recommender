@@ -1340,5 +1340,96 @@ class ImageDatabase:
 
         return export_data
 
+    def clear_all_data(self) -> Dict:
+        """Clear all data from the database and return statistics about what was cleared"""
+        # Get statistics before clearing
+        stats_before = {
+            "images": self.conn.execute("SELECT COUNT(*) FROM images").fetchone()[0],
+            "languages": self.conn.execute("SELECT COUNT(*) FROM languages").fetchone()[
+                0
+            ],
+            "package_managers": self.conn.execute(
+                "SELECT COUNT(*) FROM package_managers"
+            ).fetchone()[0],
+            "capabilities": self.conn.execute(
+                "SELECT COUNT(*) FROM capabilities"
+            ).fetchone()[0],
+            "system_packages": self.conn.execute(
+                "SELECT COUNT(*) FROM system_packages"
+            ).fetchone()[0],
+            "vulnerabilities": self.conn.execute(
+                "SELECT COUNT(*) FROM vulnerabilities"
+            ).fetchone()[0],
+            "security_findings": self.conn.execute(
+                "SELECT COUNT(*) FROM security_findings"
+            ).fetchone()[0],
+        }
+
+        # Clear all tables (order matters due to foreign key constraints)
+        tables_to_clear = [
+            "security_findings",
+            "vulnerabilities",
+            "system_packages",
+            "capabilities",
+            "package_managers",
+            "languages",
+            "images",
+        ]
+
+        for table in tables_to_clear:
+            self.conn.execute(f"DELETE FROM {table}")
+
+        # Reset auto-increment counters
+        for table in tables_to_clear:
+            self.conn.execute(f"DELETE FROM sqlite_sequence WHERE name='{table}'")
+
+        # Commit all changes
+        self.conn.commit()
+
+        # Verify tables are empty
+        stats_after = {
+            "images": self.conn.execute("SELECT COUNT(*) FROM images").fetchone()[0],
+            "languages": self.conn.execute("SELECT COUNT(*) FROM languages").fetchone()[
+                0
+            ],
+            "package_managers": self.conn.execute(
+                "SELECT COUNT(*) FROM package_managers"
+            ).fetchone()[0],
+            "capabilities": self.conn.execute(
+                "SELECT COUNT(*) FROM capabilities"
+            ).fetchone()[0],
+            "system_packages": self.conn.execute(
+                "SELECT COUNT(*) FROM system_packages"
+            ).fetchone()[0],
+            "vulnerabilities": self.conn.execute(
+                "SELECT COUNT(*) FROM vulnerabilities"
+            ).fetchone()[0],
+            "security_findings": self.conn.execute(
+                "SELECT COUNT(*) FROM security_findings"
+            ).fetchone()[0],
+        }
+
+        return {
+            "cleared_timestamp": datetime.now().isoformat(),
+            "stats_before": stats_before,
+            "stats_after": stats_after,
+            "total_records_cleared": sum(stats_before.values()),
+        }
+
+    def reset_database(self) -> Dict:
+        """Reset the database by clearing all data and recreating tables if needed"""
+        # Clear all data first
+        clear_stats = self.clear_all_data()
+
+        # Verify table structure is still intact
+        self.verify_table_constraints()
+
+        return {
+            "reset_timestamp": datetime.now().isoformat(),
+            "operation": "database_reset",
+            "clear_stats": clear_stats,
+            "message": "Database has been reset and is ready for new data",
+        }
+
     def __enter__(self):
         return self
