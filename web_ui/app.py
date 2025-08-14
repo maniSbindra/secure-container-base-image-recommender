@@ -343,14 +343,6 @@ def api_scan():
         print(f"✅ Scan completed! Found {len(results)} images")
         print(f"📊 SQLite Database: {db_path}")
 
-        # Save legacy JSON for backward compatibility (like CLI does)
-        try:
-            legacy_json_path = db_path.replace(".db", ".json")
-            database = scanner.save_database(results, legacy_json_path)
-            print(f"📄 Legacy JSON saved: {legacy_json_path}")
-        except Exception as e:
-            print(f"⚠️  Could not save legacy JSON: {e}")
-
         # Get and display database statistics (like CLI does)
         stats_message = ""
         try:
@@ -907,14 +899,6 @@ def api_scan_streaming():
                     log_handler.emit(f"✅ Scan completed! Found {len(results)} images")
                     log_handler.emit(f"📊 SQLite Database: {db_path}")
 
-                    # Save legacy JSON
-                    try:
-                        legacy_json_path = db_path.replace(".db", ".json")
-                        scanner.save_database(results, legacy_json_path)
-                        log_handler.emit(f"📄 Legacy JSON saved: {legacy_json_path}")
-                    except Exception as e:
-                        log_handler.emit(f"⚠️  Could not save legacy JSON: {e}")
-
                     # Get database statistics
                     try:
                         stats = scanner.get_database_stats()
@@ -1158,11 +1142,10 @@ def api_scan_image_streaming():
                 )
 
                 # Create scanner instance with SQLite database
-                # Get database path, using the same convention as CLI
-                json_db_path = os.path.join(
-                    os.path.dirname(__file__), "..", "azure_linux_images.json"
+                # Get database path directly
+                db_path = os.path.join(
+                    os.path.dirname(__file__), "..", "azure_linux_images.db"
                 )
-                db_path = json_db_path.replace(".json", ".db")  # Use SQLite DB
 
                 scanner = MCRRegistryScanner(
                     db_path=db_path,

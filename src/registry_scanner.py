@@ -1135,22 +1135,6 @@ class MCRRegistryScanner:
             )
         return self.default_image_patterns.copy()
 
-    def save_database(
-        self, results: List[Dict], filename: str = "azure_linux_images.json"
-    ):
-        """Save scan results to a JSON database file (legacy support)"""
-        database = {
-            "scan_timestamp": datetime.now().isoformat(),
-            "total_images": len(results),
-            "images": results,
-        }
-
-        with open(filename, "w") as f:
-            json.dump(database, f, indent=2)
-
-        print(f"Legacy JSON database saved to {filename}")
-        return database
-
     def cleanup_docker_images(self, image_names: List[str]) -> None:
         """Remove Docker images to free up disk space"""
         if not image_names:
@@ -1639,9 +1623,6 @@ def main():
                 f"  {lang_stat['language']}: {lang_stat['image_count']} images "
                 f"(avg {lang_stat['avg_vulnerabilities']:.1f} vulns)"
             )
-
-        # Save legacy JSON for backward compatibility
-        scanner.save_database(results)
 
         return results
 

@@ -133,7 +133,7 @@ Sample dashboard:
 Project ships with a pre-scanned SQLite DB (`azure_linux_images.db`) updated nightly via GitHub Actions (comprehensive scan + commit via Git LFS).
 
 Quick facts:
-* Nightly workflow updates DB only (JSON export deprecated)
+* Nightly workflow updates SQLite database only
 * Git LFS pointer auto-detected; empty schema created if real DB missing
 * You can regenerate locally with the CLI scan command
 * Full details, troubleshooting, and regeneration steps: see [`docs/database.md`](docs/database.md)
