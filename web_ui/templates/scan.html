@@ -42,10 +42,10 @@
     <div class="col-12">
         <h1 class="mb-4">
             <i class="bi bi-arrow-clockwise text-primary"></i>
-            MCR registry key image repository scanner
+            Container Registry Scanner
         </h1>
         <p class="lead text-muted">
-            Update the image database by scanning Microsoft Container Registry
+            Update the image database by scanning configured container registries
         </p>
     </div>
 </div>
@@ -61,7 +61,7 @@
                 <ul class="nav nav-tabs mb-3" id="scanTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="full-scan-tab" data-bs-toggle="tab" data-bs-target="#full-scan" type="button" role="tab">
-                            <i class="bi bi-globe"></i> Full Registry
+                            <i class="bi bi-globe"></i> Full Scan
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -312,10 +312,10 @@
             </div>
         </div>
 
-        <!-- MCR Repositories Scanned -->
+        <!-- Scanned Repositories and Registries -->
         <div class="card mt-4">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-list-ul"></i> MCR Repositories Scanned</h5>
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Scanned Repositories and Registries</h5>
             </div>
             <div class="card-body">
                 <div id="repositoriesList">
@@ -383,25 +383,67 @@ async function loadRepositoriesList() {
 
         if (data.success) {
             const repositoriesDiv = document.getElementById('repositoriesList');
-            repositoriesDiv.innerHTML = `
-                <div class="row">
-                    <div class="col-12">
-                        <p class="text-muted mb-3">
-                            <strong>${data.count}</strong> MCR repositories configured for scanning:
-                        </p>
-                        <div class="list-group list-group-flush">
-                            ${data.repositories.map(repo => `
-                                <div class="list-group-item border-0 px-0 py-2">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-box me-2 text-primary"></i>
-                                        <code class="small">${repo.startsWith('mcr.microsoft.com/') ? repo : 'mcr.microsoft.com/' + repo}</code>
-                                    </div>
+
+            let html = `<div class="row"><div class="col-12">`;
+
+            // Show summary
+            html += `
+                <p class="text-muted mb-3">
+                    <strong>${data.total_count}</strong> entries configured for scanning from <code>config/repositories.txt</code>
+                </p>
+            `;
+
+            // Show repository paths (enumerate tags)
+            if (data.repository_count > 0) {
+                html += `
+                    <h6 class="text-primary mb-2">
+                        <i class="bi bi-folder"></i> Repositories (${data.repository_count}) - enumerate all tags
+                    </h6>
+                    <div class="list-group list-group-flush mb-4">
+                        ${data.repositories.map(repo => `
+                            <div class="list-group-item border-0 px-0 py-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-folder me-2 text-primary"></i>
+                                    <code class="small">${repo}</code>
+                                    <small class="text-muted ms-auto">• scans all available tags</small>
                                 </div>
-                            `).join('')}
-                        </div>
+                            </div>
+                        `).join('')}
                     </div>
+                `;
+            }
+
+            // Show single images (specific tags)
+            if (data.single_image_count > 0) {
+                html += `
+                    <h6 class="text-success mb-2">
+                        <i class="bi bi-box"></i> Specific Images (${data.single_image_count}) - single tag each
+                    </h6>
+                    <div class="list-group list-group-flush">
+                        ${data.single_images.map(image => `
+                            <div class="list-group-item border-0 px-0 py-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-box me-2 text-success"></i>
+                                    <code class="small">${image}</code>
+                                    <small class="text-muted ms-auto">• single image scan</small>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        Configuration file: <code>config/repositories.txt</code>
+                    </small>
                 </div>
             `;
+
+            html += `</div></div>`;
+            repositoriesDiv.innerHTML = html;
         }
     } catch (error) {
         console.error('Failed to load repositories:', error);

@@ -1090,29 +1090,44 @@ class MCRRegistryScanner:
 
         Returns default patterns if file missing or yields zero valid entries.
         """
-        config_path = os.path.join("config", "repositories.txt")
+        # Try multiple possible paths for the config file
+        possible_paths = [
+            os.path.join("config", "repositories.txt"),  # Current working dir
+            os.path.join("..", "config", "repositories.txt"),  # From web_ui dir
+            os.path.join(
+                os.path.dirname(__file__), "..", "config", "repositories.txt"
+            ),  # From src dir
+        ]
+
+        config_path = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                config_path = path
+                break
+
+        if not config_path:
+            self.logger.info(
+                f"No repository configuration file found at any of: {possible_paths} - using defaults"
+            )
+            return self.default_image_patterns.copy()
+
         entries: List[str] = []
         try:
-            if os.path.exists(config_path):
-                with open(config_path, "r", encoding="utf-8") as f:
-                    for raw_line in f:
-                        line = raw_line.strip()
-                        if not line or line.startswith("#"):
-                            continue
-                        entries.append(line)
-                if entries:
-                    self.logger.info(
-                        f"Loaded {len(entries)} repository/image entries from {config_path}"
-                    )
-                    return entries
-                else:
-                    # Note: use dash instead of semicolon to avoid style warning (E702 false positive)
-                    self.logger.warning(
-                        f"Configuration file {config_path} contained no valid entries - using defaults"
-                    )
-            else:
+            with open(config_path, "r", encoding="utf-8") as f:
+                for raw_line in f:
+                    line = raw_line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    entries.append(line)
+            if entries:
                 self.logger.info(
-                    f"No repository configuration file found at {config_path} - using defaults"
+                    f"Loaded {len(entries)} repository/image entries from {config_path}"
+                )
+                return entries
+            else:
+                # Note: use dash instead of semicolon to avoid style warning (E702 false positive)
+                self.logger.warning(
+                    f"Configuration file {config_path} contained no valid entries - using defaults"
                 )
         except Exception as e:
             self.logger.error(
