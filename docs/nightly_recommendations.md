@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-08-13T17:25:36.098619Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
+_Generated: 2025-08-14T03:22:17.115504Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
 
 ## Java
 
