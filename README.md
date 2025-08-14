@@ -4,7 +4,7 @@ A comprehensive tool for analyzing and recommending secure container base images
 
 ## Demo
 
-![Demo](secure-container-base-image-recommender-demo.gif)
+![Demo](docs/images/secure-container-base-image-recommender-demo.gif)
 
 *Web UI demonstration: Starting from dev container, getting image recommendations, and comparing alternatives*
 
