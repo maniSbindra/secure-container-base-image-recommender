@@ -48,7 +48,7 @@ git lfs pull
 
 You can rebuild the database from scratch (starts empty, then populated):
 ```bash
-python src/cli.py --scan --comprehensive --update-existing --max-tags 10 --database azure_linux_images.json
+python src/cli.py --scan --comprehensive --update-existing --max-tags 10 --database azure_linux_images.db
 ```
 Increase or set `--max-tags 0` to scan all tags (can be slow on large repos).
 

@@ -64,9 +64,9 @@ jobs:
       - name: Run comprehensive registry scan (all tags, update existing) (DB only)
         run: |
           # Use --scan to process all configured repositories in code (see registry_scanner.py image_patterns)
-          # Store DB in root (tracked with LFS). We skip --update-db to avoid legacy JSON export.
+          # Store DB in root (tracked with LFS). We use the SQLite database (azure_linux_images.db) which is tracked by LFS.
           # --max-tags 0 means all tags; --comprehensive enables full Trivy scan; --update-existing rescans entries
-          python src/cli.py --scan --database azure_linux_images.json --max-tags 0 --comprehensive --update-existing
+          python src/cli.py --scan --database azure_linux_images.db --max-tags 0 --comprehensive --update-existing
 
       - name: Show database stats
         run: |
@@ -81,20 +81,24 @@ jobs:
             head -n 20 docs/nightly_recommendations.md || true
           fi
 
-      - name: Commit & push updated database & recommendations (no JSON export)
+      - name: Commit & push updated database & recommendations
         if: success()
         run: |
           git config user.name 'github-actions'
           git config user.email 'github-actions@github.com'
           git add azure_linux_images.db docs/nightly_recommendations.md || true
-          if git diff --cached --quiet; then
-            echo 'No database changes to commit.'
-          else
-            git commit -m 'chore: nightly registry scan, DB update & recommendations [skip ci]'
+          # Check if there are files staged for commit (works better with LFS files)
+          if [ -n "$(git diff --cached --name-only)" ]; then
+            echo 'Database or documentation changes detected. Committing...'
+            CHANGED_FILES=$(git diff --cached --name-only | tr '\n' ' ')
+            echo "Changed files: $CHANGED_FILES"
+            git commit -m "chore: update ${CHANGED_FILES}from nightly registry scan [skip ci]"
             git push
+          else
+            echo 'No database changes to commit.'
           fi
 
-      - name: Upload database artifact (SQLite only)
+      - name: Upload database artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
