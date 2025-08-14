@@ -2,6 +2,12 @@
 
 A comprehensive tool for analyzing and recommending secure container base images from various container registries.
 
+## Demo
+
+![Demo](secure-container-base-image-recommender-demo.gif)
+
+*Web UI demonstration: Starting from dev container, getting image recommendations, and comparing alternatives*
+
 ## Architecture
 
 For a detailed overview of the system architecture, including the Web UI, SQLite database, CLI interface, and external tool integrations, see the [Architecture Documentation](docs/images/architecture.md).
