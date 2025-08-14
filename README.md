@@ -2,6 +2,8 @@
 
 A comprehensive tool for analyzing and recommending secure container base images from various container registries.
 
+⚠️ **Important**: This tool is designed for **local development and individual use only**. It is **NOT suitable for production deployments**. See the [Architecture Documentation](docs/images/architecture.md) for detailed deployment guidance.
+
 ## Demo
 
 ![Demo](docs/images/secure-container-base-image-recommender-demo.gif)
@@ -11,6 +13,25 @@ A comprehensive tool for analyzing and recommending secure container base images
 ## Architecture
 
 For a detailed overview of the system architecture, including the Web UI, SQLite database, CLI interface, and external tool integrations, see the [Architecture Documentation](docs/images/architecture.md).
+
+## Intended Use Case
+
+This tool is specifically designed as a **local development utility** for:
+
+- **Individual developers** selecting secure base images for their containerized applications
+- **Security researchers** analyzing container image vulnerabilities in development environments
+- **DevOps teams** evaluating base image options during the development phase
+- **Learning and experimentation** with container security scanning tools
+
+### Not Suitable For Production
+
+This tool should **NOT** be used for:
+- Production container image management systems
+- Enterprise-wide deployment or multi-user environments
+- Mission-critical security scanning in production pipelines
+- High-availability or high-throughput scanning operations
+
+For production use cases, consider enterprise-grade container security platforms that provide proper authentication, authorization, audit logging, and scalability features.
 
 ## Features
 
@@ -54,16 +75,20 @@ less docs/nightly_recommendations.md
 
 ## Installation
 
+This tool is designed for local development environments only. Choose one of the following installation methods:
+
 ### Prerequisites
 
-**Option 1: Use Dev Container (Recommended)**
+**Option 1: Use Dev Container (Recommended for Local Development)**
 
 If you're using VS Code, you can use the provided dev container which has all dependencies pre-installed:
 - Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 - Open the project in VS Code and select "Reopen in Container" when prompted
 - All tools (Docker, Syft, Trivy) will be automatically available
 
-**Option 2: Manual Installation**
+**Option 2: Manual Installation on Local Machine**
+
+For local development on your individual machine:
 
 1. **Docker**: Required for image analysis
    ```bash

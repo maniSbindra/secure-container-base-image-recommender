@@ -99,11 +99,26 @@ The system automatically discovers and scans images from Container Registries, p
 
 ## Deployment
 
-The system supports multiple deployment options:
-- **Development Container**: Pre-configured VS Code dev container with all dependencies
-- **Local Installation**: Manual setup with virtual environments
-- **Production**: Docker containerization with WSGI servers
+⚠️ **Important**: This tool is designed for local development and individual use only. It is **NOT suitable for production deployments**.
 
-This architecture provides a robust, scalable platform for container security analysis, supporting both technical users through the CLI and business users through the intuitive web interface.
+The system supports the following local deployment options:
+- **Development Container (Recommended)**: Pre-configured VS Code dev container with all dependencies
+- **Local Installation**: Manual setup with virtual environments on individual machines
 
-This architecture provides a robust, scalable platform for container security analysis, supporting both technical users through the CLI and business users through the intuitive web interface.
+### Why Local Use Only?
+
+This tool is intentionally designed as a development utility for:
+- Individual developers selecting base images for their projects
+- Security research and analysis in development environments
+- Learning and experimentation with container security tools
+
+It is **not recommended for production use** due to:
+- SQLite database limitations for concurrent access
+- Lack of enterprise security features (authentication, authorization, audit logging)
+- No horizontal scaling capabilities
+- Resource-intensive scanning operations not optimized for production workloads
+- Simple Flask development server not suitable for production traffic
+
+For production container image management, consider enterprise-grade solutions with proper security, scalability, and monitoring capabilities.
+
+This architecture provides a robust platform for local container security analysis, supporting both technical users through the CLI and business users through the intuitive web interface in development environments.
