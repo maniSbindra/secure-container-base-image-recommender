@@ -12,6 +12,8 @@ Steps performed by the scheduled GitHub Actions job:
 
 Only the SQLite database is persisted; the legacy JSON export is intentionally skipped to avoid bloat and redundancy.
 
+**Important:** Image sizes are collected using `docker images` on Linux amd64 (GitHub runners) and may differ significantly on other platforms. When scanning locally on macOS, Windows, or ARM systems, size values will reflect the local platform.
+
 ## Why Git LFS?
 
 Daily binary diffs would quickly inflate repository size. Git LFS stores lightweight pointers in Git history and fetches the binary object on demand, keeping clones fast.

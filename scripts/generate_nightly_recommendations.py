@@ -75,6 +75,10 @@ def main():
             "The tables below list the top images per language prioritized by minimal critical/high vulnerabilities, then total vulnerabilities, then image size."
         )
         lines.append("")
+        lines.append(
+            "**Note:** Image sizes are based on Linux amd64 platform as reported by `docker images` on GitHub runners. Actual sizes may vary significantly on other platforms (macOS, Windows, etc.)."
+        )
+        lines.append("")
 
         if not languages:
             lines.append("No languages detected in the current database.")
