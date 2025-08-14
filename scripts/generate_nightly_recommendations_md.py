@@ -87,6 +87,9 @@ def main() -> int:
             f.write(
                 f"_Generated: {datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')} from {DB_PATH.name}. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top {TOP_N} per language._\n\n"
             )
+            f.write(
+                "**Note:** Image sizes are based on Linux amd64 platform as reported by `docker images` on GitHub runners. Actual sizes may vary significantly on other platforms (macOS, Windows, etc.).\n\n"
+            )
             for language in languages:
                 top_images = get_top_images_for_language(conn, language, TOP_N)
                 if not top_images:

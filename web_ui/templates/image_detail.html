@@ -134,7 +134,14 @@
                 <table class="table table-borderless">
                     <tr>
                         <td><strong>Size:</strong></td>
-                        <td>{{ image.size_bytes|formatBytes if image.size_bytes else 'Unknown' }}</td>
+                        <td>
+                            {{ image.size_bytes|formatBytes if image.size_bytes else 'Unknown' }}
+                            {% if image.size_bytes %}
+                            <small class="text-muted d-block">
+                                <i class="bi bi-info-circle"></i> Platform-specific (varies on macOS, Windows, ARM)
+                            </small>
+                            {% endif %}
+                        </td>
                     </tr>
                     <tr>
                         <td><strong>Layers:</strong></td>
