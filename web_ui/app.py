@@ -546,7 +546,7 @@ def api_get_image_packages(image_id):
 
 @app.route("/api/repositories")
 def api_get_repositories():
-    """API endpoint for getting the list of MCR repositories being scanned"""
+    """API endpoint for getting the list of repositories and images being scanned from config/repositories.txt"""
     try:
         # Create a temporary scanner instance to get the repository list
         scanner = MCRRegistryScanner(
@@ -557,10 +557,33 @@ def api_get_repositories():
             max_tags_per_repo=5,
         )
 
-        repositories = scanner.image_patterns
+        # Categorize the entries from repositories.txt
+        repository_paths = []  # Repositories that enumerate tags
+        single_images = []  # Full image references with tags
+
+        for entry in scanner.image_patterns:
+            # Determine if entry is a single image (has a tag component)
+            is_single_image = ":" in entry.split("@")[0]  # ignore digest form for now
+
+            if is_single_image:
+                single_images.append(entry)
+            else:
+                # Format repository path for display
+                if not entry.startswith("mcr.microsoft.com/"):
+                    display_entry = f"mcr.microsoft.com/{entry}"
+                else:
+                    display_entry = entry
+                repository_paths.append(display_entry)
 
         return jsonify(
-            {"success": True, "repositories": repositories, "count": len(repositories)}
+            {
+                "success": True,
+                "repositories": repository_paths,
+                "single_images": single_images,
+                "repository_count": len(repository_paths),
+                "single_image_count": len(single_images),
+                "total_count": len(scanner.image_patterns),
+            }
         )
 
     except Exception as e:
