@@ -27,11 +27,23 @@ azurelinux/distroless/base
 azurelinux/distroless/python
 azurelinux/distroless/node
 azurelinux/distroless/java
+
+# Docker hub
 docker.io/library/python:3.12-slim
-docker.io/library/python:3-
+docker.io/library/python:3-slim
 docker.io/library/node:20.0-slim
+
+# Microsoft .NET images
+mcr.microsoft.com/dotnet/aspnet:8.0
+mcr.microsoft.com/dotnet/runtime:8.0
+mcr.microsoft.com/dotnet/sdk:8.0
 
 # Example additional entries (uncomment to use):
 # mcr.microsoft.com/azurelinux/base/core
 # docker.io/library/python:3.12-slim
 # ghcr.io/someorg/custom-runtime:1.0.0
+
+# MCR java images
+mcr.microsoft.com/openjdk/jdk:21-azurelinux
+mcr.microsoft.com/openjdk/jdk:21-distroless
+mcr.microsoft.com/openjdk/jdk:21-ubuntu
