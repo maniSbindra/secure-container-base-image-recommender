@@ -30,7 +30,13 @@ class ImageAnalyzer:
             "go": [r"^golang?$", r"^go$"],
             "ruby": [r"^ruby$", r"^ruby\d+.*"],
             "php": [r"^php$", r"^php\d+.*"],
-            "dotnet": [r"^dotnet.*", r"^aspnetcore.*"],
+            "dotnet": [
+                r"^dotnet.*",
+                r"^aspnetcore.*",
+                r"^netstandard.*",
+                r"^microsoft\.netcore\.app.*",
+                r"^microsoft\.aspnetcore\.app.*",
+            ],
             "rust": [r"^rust$", r"^cargo$"],
             "perl": [r"^perl$"],
             "lua": [r"^lua$", r"^lua\d+.*"],
@@ -78,7 +84,7 @@ class ImageAnalyzer:
             "go": ["go", "version"],
             "ruby": ["ruby", "--version"],
             "php": ["php", "--version"],
-            "dotnet": ["dotnet", "--version"],
+            "dotnet": ["dotnet", "--info"],
             "perl": ["perl", "--version"],
             "lua": ["lua", "-v"],
         }
@@ -212,8 +218,25 @@ class ImageAnalyzer:
                                     f"      🟢 Extracted Node.js major.minor: {runtime_info['major_minor']}"
                                 )
 
+                            # Special handling for .NET versions
+                            elif lang == "dotnet":
+                                runtime_info["major_minor"] = (
+                                    self.extract_dotnet_version(package_name, version)
+                                )
+                                print(
+                                    f"      🔷 Extracted .NET major.minor: {runtime_info['major_minor']}"
+                                )
+
                             found_languages[lang] = runtime_info
                         break
+
+        # Check for .NET based on image name patterns (fallback for Microsoft images)
+        dotnet_from_image = self.detect_dotnet_from_image_name()
+        if dotnet_from_image and "dotnet" not in found_languages:
+            found_languages["dotnet"] = dotnet_from_image
+            print(
+                f"    🔍 Found .NET runtime from image name: {dotnet_from_image['version']} (priority: {dotnet_from_image['priority']})"
+            )
 
         # Convert to list and remove priority field
         result_languages = []
@@ -223,6 +246,59 @@ class ImageAnalyzer:
 
         print(f"  ✅ Detected {len(result_languages)} language runtimes from packages")
         return result_languages
+
+    def extract_dotnet_version(self, package_name: str, full_version: str) -> str:
+        """Extract major.minor version for .NET"""
+
+        # Try to extract from the image tag if this is from a container image
+        if hasattr(self, "image_name") and ":" in self.image_name:
+            image_tag = self.image_name.split(":")[-1]
+            # Look for version pattern in tag like "8.0" or "8.0.19"
+            version_match = re.search(r"(\d+\.\d+)", image_tag)
+            if version_match:
+                return version_match.group(1)
+
+        # Extract from version string like 8.0.19
+        if full_version:
+            match = re.search(r"^(\d+\.\d+)", full_version)
+            if match:
+                return match.group(1)
+
+        # Fallback to full version
+        return full_version
+
+    def detect_dotnet_from_image_name(self) -> Optional[Dict]:
+        """Detect .NET runtime from Microsoft image name patterns"""
+
+        # Check if this is a Microsoft .NET image
+        dotnet_image_patterns = [
+            r"mcr\.microsoft\.com/dotnet/(?:aspnet|runtime):(\d+\.\d+)",
+            r"mcr\.microsoft\.com/dotnet/(?:aspnet|runtime):(\d+\.\d+\.\d+)",
+            r"microsoft/dotnet:(\d+\.\d+)-(?:aspnetcore-)?runtime",
+            r"microsoft/aspnetcore:(\d+\.\d+)",
+        ]
+
+        for pattern in dotnet_image_patterns:
+            match = re.search(pattern, self.image_name.lower())
+            if match:
+                version = match.group(1)
+                # If we only have major.minor, assume latest patch version
+                if version.count(".") == 1:
+                    version += ".0"
+
+                return {
+                    "language": "dotnet",
+                    "version": version,
+                    "package_name": "Microsoft .NET Runtime",
+                    "package_type": "container_runtime",
+                    "architecture": None,
+                    "vendor": "Microsoft",
+                    "source": "image_name_detection",
+                    "priority": 90,  # High priority for known Microsoft images
+                    "major_minor": ".".join(version.split(".")[:2]),
+                }
+
+        return None
 
     def calculate_package_priority(
         self, package_name: str, language: str, package_type: str
@@ -381,7 +457,7 @@ class ImageAnalyzer:
             "go": r"go version go(\d+\.\d+\.\d+)",
             "ruby": r"ruby (\d+\.\d+\.\d+)",
             "php": r"PHP (\d+\.\d+\.\d+)",
-            "dotnet": r"(\d+\.\d+\.\d+)",
+            "dotnet": r"Version:\s*(\d+\.\d+\.\d+)",
             "perl": r"v(\d+\.\d+\.\d+)",
             "lua": r"Lua (\d+\.\d+\.\d+)",
         }
@@ -508,6 +584,12 @@ class ImageAnalyzer:
                         if version_match:
                             syft_info["major_minor"] = f"{version_match.group(1)}.0"
 
+                # For .NET, update major_minor based on verified version
+                elif key == "dotnet":
+                    version_match = re.search(r"^(\d+\.\d+)", runtime["version"])
+                    if version_match:
+                        syft_info["major_minor"] = version_match.group(1)
+
                 language_map[key] = syft_info
             else:
                 # Add new verified runtime
@@ -530,6 +612,12 @@ class ImageAnalyzer:
                         version_match = re.search(r"^(\d+)", runtime["version"])
                         if version_match:
                             new_runtime["major_minor"] = f"{version_match.group(1)}.0"
+
+                # For .NET, add major_minor
+                elif key == "dotnet":
+                    version_match = re.search(r"^(\d+\.\d+)", runtime["version"])
+                    if version_match:
+                        new_runtime["major_minor"] = version_match.group(1)
 
                 language_map[key] = new_runtime
 
@@ -607,6 +695,28 @@ class ImageAnalyzer:
                 )
                 recommendations["use_cases"].extend(
                     ["Enterprise applications", "Microservices", "Big data processing"]
+                )
+
+            elif lang == "dotnet":
+                major_minor = lang_info.get("major_minor", version)
+                recommendations["best_for"].extend(
+                    [
+                        f"dotnet-{major_minor}",
+                        "aspnet-core",
+                        "enterprise-apps",
+                        "microservices",
+                    ]
+                )
+                recommendations["compatible_frameworks"].extend(
+                    ["ASP.NET Core", "Entity Framework", "Blazor", "Web API"]
+                )
+                recommendations["use_cases"].extend(
+                    [
+                        "Web applications",
+                        "API services",
+                        "Enterprise applications",
+                        "Microservices",
+                    ]
                 )
 
         # Add capability-based recommendations
