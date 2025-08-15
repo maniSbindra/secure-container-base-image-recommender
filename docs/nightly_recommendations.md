@@ -1,6 +1,37 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-08-15T03:24:21.915422Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
+_Generated: 2025-08-15T05:23:27.773167Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
+
+## Scanned Repositories and Images
+
+This report includes analysis from **15 configured sources**:
+
+### Repositories (6 total)
+
+The following repositories were scanned with multiple tags enumerated:
+
+- `mcr.microsoft.com/azurelinux/base/nodejs`
+- `mcr.microsoft.com/azurelinux/base/python`
+- `mcr.microsoft.com/azurelinux/distroless/base`
+- `mcr.microsoft.com/azurelinux/distroless/java`
+- `mcr.microsoft.com/azurelinux/distroless/node`
+- `mcr.microsoft.com/azurelinux/distroless/python`
+
+### Single Images (9 total)
+
+The following specific image tags were scanned:
+
+- `docker.io/library/node:20.0-slim`
+- `docker.io/library/python:3-slim`
+- `docker.io/library/python:3.12-slim`
+- `mcr.microsoft.com/dotnet/aspnet:8.0`
+- `mcr.microsoft.com/dotnet/runtime:8.0`
+- `mcr.microsoft.com/dotnet/sdk:8.0`
+- `mcr.microsoft.com/openjdk/jdk:21-azurelinux`
+- `mcr.microsoft.com/openjdk/jdk:21-distroless`
+- `mcr.microsoft.com/openjdk/jdk:21-ubuntu`
+
+_Note: Repository scans may include multiple tags per repository, while single images represent specific tagged images._
 
 **Note:** Image sizes are based on Linux amd64 platform as reported by `docker images` on GitHub runners. Actual sizes may vary significantly on other platforms (macOS, Windows, etc.).
 
