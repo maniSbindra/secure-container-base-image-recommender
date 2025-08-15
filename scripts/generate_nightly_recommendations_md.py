@@ -9,9 +9,20 @@ Output written to docs/nightly_recommendations.md
 """
 from __future__ import annotations
 
+import os
 import sqlite3
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+# Add src directory to path for imports
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
+
+try:
+    from registry_scanner import MCRRegistryScanner
+except ImportError:
+    # Fallback if import fails
+    MCRRegistryScanner = None
 
 DB_PATH = Path("azure_linux_images.db")
 OUTPUT_PATH = Path("docs/nightly_recommendations.md")
@@ -29,6 +40,54 @@ def human_size(num_bytes: int | None) -> str:
         return f"{mb:.1f} MB"
     gb = mb / 1024
     return f"{gb:.2f} GB"
+
+
+def get_scanned_repositories_info() -> dict:
+    """Get information about the repositories and images that were scanned.
+
+    Returns a dict with repository and single image information, or empty dict if scanner unavailable.
+    """
+    if MCRRegistryScanner is None:
+        return {}
+
+    try:
+        # Create a temporary scanner instance to get the repository list
+        scanner = MCRRegistryScanner(
+            db_path=str(DB_PATH),
+            comprehensive_scan=False,
+            cleanup_images=True,
+            update_existing=False,
+            max_tags_per_repo=5,
+        )
+
+        # Categorize the entries from repositories.txt
+        repository_paths = []  # Repositories that enumerate tags
+        single_images = []  # Full image references with tags
+
+        for entry in scanner.image_patterns:
+            # Determine if entry is a single image (has a tag component)
+            is_single_image = ":" in entry.split("@")[0]  # ignore digest form for now
+
+            if is_single_image:
+                single_images.append(entry)
+            else:
+                # Format repository path for display
+                if not entry.startswith("mcr.microsoft.com/"):
+                    display_entry = f"mcr.microsoft.com/{entry}"
+                else:
+                    display_entry = entry
+                repository_paths.append(display_entry)
+
+        return {
+            "repositories": repository_paths,
+            "single_images": single_images,
+            "repository_count": len(repository_paths),
+            "single_image_count": len(single_images),
+            "total_count": len(scanner.image_patterns),
+        }
+    except Exception:
+        # If scanner fails, return empty info
+        return {}
 
 
 def get_languages(conn: sqlite3.Connection) -> list[str]:
@@ -75,6 +134,10 @@ def main() -> int:
     if not DB_PATH.exists():
         print(f"Database not found at {DB_PATH}, aborting markdown generation.")
         return 0
+
+    # Get repository information
+    repo_info = get_scanned_repositories_info()
+
     conn = sqlite3.connect(str(DB_PATH))
     try:
         languages = get_languages(conn)
@@ -87,6 +150,43 @@ def main() -> int:
             f.write(
                 f"_Generated: {datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')} from {DB_PATH.name}. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top {TOP_N} per language._\n\n"
             )
+
+            # Add repository information section
+            if repo_info:
+                f.write("## Scanned Repositories and Images\n\n")
+                f.write(
+                    f"This report includes analysis from **{repo_info.get('total_count', 0)} configured sources**:\n\n"
+                )
+
+                if repo_info.get("repositories"):
+                    f.write(
+                        f"### Repositories ({repo_info.get('repository_count', 0)} total)\n\n"
+                    )
+                    f.write(
+                        "The following repositories were scanned with multiple tags enumerated:\n\n"
+                    )
+                    for repo in sorted(repo_info["repositories"]):
+                        f.write(f"- `{repo}`\n")
+                    f.write("\n")
+
+                if repo_info.get("single_images"):
+                    f.write(
+                        f"### Single Images ({repo_info.get('single_image_count', 0)} total)\n\n"
+                    )
+                    f.write("The following specific image tags were scanned:\n\n")
+                    for image in sorted(repo_info["single_images"]):
+                        f.write(f"- `{image}`\n")
+                    f.write("\n")
+
+                f.write(
+                    "_Note: Repository scans may include multiple tags per repository, while single images represent specific tagged images._\n\n"
+                )
+            else:
+                f.write("## Scan Configuration\n\n")
+                f.write(
+                    "Repository and image scan details are configured in `config/repositories.txt`.\n\n"
+                )
+
             f.write(
                 "**Note:** Image sizes are based on Linux amd64 platform as reported by `docker images` on GitHub runners. Actual sizes may vary significantly on other platforms (macOS, Windows, etc.).\n\n"
             )
