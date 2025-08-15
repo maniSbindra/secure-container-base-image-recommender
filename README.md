@@ -51,6 +51,38 @@ For production use cases, consider enterprise-grade container security platforms
 - Web UI Guide & API endpoints: [`web_ui/README.md`](web_ui/README.md)
 - Architecture Overview: [`docs/images/architecture.md`](docs/images/architecture.md)
 
+
+## Pre-scanned Images
+
+Following images are pre-scanned and added by default to the SQLlite database. These pre-scanned images also serve as an input to the [nightly recommendations](#language-specific-recommended-base-images-nightly). To configure which images are pre-scanned please look at [configuring which repositories & images are scanned](#configuring-which-repositories--images-are-scanned).
+
+### Repositories (6 total)
+
+The following repositories are configured to be scanned with multiple tags enumerated:
+
+- `mcr.microsoft.com/azurelinux/base/nodejs`
+- `mcr.microsoft.com/azurelinux/base/python`
+- `mcr.microsoft.com/azurelinux/distroless/base`
+- `mcr.microsoft.com/azurelinux/distroless/java`
+- `mcr.microsoft.com/azurelinux/distroless/node`
+- `mcr.microsoft.com/azurelinux/distroless/python`
+
+### Single Images (9 total)
+
+The following specific image tags are configured to be scanned:
+
+- `docker.io/library/node:20.0-slim`
+- `docker.io/library/python:3-slim`
+- `docker.io/library/python:3.12-slim`
+- `mcr.microsoft.com/dotnet/aspnet:8.0`
+- `mcr.microsoft.com/dotnet/runtime:8.0`
+- `mcr.microsoft.com/dotnet/sdk:8.0`
+- `mcr.microsoft.com/openjdk/jdk:21-azurelinux`
+- `mcr.microsoft.com/openjdk/jdk:21-distroless`
+- `mcr.microsoft.com/openjdk/jdk:21-ubuntu`
+
+_Note: Users can scan other images via the web UI or CLI
+
 ## Language Specific Recommended Base Images (Nightly)
 
 Nightly scan workflow generates [`docs/nightly_recommendations.md`](docs/nightly_recommendations.md) with the current top images per detected language, ranked by:
