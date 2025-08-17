@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-08-16T03:17:45.936129Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
+_Generated: 2025-08-17T03:28:24.291366Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
 
 ## Scanned Repositories and Images
 
@@ -57,7 +57,7 @@ _Note: Repository scans may include multiple tags per repository, while single i
 |------|-------|---------|------|------|-------|------|
 | 1 | `mcr.microsoft.com/azurelinux/base/nodejs:20` | 20.14.0 | 0 | 0 | 0 | 146.0 MB |
 | 2 | `mcr.microsoft.com/azurelinux/base/nodejs:20.14` | 20.14.0 | 0 | 0 | 0 | 146.0 MB |
-| 3 | `docker.io/library/node:20.0-slim` | 20.0.0 | 6 | 39 | 216 | 250.0 MB |
+| 3 | `docker.io/library/node:20.0-slim` | 20.0.0 | 6 | 40 | 216 | 250.0 MB |
 
 ## Perl
 
