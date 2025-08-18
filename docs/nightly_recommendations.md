@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-08-17T03:28:24.291366Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
+_Generated: 2025-08-18T03:32:34.395306Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
 
 ## Scanned Repositories and Images
 
@@ -39,9 +39,9 @@ _Note: Repository scans may include multiple tags per repository, while single i
 
 | Rank | Image | Version | Crit | High | Total | Size |
 |------|-------|---------|------|------|-------|------|
-| 1 | `mcr.microsoft.com/dotnet/runtime:8.0` | 8.0.19 | 1 | 7 | 84 | 193.0 MB |
-| 2 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 8.0.19 | 1 | 7 | 84 | 218.0 MB |
-| 3 | `mcr.microsoft.com/dotnet/sdk:8.0` | 8.0.413 | 1 | 23 | 151 | 847.0 MB |
+| 1 | `mcr.microsoft.com/dotnet/runtime:8.0` | 8.0.19 | 1 | 7 | 83 | 193.0 MB |
+| 2 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 8.0.19 | 1 | 7 | 83 | 218.0 MB |
+| 3 | `mcr.microsoft.com/dotnet/sdk:8.0` | 8.0.413 | 1 | 23 | 150 | 847.0 MB |
 
 ## Java
 
@@ -57,18 +57,18 @@ _Note: Repository scans may include multiple tags per repository, while single i
 |------|-------|---------|------|------|-------|------|
 | 1 | `mcr.microsoft.com/azurelinux/base/nodejs:20` | 20.14.0 | 0 | 0 | 0 | 146.0 MB |
 | 2 | `mcr.microsoft.com/azurelinux/base/nodejs:20.14` | 20.14.0 | 0 | 0 | 0 | 146.0 MB |
-| 3 | `docker.io/library/node:20.0-slim` | 20.0.0 | 6 | 40 | 216 | 250.0 MB |
+| 3 | `docker.io/library/node:20.0-slim` | 20.0.0 | 6 | 40 | 215 | 250.0 MB |
 
 ## Perl
 
 | Rank | Image | Version | Crit | High | Total | Size |
 |------|-------|---------|------|------|-------|------|
-| 1 | `docker.io/library/python:3-slim` | 5.40.1 | 0 | 0 | 52 | 117.0 MB |
-| 2 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 0 | 52 | 119.0 MB |
+| 1 | `docker.io/library/python:3-slim` | 5.40.1 | 0 | 0 | 51 | 117.0 MB |
+| 2 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 0 | 51 | 119.0 MB |
 | 3 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 5.34.0 | 0 | 0 | 55 | 444.0 MB |
-| 4 | `mcr.microsoft.com/dotnet/runtime:8.0` | 5.36.0 | 1 | 7 | 84 | 193.0 MB |
-| 5 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 5.36.0 | 1 | 7 | 84 | 218.0 MB |
-| 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 23 | 151 | 847.0 MB |
+| 4 | `mcr.microsoft.com/dotnet/runtime:8.0` | 5.36.0 | 1 | 7 | 83 | 193.0 MB |
+| 5 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 5.36.0 | 1 | 7 | 83 | 218.0 MB |
+| 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 23 | 150 | 847.0 MB |
 
 ## Python
 
