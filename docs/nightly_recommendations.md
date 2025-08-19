@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-08-18T03:32:34.395306Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
+_Generated: 2025-08-19T03:13:03.251674Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
 
 ## Scanned Repositories and Images
 
