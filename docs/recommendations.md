@@ -8,7 +8,7 @@ Nightly recommendations are published to `docs/nightly_recommendations.md` to hi
 3. Lowest total vulnerabilities
 4. Smallest image size
 
-Tie-breaking proceeds sequentially through the criteria. The top N (default 3) images per language are reported.
+Tie-breaking proceeds sequentially through the criteria. The top N (default 10) images per language are reported.
 
 **Note:** Image sizes are platform-specific and reflect the Linux amd64 platform (GitHub runners) for the default database. Actual sizes may vary significantly on other platforms (macOS, Windows, ARM, etc.).
 
