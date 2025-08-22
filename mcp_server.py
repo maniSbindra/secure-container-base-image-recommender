@@ -37,7 +37,9 @@ class MCPServer:
     def _initialize_engine(self):
         """Initialize the recommendation engine"""
         try:
-            self.recommendation_engine = RecommendationEngine(database_path=self.db_path)
+            self.recommendation_engine = RecommendationEngine(
+                database_path=self.db_path
+            )
             logger.info(f"MCP Server initialized with database: {self.db_path}")
         except Exception as e:
             logger.error(f"Failed to initialize recommendation engine: {e}")
@@ -63,13 +65,17 @@ class MCPServer:
             elif method == "resources/read":
                 return await self._handle_resources_read(request_id, params)
             else:
-                return self._error_response(request_id, -32601, f"Method not found: {method}")
+                return self._error_response(
+                    request_id, -32601, f"Method not found: {method}"
+                )
 
         except Exception as e:
             logger.error(f"Error handling request: {e}")
             return self._error_response(request.get("id"), -32603, str(e))
 
-    async def _handle_initialize(self, request_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_initialize(
+        self, request_id: str, params: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Handle initialization request"""
         return {
             "jsonrpc": "2.0",
@@ -77,19 +83,14 @@ class MCPServer:
             "result": {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {
-                    "tools": {
-                        "listChanged": True
-                    },
-                    "resources": {
-                        "subscribe": True,
-                        "listChanged": True
-                    }
+                    "tools": {"listChanged": True},
+                    "resources": {"subscribe": True, "listChanged": True},
                 },
                 "serverInfo": {
                     "name": "container-image-recommender",
-                    "version": "1.0.0"
-                }
-            }
+                    "version": "1.0.0",
+                },
+            },
         }
 
     async def _handle_tools_list(self, request_id: str) -> Dict[str, Any]:
@@ -103,41 +104,41 @@ class MCPServer:
                     "properties": {
                         "language": {
                             "type": "string",
-                            "description": "Programming language (e.g., python, nodejs, java, go, dotnet)"
+                            "description": "Programming language (e.g., python, nodejs, java, go, dotnet)",
                         },
                         "version": {
                             "type": "string",
                             "description": "Language version (e.g., 3.12, 18, 17)",
-                            "default": None
+                            "default": None,
                         },
                         "packages": {
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "Required packages",
-                            "default": []
+                            "default": [],
                         },
                         "size_preference": {
                             "type": "string",
                             "enum": ["minimal", "balanced", "full"],
                             "description": "Size preference for the image",
-                            "default": "balanced"
+                            "default": "balanced",
                         },
                         "security_level": {
                             "type": "string",
                             "enum": ["standard", "high", "maximum"],
                             "description": "Security level requirement",
-                            "default": "high"
+                            "default": "high",
                         },
                         "limit": {
                             "type": "integer",
                             "description": "Maximum number of recommendations to return",
                             "default": 5,
                             "minimum": 1,
-                            "maximum": 20
-                        }
+                            "maximum": 20,
+                        },
                     },
-                    "required": ["language"]
-                }
+                    "required": ["language"],
+                },
             },
             {
                 "name": "analyze_image",
@@ -147,18 +148,18 @@ class MCPServer:
                     "properties": {
                         "image_name": {
                             "type": "string",
-                            "description": "Full container image name (e.g., docker.io/library/python:3.12-slim)"
+                            "description": "Full container image name (e.g., docker.io/library/python:3.12-slim)",
                         },
                         "limit": {
                             "type": "integer",
                             "description": "Maximum number of alternative recommendations",
                             "default": 5,
                             "minimum": 1,
-                            "maximum": 20
-                        }
+                            "maximum": 20,
+                        },
                     },
-                    "required": ["image_name"]
-                }
+                    "required": ["image_name"],
+                },
             },
             {
                 "name": "search_images",
@@ -168,38 +169,36 @@ class MCPServer:
                     "properties": {
                         "language": {
                             "type": "string",
-                            "description": "Programming language filter"
+                            "description": "Programming language filter",
                         },
                         "security_filter": {
                             "type": "string",
                             "enum": ["secure", "safe", "vulnerable", "all"],
                             "description": "Security level filter",
-                            "default": "all"
+                            "default": "all",
                         },
                         "max_vulnerabilities": {
                             "type": "integer",
                             "description": "Maximum number of vulnerabilities allowed",
-                            "minimum": 0
+                            "minimum": 0,
                         },
                         "limit": {
                             "type": "integer",
                             "description": "Maximum number of results",
                             "default": 10,
                             "minimum": 1,
-                            "maximum": 50
-                        }
-                    }
-                }
-            }
+                            "maximum": 50,
+                        },
+                    },
+                },
+            },
         ]
 
-        return {
-            "jsonrpc": "2.0",
-            "id": request_id,
-            "result": {"tools": tools}
-        }
+        return {"jsonrpc": "2.0", "id": request_id, "result": {"tools": tools}}
 
-    async def _handle_tools_call(self, request_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_tools_call(
+        self, request_id: str, params: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Handle tool call request"""
         tool_name = params.get("name")
         arguments = params.get("arguments", {})
@@ -212,24 +211,23 @@ class MCPServer:
             elif tool_name == "search_images":
                 result = await self._search_images(arguments)
             else:
-                return self._error_response(request_id, -32602, f"Unknown tool: {tool_name}")
+                return self._error_response(
+                    request_id, -32602, f"Unknown tool: {tool_name}"
+                )
 
             return {
                 "jsonrpc": "2.0",
                 "id": request_id,
                 "result": {
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": json.dumps(result, indent=2)
-                        }
-                    ]
-                }
+                    "content": [{"type": "text", "text": json.dumps(result, indent=2)}]
+                },
             }
 
         except Exception as e:
             logger.error(f"Error executing tool {tool_name}: {e}")
-            return self._error_response(request_id, -32603, f"Tool execution failed: {str(e)}")
+            return self._error_response(
+                request_id, -32603, f"Tool execution failed: {str(e)}"
+            )
 
     async def _recommend_images(self, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """Get image recommendations based on requirements"""
@@ -246,12 +244,12 @@ class MCPServer:
             version=version,
             packages=packages,
             size_preference=size_preference,
-            security_level=security_level
+            security_level=security_level,
         )
 
         # Get recommendations
         recommendations = self.recommendation_engine.recommend(requirement)
-        
+
         # Limit results
         recommendations = recommendations[:limit]
 
@@ -262,40 +260,50 @@ class MCPServer:
                 "version": version,
                 "packages": packages,
                 "size_preference": size_preference,
-                "security_level": security_level
+                "security_level": security_level,
             },
-            "recommendations": []
+            "recommendations": [],
         }
 
         for rec in recommendations:
             # Extract vulnerability data from analysis_data
             vulnerabilities = rec.analysis_data.get("vulnerabilities", {})
-            size_mb = rec.analysis_data.get("manifest", {}).get("size", 0) / (1024 * 1024)
-            detected_languages = [lang.get("language") for lang in rec.analysis_data.get("languages", [])]
+            size_mb = rec.analysis_data.get("manifest", {}).get("size", 0) / (
+                1024 * 1024
+            )
+            detected_languages = [
+                lang.get("language") for lang in rec.analysis_data.get("languages", [])
+            ]
             packages = []
             if "packages" in rec.analysis_data:
-                packages = [pkg.get("name", "") for pkg in rec.analysis_data.get("packages", [])]
+                packages = [
+                    pkg.get("name", "") for pkg in rec.analysis_data.get("packages", [])
+                ]
 
-            result["recommendations"].append({
-                "image_name": rec.image_name,
-                "score": rec.score,
-                "security_score": rec.security_score,
-                "package_compatibility": rec.package_compatibility,
-                "size_score": rec.size_score,
-                "language_match": rec.language_match,
-                "version_match": rec.version_match,
-                "reasoning": rec.reasoning,
-                "vulnerabilities": {
-                    "total": vulnerabilities.get("total", 0),
-                    "critical": vulnerabilities.get("critical", 0),
-                    "high": vulnerabilities.get("high", 0),
-                    "medium": vulnerabilities.get("medium", 0),
-                    "low": vulnerabilities.get("low", 0)
-                },
-                "size_mb": round(size_mb, 1),
-                "detected_languages": detected_languages,
-                "packages": packages[:10] if packages else []  # Limit packages for readability
-            })
+            result["recommendations"].append(
+                {
+                    "image_name": rec.image_name,
+                    "score": rec.score,
+                    "security_score": rec.security_score,
+                    "package_compatibility": rec.package_compatibility,
+                    "size_score": rec.size_score,
+                    "language_match": rec.language_match,
+                    "version_match": rec.version_match,
+                    "reasoning": rec.reasoning,
+                    "vulnerabilities": {
+                        "total": vulnerabilities.get("total", 0),
+                        "critical": vulnerabilities.get("critical", 0),
+                        "high": vulnerabilities.get("high", 0),
+                        "medium": vulnerabilities.get("medium", 0),
+                        "low": vulnerabilities.get("low", 0),
+                    },
+                    "size_mb": round(size_mb, 1),
+                    "detected_languages": detected_languages,
+                    "packages": (
+                        packages[:10] if packages else []
+                    ),  # Limit packages for readability
+                }
+            )
 
         return result
 
@@ -306,21 +314,18 @@ class MCPServer:
 
         # For now, we'll extract requirements from the image name and get recommendations
         # In a full implementation, this would actually analyze the image
-        
+
         # Simple extraction of language from image name
         language = self._extract_language_from_image(image_name)
         if not language:
             return {
                 "error": "Could not determine language from image name",
                 "image_name": image_name,
-                "suggestions": "Please provide language explicitly using recommend_images tool"
+                "suggestions": "Please provide language explicitly using recommend_images tool",
             }
 
         # Create a requirement based on detected language
-        requirement = UserRequirement(
-            language=language,
-            security_level="high"
-        )
+        requirement = UserRequirement(language=language, security_level="high")
 
         recommendations = self.recommendation_engine.recommend(requirement)
         recommendations = recommendations[:limit]
@@ -333,11 +338,16 @@ class MCPServer:
                     "image_name": rec.image_name,
                     "score": rec.score,
                     "reasoning": rec.reasoning,
-                    "security_improvement": "Lower vulnerability count" if rec.analysis_data.get("vulnerabilities", {}).get("total", 0) < 50 else "Similar security profile",
-                    "vulnerabilities": rec.analysis_data.get("vulnerabilities", {})
+                    "security_improvement": (
+                        "Lower vulnerability count"
+                        if rec.analysis_data.get("vulnerabilities", {}).get("total", 0)
+                        < 50
+                        else "Similar security profile"
+                    ),
+                    "vulnerabilities": rec.analysis_data.get("vulnerabilities", {}),
                 }
                 for rec in recommendations
-            ]
+            ],
         }
 
     async def _search_images(self, arguments: Dict[str, Any]) -> Dict[str, Any]:
@@ -363,8 +373,7 @@ class MCPServer:
             # Use the query_images_by_language method if language is specified
             if language:
                 images = db.query_images_by_language(
-                    language=language,
-                    max_vulnerabilities=max_vulnerabilities
+                    language=language, max_vulnerabilities=max_vulnerabilities
                 )
             else:
                 # For no language filter, get all images and filter manually
@@ -376,15 +385,19 @@ class MCPServer:
                     GROUP BY i.id
                 """
                 if max_vulnerabilities is not None:
-                    all_images_query += f" HAVING i.total_vulnerabilities <= {max_vulnerabilities}"
-                
+                    all_images_query += (
+                        f" HAVING i.total_vulnerabilities <= {max_vulnerabilities}"
+                    )
+
                 cursor = db.conn.cursor()
                 cursor.execute(all_images_query)
                 images = [dict(row) for row in cursor.fetchall()]
 
             # Filter for vulnerable images if requested
             if security_filter == "vulnerable" and max_vulnerabilities is None:
-                images = [img for img in images if img.get("total_vulnerabilities", 0) > 20]
+                images = [
+                    img for img in images if img.get("total_vulnerabilities", 0) > 20
+                ]
 
             # Limit results
             images = images[:limit]
@@ -393,23 +406,28 @@ class MCPServer:
                 "search_criteria": {
                     "language": language,
                     "security_filter": security_filter,
-                    "max_vulnerabilities": max_vulnerabilities
+                    "max_vulnerabilities": max_vulnerabilities,
                 },
                 "results": [
                     {
                         "image_name": img.get("name"),
-                        "language": img.get("language") or img.get("languages", "").split(",")[0] if img.get("languages") else None,
+                        "language": (
+                            img.get("language")
+                            or img.get("languages", "").split(",")[0]
+                            if img.get("languages")
+                            else None
+                        ),
                         "version": img.get("lang_version"),
                         "size_mb": round(img.get("size", 0) / (1024 * 1024), 1),
                         "vulnerabilities": {
                             "total": img.get("total_vulnerabilities", 0),
                             "critical": img.get("critical_vulnerabilities", 0),
-                            "high": img.get("high_vulnerabilities", 0)
+                            "high": img.get("high_vulnerabilities", 0),
                         },
-                        "packages_count": img.get("package_count", 0)
+                        "packages_count": img.get("package_count", 0),
                     }
                     for img in images
-                ]
+                ],
             }
 
         finally:
@@ -418,7 +436,7 @@ class MCPServer:
     def _extract_language_from_image(self, image_name: str) -> Optional[str]:
         """Extract language from image name"""
         image_lower = image_name.lower()
-        
+
         if "python" in image_lower:
             return "python"
         elif "node" in image_lower or "nodejs" in image_lower:
@@ -429,7 +447,7 @@ class MCPServer:
             return "go"
         elif "dotnet" in image_lower or ".net" in image_lower:
             return "dotnet"
-        
+
         return None
 
     async def _handle_resources_list(self, request_id: str) -> Dict[str, Any]:
@@ -439,23 +457,21 @@ class MCPServer:
                 "uri": "database://stats",
                 "name": "Database Statistics",
                 "description": "Current database statistics and summary",
-                "mimeType": "application/json"
+                "mimeType": "application/json",
             },
             {
                 "uri": "database://languages",
                 "name": "Supported Languages",
                 "description": "List of supported programming languages and their statistics",
-                "mimeType": "application/json"
-            }
+                "mimeType": "application/json",
+            },
         ]
 
-        return {
-            "jsonrpc": "2.0",
-            "id": request_id,
-            "result": {"resources": resources}
-        }
+        return {"jsonrpc": "2.0", "id": request_id, "result": {"resources": resources}}
 
-    async def _handle_resources_read(self, request_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_resources_read(
+        self, request_id: str, params: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Handle resources read request"""
         uri = params.get("uri")
 
@@ -465,7 +481,9 @@ class MCPServer:
             elif uri == "database://languages":
                 content = await self._get_language_stats()
             else:
-                return self._error_response(request_id, -32602, f"Unknown resource: {uri}")
+                return self._error_response(
+                    request_id, -32602, f"Unknown resource: {uri}"
+                )
 
             return {
                 "jsonrpc": "2.0",
@@ -475,15 +493,17 @@ class MCPServer:
                         {
                             "uri": uri,
                             "mimeType": "application/json",
-                            "text": json.dumps(content, indent=2)
+                            "text": json.dumps(content, indent=2),
                         }
                     ]
-                }
+                },
             }
 
         except Exception as e:
             logger.error(f"Error reading resource {uri}: {e}")
-            return self._error_response(request_id, -32603, f"Resource read failed: {str(e)}")
+            return self._error_response(
+                request_id, -32603, f"Resource read failed: {str(e)}"
+            )
 
     async def _get_database_stats(self) -> Dict[str, Any]:
         """Get database statistics"""
@@ -495,7 +515,7 @@ class MCPServer:
                 "zero_vulnerability_images": stats.get("zero_vulnerability_images", 0),
                 "average_vulnerabilities": stats.get("average_vulnerabilities", 0),
                 "total_packages": stats.get("total_packages", 0),
-                "last_updated": "Available in database"
+                "last_updated": "Available in database",
             }
         finally:
             db.close()
@@ -507,63 +527,62 @@ class MCPServer:
             languages = db.get_languages_summary()
             return {
                 "supported_languages": languages,
-                "total_language_variants": len(languages)
+                "total_language_variants": len(languages),
             }
         finally:
             db.close()
 
-    def _error_response(self, request_id: str, code: int, message: str) -> Dict[str, Any]:
+    def _error_response(
+        self, request_id: str, code: int, message: str
+    ) -> Dict[str, Any]:
         """Create error response"""
         return {
             "jsonrpc": "2.0",
             "id": request_id,
-            "error": {
-                "code": code,
-                "message": message
-            }
+            "error": {"code": code, "message": message},
         }
 
 
 async def main():
     """Main entry point for the MCP server"""
     import sys
-    
+
     # Initialize server
     db_path = sys.argv[1] if len(sys.argv) > 1 else "azure_linux_images.db"
     server = MCPServer(db_path)
-    
+
     logger.info("Container Image Recommendation MCP Server starting...")
     logger.info("Reading from stdin, writing to stdout")
-    
+
     # Read from stdin and write to stdout for MCP communication
     while True:
         try:
             line = sys.stdin.readline()
             if not line:
                 break
-                
+
             line = line.strip()
             if not line:
                 continue
-                
+
             # Parse JSON request
             try:
                 request = json.loads(line)
             except json.JSONDecodeError:
                 continue
-                
+
             # Handle request
             response = await server.handle_request(request)
-            
+
             # Write response to stdout
             print(json.dumps(response), flush=True)
-            
+
         except KeyboardInterrupt:
             break
         except Exception as e:
             logger.error(f"Error in main loop: {e}")
             break
-    
+
     logger.info("MCP Server shutting down")
 
 

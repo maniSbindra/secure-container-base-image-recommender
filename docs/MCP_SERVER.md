@@ -14,7 +14,7 @@ The MCP server exposes the container image recommendation functionality through 
    - Input: language, version, packages, size_preference, security_level, limit
    - Output: Ranked list of recommended images with scores and reasoning
 
-2. **analyze_image** - Analyze a specific container image and get recommendations for alternatives  
+2. **analyze_image** - Analyze a specific container image and get recommendations for alternatives
    - Input: image_name, limit
    - Output: Analysis of the image with alternative recommendations
 
@@ -38,7 +38,7 @@ ghcr.io/manisbindra/secure-container-base-image-recommender/mcp-server:latest
 ### Tags Available
 
 - `latest` - Latest stable version from main branch
-- `main` - Latest build from main branch  
+- `main` - Latest build from main branch
 - `v1.0.0` - Specific version tags
 - `pr-*` - Pull request builds for testing
 
@@ -49,9 +49,9 @@ ghcr.io/manisbindra/secure-container-base-image-recommender/mcp-server:latest
 1. **Install the MCP Extension** (when available) or use compatible MCP client extensions
 
 2. **Configure the MCP Server**:
-   
+
    Add to your VS Code settings or MCP client configuration:
-   
+
    ```json
    {
      "mcp": {
@@ -59,8 +59,8 @@ ghcr.io/manisbindra/secure-container-base-image-recommender/mcp-server:latest
          "container-recommendations": {
            "command": "docker",
            "args": [
-             "run", 
-             "--rm", 
+             "run",
+             "--rm",
              "-i",
              "ghcr.io/manisbindra/secure-container-base-image-recommender/mcp-server:latest"
            ],
@@ -72,9 +72,9 @@ ghcr.io/manisbindra/secure-container-base-image-recommender/mcp-server:latest
    ```
 
 3. **Alternative: Local Development Setup**
-   
+
    For development, you can run the server locally:
-   
+
    ```json
    {
      "mcp": {
@@ -125,7 +125,7 @@ echo '{"jsonrpc": "2.0", "id": "1", "method": "tools/list"}' | docker run -i ghc
 ```json
 {
   "jsonrpc": "2.0",
-  "id": "2", 
+  "id": "2",
   "method": "tools/call",
   "params": {
     "name": "recommend_images",
@@ -146,7 +146,7 @@ echo '{"jsonrpc": "2.0", "id": "1", "method": "tools/list"}' | docker run -i ghc
 {
   "jsonrpc": "2.0",
   "id": "3",
-  "method": "tools/call", 
+  "method": "tools/call",
   "params": {
     "name": "analyze_image",
     "arguments": {

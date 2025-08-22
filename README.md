@@ -183,7 +183,7 @@ Add to your MCP client configuration:
 
 **Available Tools:**
 - `recommend_images` - Get secure base image recommendations by language/requirements
-- `analyze_image` - Analyze existing images and get secure alternatives  
+- `analyze_image` - Analyze existing images and get secure alternatives
 - `search_images` - Search images by security level and other criteria
 
 For detailed MCP server documentation, see [MCP Server Guide](docs/MCP_SERVER.md).

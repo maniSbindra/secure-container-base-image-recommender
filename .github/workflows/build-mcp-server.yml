@@ -86,12 +86,12 @@ jobs:
       run: |
         # Build the image locally for testing
         docker build -t test-mcp-server .
-        
+
         # Test that the container starts and has required tools
         docker run --rm test-mcp-server syft version
-        docker run --rm test-mcp-server grype version  
+        docker run --rm test-mcp-server grype version
         docker run --rm test-mcp-server trivy --version
-        
+
         # Test health check
         docker run --rm test-mcp-server python -c "
         import sys
@@ -168,21 +168,21 @@ jobs:
         import sys
         sys.path.append('src')
         from mcp_server import MCPServer
-        
+
         async def test():
             server = MCPServer()
-            
+
             # Test tools list
             request = {'jsonrpc': '2.0', 'id': 'test', 'method': 'tools/list', 'params': {}}
             response = await server.handle_request(request)
             assert 'result' in response
             assert 'tools' in response['result']
             print(f'Found {len(response[\"result\"][\"tools\"])} tools')
-            
+
             # Test recommendation
             request = {
-                'jsonrpc': '2.0', 
-                'id': 'test', 
+                'jsonrpc': '2.0',
+                'id': 'test',
                 'method': 'tools/call',
                 'params': {
                     'name': 'recommend_images',
@@ -192,6 +192,6 @@ jobs:
             response = await server.handle_request(request)
             assert 'result' in response
             print('Recommendation test passed')
-        
+
         asyncio.run(test())
         "
