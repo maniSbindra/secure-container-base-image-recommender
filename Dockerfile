@@ -15,6 +15,14 @@ FROM mcr.microsoft.com/azurelinux/base/python:3.12 AS runtime
 # Set working directory
 WORKDIR /app
 
+# Install security scanning tools before switching to non-root user
+# First install ca-certificates and tar for tool dependencies
+RUN tdnf install -y ca-certificates tar && \
+    tdnf clean all && \
+    curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin && \
+    curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin && \
+    curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
 # Copy Python dependencies from builder stage
 COPY --from=builder /usr/lib/python3.12/site-packages /usr/lib/python3.12/site-packages
 
