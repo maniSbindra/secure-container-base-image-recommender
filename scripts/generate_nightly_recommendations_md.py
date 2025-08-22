@@ -2,7 +2,7 @@
 """Generate a markdown summary of top recommended images per language.
 
 The script queries the SQLite database (azure_linux_images.db) and for each
-distinct language selects the top N (default 3) images with the fewest
+distinct language selects the top N (default 10) images with the fewest
 critical/high/total vulnerabilities and smallest size.
 
 Output written to docs/nightly_recommendations.md
@@ -26,7 +26,7 @@ except ImportError:
 
 DB_PATH = Path("azure_linux_images.db")
 OUTPUT_PATH = Path("docs/nightly_recommendations.md")
-TOP_N = 6
+TOP_N = 10
 
 
 def human_size(num_bytes: int | None) -> str:
