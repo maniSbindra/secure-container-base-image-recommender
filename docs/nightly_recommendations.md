@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-08-21T03:10:34.404066Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
+_Generated: 2025-08-22T03:11:14.762119Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
 
 ## Scanned Repositories and Images
 
@@ -49,7 +49,7 @@ _Note: Repository scans may include multiple tags per repository, while single i
 |------|-------|---------|------|------|-------|------|
 | 1 | `mcr.microsoft.com/openjdk/jdk:21-distroless` | 21.0.8 | 0 | 0 | 0 | 341.0 MB |
 | 2 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 21.0.8 | 0 | 0 | 0 | 474.0 MB |
-| 3 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 21.0.8 | 0 | 0 | 55 | 447.0 MB |
+| 3 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 21.0.8 | 0 | 0 | 52 | 447.0 MB |
 
 ## Node
 
@@ -57,7 +57,7 @@ _Note: Repository scans may include multiple tags per repository, while single i
 |------|-------|---------|------|------|-------|------|
 | 1 | `mcr.microsoft.com/azurelinux/base/nodejs:20` | 20.14.0 | 0 | 0 | 0 | 146.0 MB |
 | 2 | `mcr.microsoft.com/azurelinux/base/nodejs:20.14` | 20.14.0 | 0 | 0 | 0 | 146.0 MB |
-| 3 | `docker.io/library/node:20.0-slim` | 20.0.0 | 6 | 40 | 215 | 250.0 MB |
+| 3 | `docker.io/library/node:20.0-slim` | 20.0.0 | 6 | 41 | 215 | 250.0 MB |
 
 ## Perl
 
@@ -65,7 +65,7 @@ _Note: Repository scans may include multiple tags per repository, while single i
 |------|-------|---------|------|------|-------|------|
 | 1 | `docker.io/library/python:3-slim` | 5.40.1 | 0 | 0 | 51 | 117.0 MB |
 | 2 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 0 | 51 | 119.0 MB |
-| 3 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 5.34.0 | 0 | 0 | 55 | 447.0 MB |
+| 3 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 5.34.0 | 0 | 0 | 52 | 447.0 MB |
 | 4 | `mcr.microsoft.com/dotnet/runtime:8.0` | 5.36.0 | 1 | 7 | 83 | 193.0 MB |
 | 5 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 5.36.0 | 1 | 7 | 83 | 218.0 MB |
 | 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 23 | 150 | 847.0 MB |
