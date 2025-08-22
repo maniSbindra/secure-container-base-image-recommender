@@ -2,7 +2,7 @@ name: Build and Publish MCP Server Container
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, copilot/fix-30 ]
     paths:
       - 'mcp_server.py'
       - 'Dockerfile'
