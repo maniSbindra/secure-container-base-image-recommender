@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-08-22T06:09:25.388248Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
+_Generated: 2025-08-22T06:05:30.211277Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 6 per language._
 
 ## Scanned Repositories and Images
 
@@ -69,7 +69,6 @@ _Note: Repository scans may include multiple tags per repository, while single i
 | 4 | `mcr.microsoft.com/dotnet/runtime:8.0` | 5.36.0 | 1 | 7 | 83 | 193.0 MB |
 | 5 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 5.36.0 | 1 | 7 | 83 | 218.0 MB |
 | 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 23 | 150 | 847.0 MB |
-| 7 | `docker.io/library/node:20.0-slim` | 5.32.1 | 6 | 41 | 215 | 250.0 MB |
 
 ## Python
 
@@ -81,6 +80,3 @@ _Note: Repository scans may include multiple tags per repository, while single i
 | 4 | `mcr.microsoft.com/azurelinux/distroless/python:3.12-nonroot` | 3.12.9 | 0 | 0 | 0 | 83.8 MB |
 | 5 | `mcr.microsoft.com/azurelinux/base/python:3` | 3.12.9 | 0 | 0 | 0 | 138.0 MB |
 | 6 | `mcr.microsoft.com/azurelinux/base/python:3.12` | 3.12.9 | 0 | 0 | 0 | 138.0 MB |
-| 7 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 3.12.9 | 0 | 0 | 0 | 474.0 MB |
-| 8 | `docker.io/library/python:3-slim` | 3.13.7 | 0 | 0 | 51 | 117.0 MB |
-| 9 | `docker.io/library/python:3.12-slim` | 3.12.11 | 0 | 0 | 51 | 119.0 MB |
