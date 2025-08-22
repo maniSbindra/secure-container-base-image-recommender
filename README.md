@@ -42,6 +42,8 @@ For production use cases, consider enterprise-grade container security platforms
 - 🚀 **Language Support**: Supports Python, Node.js, Java, Go, .NET
 - 📦 **Package Ecosystem**: Analyzes package managers and installed libraries
 - 💾 **Size Optimization**: Considers image size preferences (minimal, balanced, full)
+- 🤖 **MCP Server**: Model Context Protocol server for AI assistant integration
+- 🐳 **Container Ready**: Available as Docker container for easy deployment
 
 ### 📌 Quick Links
 
@@ -143,6 +145,48 @@ For local development on your individual machine:
    ```
 
 ## Quick Start
+
+### MCP Server (AI Assistant Integration)
+
+The Container Image Recommendation tool is available as a **Model Context Protocol (MCP) server**, allowing AI assistants to directly query for secure container image recommendations.
+
+#### Running the MCP Server Container
+
+```bash
+# Pull and run the MCP server from GitHub Container Registry
+docker run -i ghcr.io/manisbindra/secure-container-base-image-recommender/mcp-server:latest
+
+# Test with a sample MCP request
+echo '{"jsonrpc": "2.0", "id": "1", "method": "tools/list"}' | \
+  docker run --rm -i ghcr.io/manisbindra/secure-container-base-image-recommender/mcp-server:latest
+```
+
+#### VS Code Integration
+
+Add to your MCP client configuration:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "container-recommendations": {
+        "command": "docker",
+        "args": [
+          "run", "--rm", "-i",
+          "ghcr.io/manisbindra/secure-container-base-image-recommender/mcp-server:latest"
+        ]
+      }
+    }
+  }
+}
+```
+
+**Available Tools:**
+- `recommend_images` - Get secure base image recommendations by language/requirements
+- `analyze_image` - Analyze existing images and get secure alternatives  
+- `search_images` - Search images by security level and other criteria
+
+For detailed MCP server documentation, see [MCP Server Guide](docs/MCP_SERVER.md).
 
 ### Web UI
 
