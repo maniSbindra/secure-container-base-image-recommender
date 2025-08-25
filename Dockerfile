@@ -21,7 +21,8 @@ RUN tdnf install -y ca-certificates tar && \
     tdnf clean all && \
     curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin && \
     curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin && \
-    curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+    curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin && \
+    ln -sf /usr/bin/python3 /usr/bin/python
 
 # Copy Python dependencies from builder stage
 COPY --from=builder /usr/lib/python3.12/site-packages /usr/lib/python3.12/site-packages
