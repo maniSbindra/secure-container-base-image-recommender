@@ -142,13 +142,13 @@ class MCPServer:
             },
             {
                 "name": "analyze_image",
-                "description": "Analyze a specific container image and get recommendations for alternatives",
+                "description": "Analyze a container image and get secure alternatives. If the image exists in our database, provides detailed security analysis. If not found, extracts language information and provides secure recommendations.",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
                         "image_name": {
                             "type": "string",
-                            "description": "Full container image name (e.g., docker.io/library/python:3.12-slim)",
+                            "description": "Full container image name (e.g., docker.io/library/python:3.12-slim, mcr.microsoft.com/azurelinux/base/python:3.12). The tool will check if this image exists in our security database and provide detailed analysis or fallback to language-based recommendations.",
                         },
                         "limit": {
                             "type": "integer",
@@ -312,43 +312,216 @@ class MCPServer:
         image_name = arguments.get("image_name")
         limit = arguments.get("limit", 5)
 
-        # For now, we'll extract requirements from the image name and get recommendations
-        # In a full implementation, this would actually analyze the image
+        # Check if the image exists in our database
+        db = ImageDatabase(self.db_path)
+        try:
+            existing_image = db.get_image_by_exact_name(image_name)
 
-        # Simple extraction of language from image name
-        language = self._extract_language_from_image(image_name)
-        if not language:
-            return {
-                "error": "Could not determine language from image name",
-                "image_name": image_name,
-                "suggestions": "Please provide language explicitly using recommend_images tool",
-            }
+            if existing_image:
+                # Image exists in database - provide detailed analysis
+                return await self._analyze_existing_image(existing_image, limit)
+            else:
+                # Image not in database - extract language and provide fallback recommendations
+                return await self._analyze_unknown_image(image_name, limit)
 
-        # Create a requirement based on detected language
-        requirement = UserRequirement(language=language, security_level="high")
+        finally:
+            db.close()
 
-        recommendations = self.recommendation_engine.recommend(requirement)
-        recommendations = recommendations[:limit]
+    async def _analyze_existing_image(
+        self, image_data: Dict[str, Any], limit: int
+    ) -> Dict[str, Any]:
+        """Analyze an image that exists in our database"""
+        image_name = image_data.get("image_name") or image_data.get("name")
+        languages = (
+            image_data.get("languages", "").split(",")
+            if image_data.get("languages")
+            else []
+        )
+        primary_language = languages[0] if languages else None
+
+        # Get current vulnerability status
+        current_vulns = {
+            "total": image_data.get("total_vulnerabilities", 0),
+            "critical": image_data.get("critical_vulnerabilities", 0),
+            "high": image_data.get("high_vulnerabilities", 0),
+            "medium": image_data.get("medium_vulnerabilities", 0),
+            "low": image_data.get("low_vulnerabilities", 0),
+        }
+
+        # Determine security level for recommendations
+        security_level = "high"
+        if current_vulns["critical"] > 0 or current_vulns["high"] > 5:
+            security_level = "maximum"
+        elif current_vulns["total"] > 20:
+            security_level = "high"
+
+        # Get alternative recommendations
+        alternatives = []
+        if primary_language:
+            requirement = UserRequirement(
+                language=primary_language, security_level=security_level
+            )
+            recommendations = self.recommendation_engine.recommend(requirement)[:limit]
+
+            for rec in recommendations:
+                rec_vulns = rec.analysis_data.get("vulnerabilities", {})
+                security_improvement = self._calculate_security_improvement(
+                    current_vulns, rec_vulns
+                )
+
+                alternatives.append(
+                    {
+                        "image_name": rec.image_name,
+                        "score": rec.score,
+                        "reasoning": rec.reasoning,
+                        "security_improvement": security_improvement,
+                        "vulnerabilities": rec_vulns,
+                        "size_mb": round(
+                            rec.analysis_data.get("manifest", {}).get("size", 0)
+                            / (1024 * 1024),
+                            1,
+                        ),
+                    }
+                )
 
         return {
             "analyzed_image": image_name,
+            "image_found_in_database": True,
+            "current_image_analysis": {
+                "languages": languages,
+                "vulnerabilities": current_vulns,
+                "size_mb": round(image_data.get("size_bytes", 0) / (1024 * 1024), 1),
+                "base_os": {
+                    "name": image_data.get("base_os_name"),
+                    "version": image_data.get("base_os_version"),
+                },
+                "scan_date": image_data.get("scan_timestamp"),
+            },
+            "security_assessment": self._assess_security_level(current_vulns),
+            "alternatives": alternatives,
+            "recommendation_note": (
+                f"Found {len(alternatives)} alternative images with better security profiles"
+                if alternatives
+                else "No alternative recommendations available for this language"
+            ),
+        }
+
+    async def _analyze_unknown_image(
+        self, image_name: str, limit: int
+    ) -> Dict[str, Any]:
+        """Analyze an image that's not in our database"""
+        # Extract language from image name
+        language = self._extract_language_from_image(image_name)
+        version = self._extract_version_from_image(image_name)
+
+        if not language:
+            return {
+                "analyzed_image": image_name,
+                "image_found_in_database": False,
+                "error": "Could not determine programming language from image name",
+                "message": "This image is not in our security database and we couldn't automatically detect the programming language.",
+                "suggestions": [
+                    "Use the 'recommend_images' tool with explicit language parameter",
+                    "Provide a more specific image name that includes the language (e.g., python:3.12, node:18, etc.)",
+                    "Check if you meant a similar image name that might be in our database",
+                ],
+                "fallback_action": "Please specify the programming language to get secure image recommendations",
+            }
+
+        # Create requirement based on detected language
+        requirement = UserRequirement(
+            language=language, version=version, security_level="high"
+        )
+
+        recommendations = self.recommendation_engine.recommend(requirement)[:limit]
+
+        return {
+            "analyzed_image": image_name,
+            "image_found_in_database": False,
             "detected_language": language,
+            "detected_version": version,
+            "message": f"This image is not in our security database, but we detected it as a {language} image.",
+            "security_recommendation": f"Consider switching to one of these verified secure {language} base images:",
             "alternatives": [
                 {
                     "image_name": rec.image_name,
                     "score": rec.score,
                     "reasoning": rec.reasoning,
-                    "security_improvement": (
-                        "Lower vulnerability count"
-                        if rec.analysis_data.get("vulnerabilities", {}).get("total", 0)
-                        < 50
-                        else "Similar security profile"
-                    ),
+                    "security_benefit": "Pre-analyzed and verified secure image",
                     "vulnerabilities": rec.analysis_data.get("vulnerabilities", {}),
+                    "size_mb": round(
+                        rec.analysis_data.get("manifest", {}).get("size", 0)
+                        / (1024 * 1024),
+                        1,
+                    ),
                 }
                 for rec in recommendations
             ],
+            "note": "These recommendations are based on language detection. For more specific recommendations, use the 'recommend_images' tool with your exact requirements.",
         }
+
+    def _calculate_security_improvement(
+        self, current_vulns: Dict[str, int], alternative_vulns: Dict[str, int]
+    ) -> str:
+        """Calculate and describe security improvement between images"""
+        current_total = current_vulns.get("total", 0)
+        alt_total = alternative_vulns.get("total", 0)
+        current_critical = current_vulns.get("critical", 0)
+        alt_critical = alternative_vulns.get("critical", 0)
+        current_high = current_vulns.get("high", 0)
+        alt_high = alternative_vulns.get("high", 0)
+
+        if alt_critical == 0 and current_critical > 0:
+            return f"Eliminates {current_critical} critical vulnerabilities"
+        elif alt_critical < current_critical:
+            return f"Reduces critical vulnerabilities from {current_critical} to {alt_critical}"
+        elif alt_high == 0 and current_high > 0:
+            return f"Eliminates {current_high} high-severity vulnerabilities"
+        elif alt_total < current_total:
+            reduction = current_total - alt_total
+            return f"Reduces total vulnerabilities by {reduction} ({current_total} → {alt_total})"
+        elif alt_total == current_total:
+            return "Similar security profile"
+        else:
+            return "May have different security characteristics"
+
+    def _assess_security_level(self, vulnerabilities: Dict[str, int]) -> str:
+        """Assess the security level of an image based on vulnerabilities"""
+        critical = vulnerabilities.get("critical", 0)
+        high = vulnerabilities.get("high", 0)
+        total = vulnerabilities.get("total", 0)
+
+        if critical > 0:
+            return f"HIGH RISK: {critical} critical vulnerabilities found"
+        elif high > 5:
+            return f"MEDIUM-HIGH RISK: {high} high-severity vulnerabilities"
+        elif high > 0:
+            return f"MEDIUM RISK: {high} high-severity vulnerabilities"
+        elif total > 20:
+            return f"LOW-MEDIUM RISK: {total} total vulnerabilities (no critical/high)"
+        elif total > 0:
+            return f"LOW RISK: {total} low-medium vulnerabilities"
+        else:
+            return "EXCELLENT: No known vulnerabilities"
+
+    def _extract_version_from_image(self, image_name: str) -> Optional[str]:
+        """Extract version from image name"""
+        import re
+
+        # Common version patterns
+        patterns = [
+            r":(\d+\.\d+(?:\.\d+)?)",  # :3.12, :18.19.0
+            r":(\d+)",  # :3, :18
+            r"-(\d+\.\d+)",  # -3.12
+            r"(\d+\.\d+)$",  # ending with version
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, image_name)
+            if match:
+                return match.group(1)
+
+        return None
 
     async def _search_images(self, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """Search for images based on criteria"""
@@ -434,19 +607,39 @@ class MCPServer:
             db.close()
 
     def _extract_language_from_image(self, image_name: str) -> Optional[str]:
-        """Extract language from image name"""
+        """Extract language from image name with improved detection"""
         image_lower = image_name.lower()
 
-        if "python" in image_lower:
-            return "python"
-        elif "node" in image_lower or "nodejs" in image_lower:
-            return "nodejs"
-        elif "java" in image_lower:
-            return "java"
-        elif "golang" in image_lower or "go:" in image_lower:
-            return "go"
-        elif "dotnet" in image_lower or ".net" in image_lower:
-            return "dotnet"
+        # More comprehensive language detection patterns
+        language_patterns = {
+            "python": ["python", "py"],
+            "nodejs": ["node", "nodejs", "npm"],
+            "java": ["java", "openjdk", "oracle-java", "adoptopenjdk"],
+            "go": ["golang", "go:", "/go:", "-go:", "go-"],
+            "dotnet": ["dotnet", ".net", "aspnet", "mcr.microsoft.com/dotnet"],
+            "php": ["php", "php-fpm"],
+            "ruby": ["ruby", "rails"],
+            "rust": ["rust", "cargo"],
+            "perl": ["perl"],
+        }
+
+        # Check each language pattern
+        for language, patterns in language_patterns.items():
+            for pattern in patterns:
+                if pattern in image_lower:
+                    return language
+
+        # Check for language-specific registry patterns
+        if "mcr.microsoft.com" in image_lower:
+            # Microsoft Container Registry specific mappings
+            if "/python" in image_lower:
+                return "python"
+            elif "/nodejs" in image_lower or "/node" in image_lower:
+                return "nodejs"
+            elif "/java" in image_lower:
+                return "java"
+            elif "/dotnet" in image_lower:
+                return "dotnet"
 
         return None
 
