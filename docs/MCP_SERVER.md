@@ -27,6 +27,18 @@ The MCP server exposes the container image recommendation functionality through 
 1. **database://stats** - Current database statistics and summary
 2. **database://languages** - List of supported programming languages and their statistics
 
+### Available Prompts
+
+The MCP server provides curated prompts for common container security tasks:
+
+1. **recommend-secure-base-image** - Get secure base image recommendations based on language and requirements
+2. **analyze-container-security** - Analyze current images for vulnerabilities and get secure alternatives  
+3. **search-secure-images** - Search for images meeting specific security criteria
+4. **container-migration-guide** - Get step-by-step migration guidance to secure alternatives
+5. **zero-vulnerability-images** - Find images with zero critical/high vulnerabilities
+
+These prompts are accessible via `prompts/list` and `prompts/get` methods and are designed for use with GitHub Copilot and other AI assistants.
+
 ## Container Image
 
 The MCP server is packaged as a Docker container and published to GitHub Container Registry:
