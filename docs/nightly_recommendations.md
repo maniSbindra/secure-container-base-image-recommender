@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-09-09T03:04:09.455268Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
+_Generated: 2025-09-10T02:58:38.627831Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
 
 ## Scanned Repositories and Images
 
@@ -39,9 +39,9 @@ _Note: Repository scans may include multiple tags per repository, while single i
 
 | Rank | Image | Version | Crit | High | Total | Size |
 |------|-------|---------|------|------|-------|------|
-| 1 | `mcr.microsoft.com/dotnet/runtime:8.0` | 8.0.19 | 1 | 4 | 77 | 193.0 MB |
-| 2 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 8.0.19 | 1 | 4 | 77 | 218.0 MB |
-| 3 | `mcr.microsoft.com/dotnet/sdk:8.0` | 8.0.413 | 1 | 15 | 131 | 847.0 MB |
+| 1 | `mcr.microsoft.com/dotnet/runtime:8.0` | 8.0.20 | 1 | 4 | 77 | 193.0 MB |
+| 2 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 8.0.20 | 1 | 4 | 77 | 218.0 MB |
+| 3 | `mcr.microsoft.com/dotnet/sdk:8.0` | 8.0.414 | 1 | 15 | 131 | 847.0 MB |
 
 ## Java
 
