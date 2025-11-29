@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-11-28T03:14:14.575569Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
+_Generated: 2025-11-29T03:14:16.971911Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
 
 ## Scanned Repositories and Images
 
@@ -41,7 +41,7 @@ _Note: Repository scans may include multiple tags per repository, while single i
 |------|-------|---------|------|------|-------|------|
 | 1 | `mcr.microsoft.com/dotnet/runtime:8.0` | 8.0.22 | 1 | 4 | 78 | 193.0 MB |
 | 2 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 8.0.22 | 1 | 4 | 78 | 218.0 MB |
-| 3 | `mcr.microsoft.com/dotnet/sdk:8.0` | 8.0.416 | 1 | 17 | 144 | 850.0 MB |
+| 3 | `mcr.microsoft.com/dotnet/sdk:8.0` | 8.0.416 | 1 | 17 | 145 | 850.0 MB |
 
 ## Java
 
@@ -68,7 +68,7 @@ _Note: Repository scans may include multiple tags per repository, while single i
 | 3 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 5.34.0 | 0 | 0 | 76 | 454.0 MB |
 | 4 | `mcr.microsoft.com/dotnet/runtime:8.0` | 5.36.0 | 1 | 4 | 78 | 193.0 MB |
 | 5 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 5.36.0 | 1 | 4 | 78 | 218.0 MB |
-| 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 17 | 144 | 850.0 MB |
+| 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 17 | 145 | 850.0 MB |
 | 7 | `docker.io/library/node:20.0-slim` | 5.32.1 | 6 | 41 | 217 | 250.0 MB |
 
 ## Python
