@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2025-12-07T03:30:04.160128Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
+_Generated: 2025-12-08T03:24:02.955279Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
 
 ## Scanned Repositories and Images
 
@@ -48,8 +48,8 @@ _Note: Repository scans may include multiple tags per repository, while single i
 | Rank | Image | Version | Crit | High | Total | Size |
 |------|-------|---------|------|------|-------|------|
 | 1 | `mcr.microsoft.com/openjdk/jdk:21-distroless` | 21.0.9 | 0 | 0 | 0 | 350.0 MB |
-| 2 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 21.0.9 | 0 | 0 | 0 | 482.0 MB |
-| 3 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 21.0.9 | 0 | 0 | 100 | 454.0 MB |
+| 2 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 21.0.9 | 0 | 0 | 100 | 454.0 MB |
+| 3 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 21.0.9 | 0 | 1 | 1 | 482.0 MB |
 
 ## Node
 
@@ -81,6 +81,6 @@ _Note: Repository scans may include multiple tags per repository, while single i
 | 4 | `mcr.microsoft.com/azurelinux/distroless/python:3.12-nonroot` | 3.12.9 | 0 | 0 | 0 | 83.5 MB |
 | 5 | `mcr.microsoft.com/azurelinux/base/python:3` | 3.12.9 | 0 | 0 | 0 | 139.0 MB |
 | 6 | `mcr.microsoft.com/azurelinux/base/python:3.12` | 3.12.9 | 0 | 0 | 0 | 139.0 MB |
-| 7 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 3.12.9 | 0 | 0 | 0 | 482.0 MB |
-| 8 | `docker.io/library/python:3-slim` | 3.14.1 | 0 | 0 | 61 | 119.0 MB |
-| 9 | `docker.io/library/python:3.12-slim` | 3.12.12 | 0 | 0 | 62 | 119.0 MB |
+| 7 | `docker.io/library/python:3-slim` | 3.14.1 | 0 | 0 | 61 | 119.0 MB |
+| 8 | `docker.io/library/python:3.12-slim` | 3.12.12 | 0 | 0 | 62 | 119.0 MB |
+| 9 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 3.12.9 | 0 | 1 | 1 | 482.0 MB |
