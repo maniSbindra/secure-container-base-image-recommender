@@ -33,7 +33,7 @@ def query_top_images(conn: sqlite3.Connection, language: str) -> List[Tuple]:
     cur = conn.execute(
         """
         SELECT i.name, l.version, i.critical_vulnerabilities, i.high_vulnerabilities,
-               i.total_vulnerabilities, COALESCE(i.size_bytes,0)
+               i.total_vulnerabilities, COALESCE(i.size_bytes,0), i.digest
         FROM images i
         JOIN languages l ON i.id = l.image_id
         WHERE LOWER(l.language) = ?
@@ -54,6 +54,21 @@ def human_size(num_bytes: int) -> str:
     if num_bytes <= 0:
         return "-"
     return f"{num_bytes / (1024*1024):.1f} MB"
+
+
+def format_digest(digest: str | None) -> str:
+    """Return a formatted digest string, shortened for display.
+
+    Shows the first 12 characters of the hash after the 'sha256:' prefix.
+    """
+    if not digest:
+        return ""
+    # If digest starts with sha256:, show abbreviated form
+    if digest.startswith("sha256:"):
+        hash_part = digest[7:]  # Remove 'sha256:' prefix
+        return f"sha256:{hash_part[:12]}"
+    # For other formats, show first 19 characters
+    return digest[:19]
 
 
 def main():
@@ -90,17 +105,23 @@ def main():
                 lines.append(f"## {lang.title()}")
                 lines.append("")
                 lines.append(
-                    "| Rank | Image | Version | Critical | High | Total | Size |"
+                    "| Rank | Image | Version | Critical | High | Total | Size | Digest |"
                 )
                 lines.append(
-                    "|------|-------|---------|----------|------|-------|------|"
+                    "|------|-------|---------|----------|------|-------|------|--------|"
                 )
-                for idx, (name, version, crit, high, total, size_bytes) in enumerate(
-                    rows, start=1
-                ):
+                for idx, (
+                    name,
+                    version,
+                    crit,
+                    high,
+                    total,
+                    size_bytes,
+                    digest,
+                ) in enumerate(rows, start=1):
                     version_display = version or "-"
                     lines.append(
-                        f"| {idx} | `{name}` | {version_display} | {crit} | {high} | {total} | {human_size(size_bytes)} |"
+                        f"| {idx} | `{name}` | {version_display} | {crit} | {high} | {total} | {human_size(size_bytes)} | `{format_digest(digest)}` |"
                     )
                 lines.append("")
 

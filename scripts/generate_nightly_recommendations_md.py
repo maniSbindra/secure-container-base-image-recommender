@@ -42,6 +42,21 @@ def human_size(num_bytes: int | None) -> str:
     return f"{gb:.2f} GB"
 
 
+def format_digest(digest: str | None) -> str:
+    """Return a formatted digest string, shortened for display.
+
+    Shows the first 12 characters of the hash after the 'sha256:' prefix.
+    """
+    if not digest:
+        return ""
+    # If digest starts with sha256:, show abbreviated form
+    if digest.startswith("sha256:"):
+        hash_part = digest[7:]  # Remove 'sha256:' prefix
+        return f"sha256:{hash_part[:12]}"
+    # For other formats, show first 19 characters
+    return digest[:19]
+
+
 def get_scanned_repositories_info() -> dict:
     """Get information about the repositories and images that were scanned.
 
@@ -102,7 +117,7 @@ def get_top_images_for_language(
     """Return top images for a language ordered by vuln severity then size."""
     sql = """
     SELECT i.name, l.version, i.total_vulnerabilities, i.critical_vulnerabilities,
-           i.high_vulnerabilities, i.size_bytes
+           i.high_vulnerabilities, i.size_bytes, i.digest
     FROM images i
     JOIN languages l ON i.id = l.image_id
     WHERE l.language = ?
@@ -124,6 +139,7 @@ def get_top_images_for_language(
                 "critical": row[3],
                 "high": row[4],
                 "size": row[5],
+                "digest": row[6],
             }
         )
     return results
@@ -195,11 +211,15 @@ def main() -> int:
                 if not top_images:
                     continue
                 f.write(f"## {language.capitalize()}\n\n")
-                f.write("| Rank | Image | Version | Crit | High | Total | Size |\n")
-                f.write("|------|-------|---------|------|------|-------|------|\n")
+                f.write(
+                    "| Rank | Image | Version | Crit | High | Total | Size | Digest |\n"
+                )
+                f.write(
+                    "|------|-------|---------|------|------|-------|------|--------|\n"
+                )
                 for idx, rec in enumerate(top_images, 1):
                     f.write(
-                        f"| {idx} | `{rec['image']}` | {rec['version'] or ''} | {rec['critical']} | {rec['high']} | {rec['total']} | {human_size(rec['size'])} |\n"
+                        f"| {idx} | `{rec['image']}` | {rec['version'] or ''} | {rec['critical']} | {rec['high']} | {rec['total']} | {human_size(rec['size'])} | `{format_digest(rec['digest'])}` |\n"
                     )
                 # Add single newline after each language section
                 if language != languages[-1]:  # Not the last language
