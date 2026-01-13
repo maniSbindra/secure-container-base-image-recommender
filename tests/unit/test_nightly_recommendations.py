@@ -54,7 +54,7 @@ class TestFormatDigest:
         digest = "other:1234567890abcdef1234567890"
         result = format_digest(digest)
         # For non-sha256 digests, returns first 19 characters
-        assert result == digest[:19]
+        assert result == "other:1234567890abc"
         assert len(result) == 19
 
 
