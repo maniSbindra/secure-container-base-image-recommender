@@ -949,7 +949,16 @@ class MCRRegistryScanner:
             # Extract other manifest data
             layers_count = len(inspect_data.get("RootFS", {}).get("Layers", []))
             created_time = inspect_data.get("Created", "")
-            digest = inspect_data.get("Id", "")
+
+            # Get registry digest from RepoDigests (preferred) for platform-agnostic digest
+            # RepoDigests format: ["registry/repo@sha256:..."]
+            # Falls back to local image Id if RepoDigests not available
+            repo_digests = inspect_data.get("RepoDigests", [])
+            if repo_digests:
+                first_digest = repo_digests[0]
+                digest = first_digest.split("@")[-1] if "@" in first_digest else ""
+            else:
+                digest = inspect_data.get("Id", "")
 
             manifest_data = {
                 "size": image_size,  # Use docker images size or 0
