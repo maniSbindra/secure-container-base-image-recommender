@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2026-01-23T03:35:54.547888Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
+_Generated: 2026-01-24T03:29:34.836910Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
 
 ## Scanned Repositories and Images
 
@@ -41,14 +41,14 @@ _Note: Repository scans may include multiple tags per repository, while single i
 |------|-------|---------|------|------|-------|------|--------|
 | 1 | `mcr.microsoft.com/dotnet/runtime:8.0` | 8.0.23 | 1 | 2 | 86 | 193.0 MB | `sha256:d63a6fd96a4d` |
 | 2 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 8.0.23 | 1 | 2 | 86 | 218.0 MB | `sha256:4b8f0b085348` |
-| 3 | `mcr.microsoft.com/dotnet/sdk:8.0` | 8.0.417 | 1 | 15 | 166 | 850.0 MB | `sha256:aa05b91be697` |
+| 3 | `mcr.microsoft.com/dotnet/sdk:8.0` | 8.0.417 | 1 | 15 | 167 | 850.0 MB | `sha256:aa05b91be697` |
 
 ## Java
 
 | Rank | Image | Version | Crit | High | Total | Size | Digest |
 |------|-------|---------|------|------|-------|------|--------|
-| 1 | `mcr.microsoft.com/openjdk/jdk:21-distroless` | 21.0.9 | 0 | 0 | 0 | 351.0 MB | `sha256:71410cbddea9` |
-| 2 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 21.0.9 | 0 | 0 | 0 | 482.0 MB | `sha256:6279db3b66d5` |
+| 1 | `mcr.microsoft.com/openjdk/jdk:21-distroless` | 21.0.9 | 0 | 0 | 0 | 351.0 MB | `sha256:876890c9e215` |
+| 2 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 21.0.9 | 0 | 0 | 0 | 482.0 MB | `sha256:24a4601e6dec` |
 | 3 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 21.0.9 | 0 | 0 | 67 | 470.0 MB | `sha256:f99451148474` |
 
 ## Node
@@ -68,7 +68,7 @@ _Note: Repository scans may include multiple tags per repository, while single i
 | 3 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 2 | 68 | 119.0 MB | `sha256:5e2dbd4bbdd9` |
 | 4 | `mcr.microsoft.com/dotnet/runtime:8.0` | 5.36.0 | 1 | 2 | 86 | 193.0 MB | `sha256:d63a6fd96a4d` |
 | 5 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 5.36.0 | 1 | 2 | 86 | 218.0 MB | `sha256:4b8f0b085348` |
-| 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 15 | 166 | 850.0 MB | `sha256:aa05b91be697` |
+| 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 15 | 167 | 850.0 MB | `sha256:aa05b91be697` |
 | 7 | `docker.io/library/node:20.0-slim` | 5.32.1 | 6 | 46 | 237 | 250.0 MB | `sha256:702d475af4b8` |
 
 ## Python
@@ -81,6 +81,6 @@ _Note: Repository scans may include multiple tags per repository, while single i
 | 4 | `mcr.microsoft.com/azurelinux/distroless/python:3.12-nonroot` | 3.12.9 | 0 | 0 | 0 | 83.6 MB | `sha256:89458d69ad2e` |
 | 5 | `mcr.microsoft.com/azurelinux/base/python:3` | 3.12.9 | 0 | 0 | 0 | 139.0 MB | `sha256:349502d7cedc` |
 | 6 | `mcr.microsoft.com/azurelinux/base/python:3.12` | 3.12.9 | 0 | 0 | 0 | 139.0 MB | `sha256:349502d7cedc` |
-| 7 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 3.12.9 | 0 | 0 | 0 | 482.0 MB | `sha256:6279db3b66d5` |
+| 7 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 3.12.9 | 0 | 0 | 0 | 482.0 MB | `sha256:24a4601e6dec` |
 | 8 | `docker.io/library/python:3-slim` | 3.14.2 | 0 | 2 | 67 | 119.0 MB | `sha256:9b81fe9acff7` |
 | 9 | `docker.io/library/python:3.12-slim` | 3.12.12 | 0 | 2 | 68 | 119.0 MB | `sha256:5e2dbd4bbdd9` |
