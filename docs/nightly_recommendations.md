@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2026-02-07T04:10:34.454591Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
+_Generated: 2026-02-08T04:36:02.024828Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
 
 ## Scanned Repositories and Images
 
@@ -65,7 +65,7 @@ _Note: Repository scans may include multiple tags per repository, while single i
 |------|-------|---------|------|------|-------|------|--------|
 | 1 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 5.34.0 | 0 | 0 | 64 | 476.0 MB | `sha256:1ac8d30af0bb` |
 | 2 | `docker.io/library/python:3-slim` | 5.40.1 | 0 | 2 | 68 | 119.0 MB | `sha256:486b8092bfb1` |
-| 3 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 2 | 69 | 119.0 MB | `sha256:43e4d702bbfe` |
+| 3 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 2 | 69 | 119.0 MB | `sha256:9e01bf1ae5db` |
 | 4 | `mcr.microsoft.com/dotnet/runtime:8.0` | 5.36.0 | 1 | 2 | 86 | 193.0 MB | `sha256:523b82daf080` |
 | 5 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 5.36.0 | 1 | 2 | 86 | 218.0 MB | `sha256:0d4a76c0a692` |
 | 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 2 | 15 | 168 | 850.0 MB | `sha256:1682f3cd0cb5` |
@@ -77,7 +77,7 @@ _Note: Repository scans may include multiple tags per repository, while single i
 |------|-------|---------|------|------|-------|------|--------|
 | 1 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 3.12.9 | 0 | 0 | 0 | 491.0 MB | `sha256:7e28ea3b1b26` |
 | 2 | `docker.io/library/python:3-slim` | 3.14.3 | 0 | 2 | 68 | 119.0 MB | `sha256:486b8092bfb1` |
-| 3 | `docker.io/library/python:3.12-slim` | 3.12.12 | 0 | 2 | 69 | 119.0 MB | `sha256:43e4d702bbfe` |
+| 3 | `docker.io/library/python:3.12-slim` | 3.12.12 | 0 | 2 | 69 | 119.0 MB | `sha256:9e01bf1ae5db` |
 | 4 | `mcr.microsoft.com/azurelinux/distroless/python:3` | 3.12.9 | 2 | 2 | 20 | 83.6 MB | `sha256:657bb43ad9ef` |
 | 5 | `mcr.microsoft.com/azurelinux/distroless/python:3-nonroot` | 3.12.9 | 2 | 2 | 20 | 83.6 MB | `sha256:89458d69ad2e` |
 | 6 | `mcr.microsoft.com/azurelinux/distroless/python:3.12` | 3.12.9 | 2 | 2 | 20 | 83.6 MB | `sha256:657bb43ad9ef` |
