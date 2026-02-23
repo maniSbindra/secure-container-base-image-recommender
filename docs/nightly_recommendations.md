@@ -1,3 +1,5 @@
+> **Note:** An enhanced version of the nightly recommendations report is available at [maniSbindra/sbi](https://github.com/maniSbindra/sbi/blob/main/docs/daily_recommendations.md), rewritten in Go with improved security-posture ordering, configurable repositories, and comprehensive scanning. Future nightly report enhancements will only be added to the Go repo.
+
 # Nightly Top Recommended Images by Language
 
 _Generated: 2026-02-23T05:43:58.130893Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._

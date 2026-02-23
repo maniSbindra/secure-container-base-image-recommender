@@ -1,5 +1,7 @@
 # Recommendations & Ranking Logic
 
+> **Note:** An enhanced version of the nightly recommendations report is available at [maniSbindra/sbi](https://github.com/maniSbindra/sbi/blob/main/docs/daily_recommendations.md), rewritten in Go with improved security-posture ordering, configurable repositories, and comprehensive scanning. Future nightly report enhancements will only be added to the Go repo.
+
 Nightly recommendations are published to `docs/nightly_recommendations.md` to highlight the best candidate base images per detected language.
 
 ## Current Ranking Criteria (in order)

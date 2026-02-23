@@ -45,7 +45,7 @@ For production use cases, consider enterprise-grade container security platforms
 
 ### 📌 Quick Links
 
-- Nightly Language Specific Recommendations Report (language specific top secure base images): [`docs/nightly_recommendations.md`](docs/nightly_recommendations.md)
+- Nightly Language Specific Recommendations Report (language specific top secure base images): [`docs/nightly_recommendations.md`](docs/nightly_recommendations.md) — an enhanced version is also available from [maniSbindra/sbi](https://github.com/maniSbindra/sbi/blob/main/docs/daily_recommendations.md)
 - Web UI Ranking / recommendation logic details: [`docs/recommendations.md`](docs/recommendations.md)
 - Database & nightly update details: [`docs/database.md`](docs/database.md)
 - Web UI Guide & API endpoints: [`web_ui/README.md`](web_ui/README.md)
@@ -84,6 +84,8 @@ The following specific image tags are configured to be scanned:
 _Note: Users can scan other images via the web UI or CLI
 
 ## Language Specific Recommended Base Images (Nightly)
+
+> **Note:** An enhanced version of the nightly recommendations report is available at [maniSbindra/sbi](https://github.com/maniSbindra/sbi/blob/main/docs/daily_recommendations.md), rewritten in Go with improved security-posture ordering, configurable repositories, and comprehensive scanning. Future nightly report enhancements will only be added to the Go repo.
 
 Nightly scan workflow generates [`docs/nightly_recommendations.md`](docs/nightly_recommendations.md) with the current top images per detected language, ranked by:
 

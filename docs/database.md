@@ -8,7 +8,7 @@ Steps performed by the scheduled GitHub Actions job:
 1. Run comprehensive scan: `--scan --comprehensive --update-existing --max-tags 0`
 2. Update / insert new image metadata, packages, vulnerabilities
 3. Commit updated `azure_linux_images.db` via Git LFS (only if changed)
-4. Generate nightly recommendations markdown (see `recommendations.md`)
+4. Generate nightly recommendations markdown (see `recommendations.md`) — an enhanced version is also available from [maniSbindra/sbi](https://github.com/maniSbindra/sbi/blob/main/docs/daily_recommendations.md)
 
 Only the SQLite database is persisted; the legacy JSON export is intentionally skipped to avoid bloat and redundancy.
 
