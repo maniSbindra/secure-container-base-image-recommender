@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2026-03-04T04:11:33.942026Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
+_Generated: 2026-03-05T04:14:43.985435Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
 
 ## Scanned Repositories and Images
 
@@ -47,9 +47,9 @@ _Note: Repository scans may include multiple tags per repository, while single i
 
 | Rank | Image | Version | Crit | High | Total | Size | Digest |
 |------|-------|---------|------|------|-------|------|--------|
-| 1 | `mcr.microsoft.com/openjdk/jdk:21-distroless` | 21.0.10 | 0 | 0 | 0 | 351.0 MB | `sha256:b1854fc7c9ce` |
-| 2 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 21.0.10 | 0 | 0 | 0 | 482.0 MB | `sha256:107569f1b962` |
-| 3 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 21.0.10 | 0 | 0 | 63 | 457.0 MB | `sha256:ffa40bc581ce` |
+| 1 | `mcr.microsoft.com/openjdk/jdk:21-distroless` | 21.0.10 | 0 | 0 | 0 | 351.0 MB | `sha256:6084fa2f6fae` |
+| 2 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 21.0.10 | 0 | 0 | 0 | 482.0 MB | `sha256:438047827df7` |
+| 3 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 21.0.10 | 0 | 0 | 63 | 457.0 MB | `sha256:25e0eef1ca85` |
 
 ## Node
 
@@ -57,19 +57,19 @@ _Note: Repository scans may include multiple tags per repository, while single i
 |------|-------|---------|------|------|-------|------|--------|
 | 1 | `mcr.microsoft.com/azurelinux/base/nodejs:20` | 20.14.0 | 0 | 0 | 0 | 146.0 MB | `sha256:59a1e9373259` |
 | 2 | `mcr.microsoft.com/azurelinux/base/nodejs:20.14` | 20.14.0 | 0 | 0 | 0 | 146.0 MB | `sha256:59a1e9373259` |
-| 3 | `docker.io/library/node:20.0-slim` | 20.0.0 | 6 | 62 | 267 | 250.0 MB | `sha256:702d475af4b8` |
+| 3 | `docker.io/library/node:20.0-slim` | 20.0.0 | 6 | 62 | 268 | 250.0 MB | `sha256:702d475af4b8` |
 
 ## Perl
 
 | Rank | Image | Version | Crit | High | Total | Size | Digest |
 |------|-------|---------|------|------|-------|------|--------|
-| 1 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 5.34.0 | 0 | 0 | 63 | 457.0 MB | `sha256:ffa40bc581ce` |
+| 1 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 5.34.0 | 0 | 0 | 63 | 457.0 MB | `sha256:25e0eef1ca85` |
 | 2 | `docker.io/library/python:3-slim` | 5.40.1 | 0 | 2 | 78 | 119.0 MB | `sha256:6a27522252ae` |
-| 3 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 2 | 79 | 119.0 MB | `sha256:d51616d5860b` |
+| 3 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 2 | 79 | 119.0 MB | `sha256:ccc7089399c8` |
 | 4 | `mcr.microsoft.com/dotnet/runtime:8.0` | 5.36.0 | 1 | 2 | 94 | 193.0 MB | `sha256:d304745fcb83` |
 | 5 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 5.36.0 | 1 | 2 | 94 | 218.0 MB | `sha256:88c86e5469c2` |
 | 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 15 | 176 | 850.0 MB | `sha256:bfb6ed602caa` |
-| 7 | `docker.io/library/node:20.0-slim` | 5.32.1 | 6 | 62 | 267 | 250.0 MB | `sha256:702d475af4b8` |
+| 7 | `docker.io/library/node:20.0-slim` | 5.32.1 | 6 | 62 | 268 | 250.0 MB | `sha256:702d475af4b8` |
 
 ## Python
 
@@ -81,6 +81,6 @@ _Note: Repository scans may include multiple tags per repository, while single i
 | 4 | `mcr.microsoft.com/azurelinux/distroless/python:3.12-nonroot` | 3.12.9 | 0 | 0 | 0 | 83.6 MB | `sha256:66bdc517a7fe` |
 | 5 | `mcr.microsoft.com/azurelinux/base/python:3` | 3.12.9 | 0 | 0 | 0 | 139.0 MB | `sha256:7be8b46a4dfa` |
 | 6 | `mcr.microsoft.com/azurelinux/base/python:3.12` | 3.12.9 | 0 | 0 | 0 | 139.0 MB | `sha256:7be8b46a4dfa` |
-| 7 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 3.12.9 | 0 | 0 | 0 | 482.0 MB | `sha256:107569f1b962` |
+| 7 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 3.12.9 | 0 | 0 | 0 | 482.0 MB | `sha256:438047827df7` |
 | 8 | `docker.io/library/python:3-slim` | 3.14.3 | 0 | 2 | 78 | 119.0 MB | `sha256:6a27522252ae` |
-| 9 | `docker.io/library/python:3.12-slim` | 3.12.13 | 0 | 2 | 79 | 119.0 MB | `sha256:d51616d5860b` |
+| 9 | `docker.io/library/python:3.12-slim` | 3.12.13 | 0 | 2 | 79 | 119.0 MB | `sha256:ccc7089399c8` |
