@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2026-03-12T04:41:59.991809Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
+_Generated: 2026-03-13T04:14:47.587585Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
 
 ## Scanned Repositories and Images
 
@@ -39,9 +39,9 @@ _Note: Repository scans may include multiple tags per repository, while single i
 
 | Rank | Image | Version | Crit | High | Total | Size | Digest |
 |------|-------|---------|------|------|-------|------|--------|
-| 1 | `mcr.microsoft.com/dotnet/runtime:8.0` | 8.0.25 | 1 | 2 | 95 | 193.0 MB | `sha256:73b3de5b2f82` |
-| 2 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 8.0.25 | 1 | 2 | 95 | 218.0 MB | `sha256:a1a6ed414bde` |
-| 3 | `mcr.microsoft.com/dotnet/sdk:8.0` | 8.0.419 | 1 | 16 | 186 | 850.0 MB | `sha256:312aeb1357b2` |
+| 1 | `mcr.microsoft.com/dotnet/runtime:8.0` | 8.0.25 | 1 | 2 | 95 | 193.0 MB | `sha256:bade217a4d35` |
+| 2 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 8.0.25 | 1 | 2 | 95 | 218.0 MB | `sha256:c5674b4fea45` |
+| 3 | `mcr.microsoft.com/dotnet/sdk:8.0` | 8.0.419 | 1 | 16 | 186 | 850.0 MB | `sha256:9e9690cacf04` |
 
 ## Java
 
@@ -66,9 +66,9 @@ _Note: Repository scans may include multiple tags per repository, while single i
 | 1 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 5.34.0 | 0 | 0 | 66 | 457.0 MB | `sha256:861d770bc07c` |
 | 2 | `docker.io/library/python:3-slim` | 5.40.1 | 0 | 2 | 79 | 119.0 MB | `sha256:6a27522252ae` |
 | 3 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 2 | 80 | 119.0 MB | `sha256:ccc7089399c8` |
-| 4 | `mcr.microsoft.com/dotnet/runtime:8.0` | 5.36.0 | 1 | 2 | 95 | 193.0 MB | `sha256:73b3de5b2f82` |
-| 5 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 5.36.0 | 1 | 2 | 95 | 218.0 MB | `sha256:a1a6ed414bde` |
-| 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 16 | 186 | 850.0 MB | `sha256:312aeb1357b2` |
+| 4 | `mcr.microsoft.com/dotnet/runtime:8.0` | 5.36.0 | 1 | 2 | 95 | 193.0 MB | `sha256:bade217a4d35` |
+| 5 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 5.36.0 | 1 | 2 | 95 | 218.0 MB | `sha256:c5674b4fea45` |
+| 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 16 | 186 | 850.0 MB | `sha256:9e9690cacf04` |
 | 7 | `docker.io/library/node:20.0-slim` | 5.32.1 | 6 | 64 | 270 | 250.0 MB | `sha256:702d475af4b8` |
 
 ## Python
