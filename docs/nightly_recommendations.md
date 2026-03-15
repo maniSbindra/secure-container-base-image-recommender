@@ -1,6 +1,6 @@
 # Nightly Top Recommended Images by Language
 
-_Generated: 2026-03-14T04:13:11.808307Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
+_Generated: 2026-03-15T04:37:35.214235Z from azure_linux_images.db. Criteria: lowest critical -> high -> total vulnerabilities -> size. Top 10 per language._
 
 ## Scanned Repositories and Images
 
@@ -39,9 +39,9 @@ _Note: Repository scans may include multiple tags per repository, while single i
 
 | Rank | Image | Version | Crit | High | Total | Size | Digest |
 |------|-------|---------|------|------|-------|------|--------|
-| 1 | `mcr.microsoft.com/dotnet/runtime:8.0` | 8.0.25 | 1 | 4 | 97 | 193.0 MB | `sha256:bade217a4d35` |
-| 2 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 8.0.25 | 1 | 4 | 97 | 218.0 MB | `sha256:c5674b4fea45` |
-| 3 | `mcr.microsoft.com/dotnet/sdk:8.0` | 8.0.419 | 1 | 18 | 188 | 850.0 MB | `sha256:9e9690cacf04` |
+| 1 | `mcr.microsoft.com/dotnet/runtime:8.0` | 8.0.25 | 1 | 2 | 97 | 193.0 MB | `sha256:bade217a4d35` |
+| 2 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 8.0.25 | 1 | 2 | 97 | 218.0 MB | `sha256:c5674b4fea45` |
+| 3 | `mcr.microsoft.com/dotnet/sdk:8.0` | 8.0.419 | 1 | 16 | 188 | 850.0 MB | `sha256:9e9690cacf04` |
 
 ## Java
 
@@ -57,19 +57,19 @@ _Note: Repository scans may include multiple tags per repository, while single i
 |------|-------|---------|------|------|-------|------|--------|
 | 1 | `mcr.microsoft.com/azurelinux/base/nodejs:20` | 20.14.0 | 0 | 0 | 0 | 146.0 MB | `sha256:b8a48ba88fdf` |
 | 2 | `mcr.microsoft.com/azurelinux/base/nodejs:20.14` | 20.14.0 | 0 | 0 | 0 | 146.0 MB | `sha256:b8a48ba88fdf` |
-| 3 | `docker.io/library/node:20.0-slim` | 20.0.0 | 6 | 66 | 272 | 250.0 MB | `sha256:702d475af4b8` |
+| 3 | `docker.io/library/node:20.0-slim` | 20.0.0 | 6 | 64 | 272 | 250.0 MB | `sha256:702d475af4b8` |
 
 ## Perl
 
 | Rank | Image | Version | Crit | High | Total | Size | Digest |
 |------|-------|---------|------|------|-------|------|--------|
 | 1 | `mcr.microsoft.com/openjdk/jdk:21-ubuntu` | 5.34.0 | 0 | 0 | 66 | 461.0 MB | `sha256:6c911f9d65ac` |
-| 2 | `docker.io/library/python:3-slim` | 5.40.1 | 0 | 4 | 84 | 119.0 MB | `sha256:6a27522252ae` |
-| 3 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 4 | 85 | 119.0 MB | `sha256:ccc7089399c8` |
-| 4 | `mcr.microsoft.com/dotnet/runtime:8.0` | 5.36.0 | 1 | 4 | 97 | 193.0 MB | `sha256:bade217a4d35` |
-| 5 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 5.36.0 | 1 | 4 | 97 | 218.0 MB | `sha256:c5674b4fea45` |
-| 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 18 | 188 | 850.0 MB | `sha256:9e9690cacf04` |
-| 7 | `docker.io/library/node:20.0-slim` | 5.32.1 | 6 | 66 | 272 | 250.0 MB | `sha256:702d475af4b8` |
+| 2 | `docker.io/library/python:3-slim` | 5.40.1 | 0 | 2 | 84 | 119.0 MB | `sha256:6a27522252ae` |
+| 3 | `docker.io/library/python:3.12-slim` | 5.40.1 | 0 | 2 | 85 | 119.0 MB | `sha256:ccc7089399c8` |
+| 4 | `mcr.microsoft.com/dotnet/runtime:8.0` | 5.36.0 | 1 | 2 | 97 | 193.0 MB | `sha256:bade217a4d35` |
+| 5 | `mcr.microsoft.com/dotnet/aspnet:8.0` | 5.36.0 | 1 | 2 | 97 | 218.0 MB | `sha256:c5674b4fea45` |
+| 6 | `mcr.microsoft.com/dotnet/sdk:8.0` | 5.36.0 | 1 | 16 | 188 | 850.0 MB | `sha256:9e9690cacf04` |
+| 7 | `docker.io/library/node:20.0-slim` | 5.32.1 | 6 | 64 | 272 | 250.0 MB | `sha256:702d475af4b8` |
 
 ## Python
 
@@ -82,5 +82,5 @@ _Note: Repository scans may include multiple tags per repository, while single i
 | 5 | `mcr.microsoft.com/azurelinux/base/python:3` | 3.12.9 | 0 | 0 | 0 | 139.0 MB | `sha256:8798301c18bf` |
 | 6 | `mcr.microsoft.com/azurelinux/base/python:3.12` | 3.12.9 | 0 | 0 | 0 | 139.0 MB | `sha256:8798301c18bf` |
 | 7 | `mcr.microsoft.com/openjdk/jdk:21-azurelinux` | 3.12.9 | 0 | 0 | 0 | 482.0 MB | `sha256:e94fdd4995a7` |
-| 8 | `docker.io/library/python:3-slim` | 3.14.3 | 0 | 4 | 84 | 119.0 MB | `sha256:6a27522252ae` |
-| 9 | `docker.io/library/python:3.12-slim` | 3.12.13 | 0 | 4 | 85 | 119.0 MB | `sha256:ccc7089399c8` |
+| 8 | `docker.io/library/python:3-slim` | 3.14.3 | 0 | 2 | 84 | 119.0 MB | `sha256:6a27522252ae` |
+| 9 | `docker.io/library/python:3.12-slim` | 3.12.13 | 0 | 2 | 85 | 119.0 MB | `sha256:ccc7089399c8` |
