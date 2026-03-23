@@ -1,3 +1,11 @@
+> [!IMPORTANT]
+> **This repository has been archived.** Active development has moved to
+> [manisbindra/sbi](https://github.com/manisbindra/sbi).
+>
+> The daily generated Secure Base Image recommendation reports are now published at:
+> - [Daily Recommendations (Markdown)](https://github.com/manisbindra/sbi/blob/main/docs/daily_recommendations.md)
+> - [Daily Recommendations (JSON)](https://github.com/manisbindra/sbi/blob/main/docs/daily_recommendations.json)
+
 # Container Base Image Recommendation Tool
 
 A comprehensive tool for analyzing and recommending secure container base images from various container registries.
