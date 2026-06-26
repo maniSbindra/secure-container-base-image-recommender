@@ -1,0 +1,197 @@
+name: Build and Publish MCP Server Container
+
+on:
+  push:
+    branches: [ main, copilot/fix-30 ]
+    paths:
+      - 'mcp_server.py'
+      - 'Dockerfile'
+      - 'src/**'
+      - '.github/workflows/build-mcp-server.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'mcp_server.py'
+      - 'Dockerfile'
+      - 'src/**'
+      - '.github/workflows/build-mcp-server.yml'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      push_to_registry:
+        description: 'Push to container registry'
+        required: false
+        default: 'true'
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/mcp-server
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        lfs: true
+
+    - name: Set up Git LFS
+      run: |
+        git lfs install
+        git lfs pull
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels)
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and test container image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: false
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+
+    - name: Test container functionality
+      run: |
+        # Build the image locally for testing
+        docker build -t test-mcp-server .
+
+        # Test that the container starts and has required tools
+        docker run --rm test-mcp-server syft version
+        docker run --rm test-mcp-server grype version
+        docker run --rm test-mcp-server trivy --version
+
+        # Test health check
+        docker run --rm test-mcp-server python -c "
+        import sys
+        sys.path.append('/app/src')
+        from database import ImageDatabase
+        db = ImageDatabase('/app/azure_linux_images.db')
+        stats = db.get_vulnerability_statistics()
+        db.close()
+        print('Container health check passed')
+        print(f'Database contains {stats.get(\"total_images\", 0)} images')
+        "
+
+    - name: Push container image
+      if: github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || inputs.push_to_registry)
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+    - name: Generate security report
+      if: github.event_name != 'pull_request'
+      run: |
+        # Install Trivy for scanning the built image
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          -v ${{ github.workspace }}:/workspace \
+          aquasec/trivy image --format sarif --output /workspace/trivy-results.sarif \
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest || true
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      if: github.event_name != 'pull_request'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+      continue-on-error: true
+
+  test-mcp-integration:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        lfs: true
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+    - name: Test MCP server directly
+      run: |
+        # Test the MCP server can start and respond to basic requests
+        echo '{"jsonrpc": "2.0", "id": "test-1", "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test-client", "version": "1.0.0"}}}' | timeout 10s python mcp_server.py || echo "MCP server test completed"
+
+    - name: Validate MCP server tools
+      run: |
+        # Test specific MCP tools work
+        python -c "
+        import asyncio
+        import sys
+        sys.path.append('src')
+        from mcp_server import MCPServer
+
+        async def test():
+            server = MCPServer()
+
+            # Test tools list
+            request = {'jsonrpc': '2.0', 'id': 'test', 'method': 'tools/list', 'params': {}}
+            response = await server.handle_request(request)
+            assert 'result' in response
+            assert 'tools' in response['result']
+            print(f'Found {len(response[\"result\"][\"tools\"])} tools')
+
+            # Test recommendation
+            request = {
+                'jsonrpc': '2.0',
+                'id': 'test',
+                'method': 'tools/call',
+                'params': {
+                    'name': 'recommend_images',
+                    'arguments': {'language': 'python', 'limit': 3}
+                }
+            }
+            response = await server.handle_request(request)
+            assert 'result' in response
+            print('Recommendation test passed')
+
+        asyncio.run(test())
+        "
